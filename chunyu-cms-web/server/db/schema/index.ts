@@ -8,8 +8,6 @@ import * as userToRoleSchema from './system/userToRole';
 import * as postSchema from './system/post';
 import * as userToPostSchema from './system/userToPost';
 import * as loginInfoSchema from './monitor/log/logininfo';
-import * as jobSchema from './monitor/job';
-import * as jobLogSchema from './monitor/jobLog';
 import * as sysConfigSchema from './system/sysConfig';
 import * as fileConfigSchema from './system/fileConfig';
 // 以下是业务模块
@@ -63,8 +61,6 @@ export default {
   ...postSchema,
   ...userToPostSchema,
   ...loginInfoSchema,
-  ...jobSchema,
-  ...jobLogSchema,
   ...sysConfigSchema,
   ...fileConfigSchema,
   ...countrySchema,

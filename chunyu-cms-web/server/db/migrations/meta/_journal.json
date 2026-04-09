@@ -71,6 +71,41 @@
       "when": 1764924852692,
       "tag": "0009_real_vindicator",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1775695200000,
+      "tag": "0010_resource_navigation_menu",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1775698800000,
+      "tag": "0011_remove_monitor_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1775702400000,
+      "tag": "0012_remove_movie_short_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1775706000000,
+      "tag": "0013_keep_only_resource_navigation",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1775713200000,
+      "tag": "0014_add_planned_admin_menus",
+      "breakpoints": true
     }
   ]
 }
