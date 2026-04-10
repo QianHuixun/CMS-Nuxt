@@ -1,60 +1,65 @@
 ---
 name: git-commit-convention
-description: Use when the user asks for Git commit guidance, wants help writing commit messages, asks for a 提交规范, or needs changes split into clear and reviewable commits for this repository.
+description: 当用户要求编写 Git 提交规范、撰写 commit message、拆分提交、检查提交是否合理时使用。适用于本仓库的中文团队提交风格。
 ---
 
 # Git Commit Convention
 
-Use this skill when the task is about:
+当任务涉及以下内容时使用本 skill：
 
-- writing a commit message
-- defining or following commit rules
-- deciding how to split changes into commits
-- checking whether a commit is too large or mixed
+- 编写 commit message
+- 制定提交规范
+- 判断如何拆分提交
+- 检查一次提交是否过大、过杂
 
-## Goal
+## 目标
 
-Produce commits that are:
+产出的提交应当满足：
 
-- atomic
-- easy to review
-- easy to revert
-- consistent in wording
+- 原子性强
+- 易于评审
+- 易于回滚
+- 中文表达统一
+- 适合当前仓库长期维护
 
-## Default Format
+## 默认提交格式
 
-Use:
-
-```text
-type(scope): subject
-```
-
-Examples:
+默认使用：
 
 ```text
-feat(menu): add planned admin menu placeholders
-fix(profile): keep avatar upload after admin cleanup
-docs(skill): add git commit convention skill
-refactor(router): remove unused dynamic routes
-chore(migration): seed planned admin menus
+type(scope): 中文摘要
 ```
 
-## Allowed Types
+示例：
 
-- `feat`: new capability
-- `fix`: bug fix or regression fix
-- `refactor`: restructuring without intended behavior change
-- `docs`: documentation only
-- `chore`: maintenance or support work
-- `test`: tests added or updated
-- `perf`: performance improvement
-- `style`: formatting-only changes
+```text
+feat(menu): 新增后台规划菜单占位页
+fix(profile): 保留个人中心头像上传能力
+refactor(admin): 删除旧版后台管理模块
+chore(migration): 新增后台菜单初始化迁移
+docs(skill): 新增 git 提交规范 skill
+```
 
-## Scope Guidance
+## 推荐约定
 
-Prefer the smallest useful scope.
+### 1. type 使用英文
 
-Common scopes for this repo:
+统一保留英文类型，便于工具识别和后续统计：
+
+- `feat`：新增功能
+- `fix`：修复问题
+- `refactor`：重构或删除旧结构，但不以修复 bug 为目标
+- `chore`：维护性改动、配置、脚本、迁移
+- `docs`：文档改动
+- `test`：测试相关
+- `perf`：性能优化
+- `style`：纯格式调整，不涉及逻辑
+
+### 2. scope 使用英文模块名
+
+scope 使用仓库内的模块或关注点，尽量简短。
+
+推荐 scope：
 
 - `admin`
 - `web`
@@ -66,150 +71,183 @@ Common scopes for this repo:
 - `docs`
 - `skill`
 
-If a change spans multiple real concerns, split commits instead of widening scope.
+如果一个改动跨多个真实关注点，优先拆成多个提交，不要扩大 scope 掩盖问题。
 
-## Subject Rules
+### 3. 摘要使用中文
 
-The subject line should:
+`:` 后的摘要推荐使用中文，使用动宾短语，直接说明改了什么。
 
-- be lowercase
-- use imperative mood
-- describe the actual change
-- stay concise, ideally under 72 characters
+推荐写法：
 
-Good:
+- `feat(menu): 新增活动管理占位页`
+- `chore(migration): 写入规划菜单树`
+- `refactor(admin): 精简后台保留首页与资源导航`
 
-```text
-feat(admin): add activity management placeholder pages
-chore(migration): insert planned admin menu tree
-docs(rules): add git commit guidelines
-```
+不推荐：
 
-Bad:
+- `feat(menu): update`
+- `fix: 修复一些问题`
+- `chore(admin): 最终版`
 
-```text
-update code
-fix some bugs
-final changes
-```
+## 中文摘要规则
 
-## When to Split Commits
+摘要建议满足：
 
-Split commits when the diff differs by:
+- 使用中文
+- 直接描述结果，不写过程感受
+- 不带句号
+- 尽量控制在 30 个汉字以内
+- 不使用“完成了”“已经”“最终”“临时”之类低信息词
 
-- concern
-- rollback value
-- deployment order
-- reviewability
-
-Recommended split for admin feature work:
-
-1. placeholder pages
-2. backend support
-3. migration or menu seed
-4. docs
-
-## Commit Body
-
-Add a body only when it improves review clarity.
-
-Use a body for:
-
-- migrations
-- destructive cleanup
-- non-obvious design choices
-- rollout or compatibility notes
-
-Example:
+好例子：
 
 ```text
-chore(migration): insert planned admin menu tree
-
-- add 5 parent menus and 10 child menus
-- keep pages as placeholders for now
-- use fixed menu ids for stable follow-up migrations
+feat(admin): 新增专家库管理占位页
+refactor(web): 清理后台无用管理接口
+chore(migration): 删除监控模块菜单树
 ```
 
-## What to Avoid
-
-- vague subjects like `update`, `modify`, `optimize`
-- mixing unrelated cleanup and feature work
-- one giant commit containing pages, migrations, docs, and refactors together
-- `wip`, `temp`, `misc`, `final`
-
-## Repo-Specific Rules
-
-### 1. Keep Menu Work Atomic
-
-For admin menu changes, prefer separate commits for:
-
-- pages/components
-- migrations
-- backend APIs
-- documentation
-
-### 2. Isolate Destructive Cleanup
-
-Module removals should use explicit wording:
+差例子：
 
 ```text
-refactor(admin): remove monitor module pages and routes
-chore(migration): delete monitor menu tree
-fix(profile): preserve profile endpoints after admin cleanup
+feat(admin): 完成后台修改
+fix(web): 修复问题
+chore: 更新代码
 ```
 
-### 3. Migrations Prefer Separate Commits
+## 何时拆分提交
 
-If a commit changes DB menu data, schema, or seed state, prefer a dedicated `migration` or `menu` commit.
+如果改动在以下任一维度不同，应拆分提交：
 
-### 4. Docs Can Stand Alone
+- 关注点不同
+- 风险不同
+- 回滚价值不同
+- 部署顺序不同
 
-If code changes are already large, place docs in a separate `docs(...)` commit.
+推荐拆分方式：
 
-## Quick Decision Rules
+1. 页面或组件
+2. 后端接口
+3. 数据迁移
+4. 文档
 
-If the change only adds placeholder pages:
+例如新增后台菜单时，优先拆成：
+
+1. `feat(admin): 新增规划菜单占位页`
+2. `chore(migration): 写入规划菜单树`
+3. `docs(menu): 补充后台菜单实施计划`
+
+如果改动很小，也可以合并，但前提是主题单一。
+
+## 何时写提交正文
+
+以下情况建议补正文：
+
+- 涉及 migration
+- 涉及大规模删除
+- 有兼容性影响
+- 有不直观的设计取舍
+
+正文建议使用中文短条目：
 
 ```text
-feat(admin): add placeholder pages for planned admin modules
+chore(migration): 写入规划菜单树
+
+- 新增 5 个父菜单和 10 个子菜单
+- 页面先使用占位页承接
+- 菜单 id 固定，便于后续继续补迁移
 ```
 
-If the change only adds menu data:
+## 本仓库专用规则
+
+### 1. 菜单和迁移尽量分开
+
+涉及后台菜单时，优先拆成：
+
+- 页面占位
+- 菜单迁移
+- 接口支持
+- 文档说明
+
+### 2. 大规模删除必须说清楚
+
+如果是模块级删除，摘要必须直说：
 
 ```text
-chore(migration): add planned admin menu tree
+refactor(admin): 删除监控管理模块
+refactor(admin): 删除影视与短视频后台模块
+chore(migration): 清理后台菜单仅保留资源导航
 ```
 
-If the change only removes old modules:
+不要用模糊表述掩盖删除行为。
+
+### 3. migration 建议单独提交
+
+只要涉及数据库结构、菜单树、初始化数据、角色菜单绑定，优先使用单独提交。
+
+### 4. 文档在大改动里尽量独立
+
+如果代码改动已经很大，文档建议单独提交，避免代码评审时被文档噪音干扰。
+
+## 推荐输出方式
+
+当协助用户时，优先输出：
+
+1. 建议拆成几个提交
+2. 每个提交的推荐 message
+3. 如果不容易判断，再给一句简短理由
+
+不要默认把多类改动压成一个“大杂烩提交”。
+
+## 快速判断模板
+
+如果只是新增占位页：
 
 ```text
-refactor(admin): remove deprecated admin modules
+feat(admin): 新增规划菜单占位页
 ```
 
-If the change only adds documentation:
+如果只是新增菜单迁移：
 
 ```text
-docs(rules): add git commit convention
-docs(skill): add git commit convention skill
+chore(migration): 写入规划后台菜单树
 ```
 
-## Recommended Workflow
+如果只是删除旧模块：
 
-Before committing:
+```text
+refactor(admin): 删除旧版后台管理模块
+```
 
-1. inspect `git status`
-2. group files by concern
-3. isolate migrations if present
-4. choose the smallest clear scope
-5. write a precise subject
-6. add a body only if needed
+如果只是新增文档：
 
-## Expected Output
+```text
+docs(rules): 新增 git 提交规范文档
+docs(skill): 新增 git 提交规范 skill
+```
 
-When helping the user, prefer returning:
+## 提交前检查
 
-1. a recommended commit split
-2. exact commit message candidates
-3. a short explanation if the split is non-obvious
+提交前建议按顺序检查：
 
-Do not default to a single large commit if the work spans multiple concerns.
+1. `git status`
+2. 本次改动是否只围绕一个主题
+3. migration 是否应独立提交
+4. 摘要是否足够明确
+5. 是否需要正文说明风险或背景
+
+## 最终要求
+
+除非用户明确要求，否则：
+
+- 不使用模糊摘要
+- 不提交无关文件
+- 不把无关删除、功能、文档混成一个提交
+- 不使用 `wip`、`temp`、`final`、`misc`
+
+本 skill 的默认风格是：
+
+- 英文 `type(scope)`
+- 中文摘要
+- 中文正文
+- 优先强调可评审性与可回滚性
