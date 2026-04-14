@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>人才管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "人才与对应科研管理",
+        child: "人才管理",
+        title: "人才管理",
+        description: "围绕学者基础信息维护与科研成果关联展开，支持照片裁剪、人才卡片展示和论文、课题、专利的下拉选择绑定。",
+        badges: ["关联型页面", "多对多关系", "静态原型"],
+        stats: [
+          { label: "人才档案", value: "26", meta: "已录入", tone: "sky", help: "支持前台学者列表展示" },
+          { label: "已绑定论文", value: "148", meta: "关联关系", tone: "emerald", help: "通过中间表管理人才与论文关系" },
+          { label: "待完善资料", value: "5", meta: "资料缺失", tone: "amber", help: "缺少高清照片或成果关联" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[0.88fr_1.12fr]">
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-slate-900">人才列表</h3>
+                  <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">新增人才</button>
+                </div>
+                <div class="mt-5 space-y-4">
+                  ${[
+                    ["张明远", "中医文献整理方向", "12 篇论文 / 3 个课题 / 1 项专利"],
+                    ["李青禾", "数字人文与知识图谱", "8 篇论文 / 2 个课题 / 0 项专利"],
+                    ["周静宜", "古籍图像识别与标注", "15 篇论文 / 4 个课题 / 2 项专利"]
+                  ]
+                    .map(
+                      item => `
+                        <div class="flex items-center gap-4 rounded-3xl border border-slate-200 p-4">
+                          <div class="h-16 w-16 rounded-3xl bg-gradient-to-br from-sky-100 to-indigo-100"></div>
+                          <div class="min-w-0 flex-1">
+                            <div class="text-base font-semibold text-slate-900">${item[0]}</div>
+                            <div class="mt-1 text-sm text-slate-500">${item[1]}</div>
+                            <div class="mt-2 text-xs text-slate-400">${item[2]}</div>
+                          </div>
+                        </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">成果绑定规则</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">论文、课题、专利只能从系统已录入数据中下拉选择。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">人才页面保存后新增关联关系，不在本页重复创建成果主数据。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">编辑人才时需支持回显已绑定成果，并允许删除旧关联。</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">人才编辑面板</h3>
+                    <p class="mt-1 text-sm text-slate-500">静态稿展示“基础资料 + 成果绑定 + 卡片预览”的组合布局。</p>
+                  </div>
+                  <div class="flex gap-3">
+                    <button class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">裁剪照片</button>
+                    <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">保存人才</button>
+                  </div>
+                </div>
+
+                <div class="mt-6 grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+                  <div class="rounded-[28px] bg-slate-50 p-5">
+                    <div class="mx-auto h-56 w-48 rounded-[28px] bg-gradient-to-br from-sky-100 to-indigo-100"></div>
+                    <div class="mt-4 text-center text-base font-semibold text-slate-900">张明远</div>
+                    <div class="mt-1 text-center text-sm text-slate-500">中医文献整理方向</div>
+                  </div>
+                  <div class="grid gap-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">简介：长期从事医简文献整理、知识组织与数字出版研究。</div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                      <div class="text-sm font-semibold text-slate-900">关联论文</div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="word-chip bg-sky-50 text-sky-700">《天回医简文本整理研究》</span>
+                        <span class="word-chip bg-sky-50 text-sky-700">《医简释文知识结构分析》</span>
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                      <div class="text-sm font-semibold text-slate-900">关联课题</div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="word-chip bg-emerald-50 text-emerald-700">国家社科基金重点项目</span>
+                        <span class="word-chip bg-emerald-50 text-emerald-700">古籍智能标注平台建设</span>
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                      <div class="text-sm font-semibold text-slate-900">关联专利</div>
+                      <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="word-chip bg-amber-50 text-amber-700">古籍图像结构化识别方法</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">关联成果明细</h3>
+                <div class="mt-5 overflow-hidden rounded-3xl border border-slate-200">
+                  <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th class="px-4 py-3 text-left font-medium">成果名称</th>
+                        <th class="px-4 py-3 text-left font-medium">类型</th>
+                        <th class="px-4 py-3 text-left font-medium">状态</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
+                      <tr><td class="px-4 py-4">《天回医简文本整理研究》</td><td class="px-4 py-4">论文</td><td class="px-4 py-4">已关联</td></tr>
+                      <tr><td class="px-4 py-4">国家社科基金重点项目</td><td class="px-4 py-4">课题</td><td class="px-4 py-4">已关联</td></tr>
+                      <tr><td class="px-4 py-4">古籍图像结构化识别方法</td><td class="px-4 py-4">专利</td><td class="px-4 py-4">已关联</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

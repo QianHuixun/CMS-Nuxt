@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>书籍仿真录入</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "论文著作与成果管理",
+        child: "书籍仿真录入",
+        title: "书籍仿真录入",
+        description: "静态稿重点体现书籍基础信息、封面封底上传与核心章节图片集管理，为后续前台仿真翻页效果提供结构化素材。",
+        badges: ["图集型页面", "预留模块", "静态原型"],
+        stats: [
+          { label: "书籍条目", value: "8", meta: "已录入", tone: "sky", help: "支持继续补录核心章节图片" },
+          { label: "图片页数", value: "124", meta: "累计上传", tone: "emerald", help: "含封面、封底和正文重点页" },
+          { label: "预览状态", value: "静态", meta: "MVP", tone: "amber", help: "先完成录入，翻页动效后置" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[0.96fr_1.04fr]">
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-slate-900">书籍基础资料</h3>
+                  <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">保存书籍</button>
+                </div>
+                <div class="mt-6 grid gap-4">
+                  ${[
+                    ["书名", "《天回医简专题图录》"],
+                    ["作者 / 整理者", "成都中医药大学数字人文实验室"],
+                    ["出版年份", "2026"],
+                    ["所属专题", "天回医简"]
+                  ]
+                    .map(
+                      item => `
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                          <div class="text-sm text-slate-500">${item[0]}</div>
+                          <div class="mt-2 text-sm font-semibold text-slate-900">${item[1]}</div>
+                        </div>`
+                    )
+                    .join("")}
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div class="text-sm text-slate-500">内容简介</div>
+                    <div class="mt-2 text-sm leading-7 text-slate-700">面向馆藏展示与线上传播整理的专题图录，收录封面、封底与重点章节图像，支撑后续仿真翻页阅读体验。</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">封面素材</h3>
+                <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div class="rounded-[24px] border border-dashed border-slate-300 p-4">
+                    <div class="aspect-[3/4] rounded-[20px] bg-gradient-to-br from-sky-100 to-indigo-100"></div>
+                    <div class="mt-3 text-sm font-semibold text-slate-900">封面</div>
+                  </div>
+                  <div class="rounded-[24px] border border-dashed border-slate-300 p-4">
+                    <div class="aspect-[3/4] rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                    <div class="mt-3 text-sm font-semibold text-slate-900">封底</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">核心章节图片集</h3>
+                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  ${Array.from({ length: 6 })
+                    .map(
+                      (_, index) => `
+                        <div class="rounded-[24px] bg-slate-50 p-3">
+                          <div class="aspect-[3/4] rounded-[18px] bg-gradient-to-br from-white to-slate-200 ring-1 ring-slate-200"></div>
+                          <div class="mt-3 text-sm font-semibold text-slate-900">第 ${index + 1} 页</div>
+                          <div class="mt-1 text-xs text-slate-500">重点章节 / 高清图像</div>
+                        </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">实现说明</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">第一阶段先做“录入 + 预览 + 排序”，不直接实现复杂翻页动画。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">建议每本书拆分主表和页面子表，便于后续前台按页渲染。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">若需要批量上传，可增加 ZIP 解包或多图拖拽上传能力作为第二阶段。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

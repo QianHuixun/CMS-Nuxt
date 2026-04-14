@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>沉浸式编辑</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "活动管理",
+        child: "沉浸式编辑",
+        title: "沉浸式编辑",
+        description: "第一阶段以富文本编辑器为核心，承接图文混排、表格、视频和图片插入，构建活动内容编辑与发布的基础能力。",
+        badges: ["内容编辑", "富文本优先", "静态原型"],
+        stats: [
+          { label: "草稿数量", value: "12", meta: "未发布", tone: "amber", help: "活动内容支持草稿和发布两种状态" },
+          { label: "已发布活动", value: "31", meta: "前台可见", tone: "emerald", help: "供活动列表和头条精选调用" },
+          { label: "媒体组件", value: "4", meta: "图片/视频/表格/引用", tone: "sky", help: "第一阶段以常用内容块为主" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1.18fr_0.82fr]">
+            <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-900">编辑画布</h3>
+                  <p class="mt-1 text-sm text-slate-500">静态示意页面沿用现有后台稳重气质，但让内容编辑区更像真正的发布工作台。</p>
+                </div>
+                <div class="flex gap-3">
+                  <button class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">保存草稿</button>
+                  <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">发布内容</button>
+                </div>
+              </div>
+
+              <div class="mt-6 rounded-[28px] border border-slate-200">
+                <div class="flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                  <span class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">标题</span>
+                  <span class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">正文</span>
+                  <span class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">图片</span>
+                  <span class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">表格</span>
+                  <span class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">视频</span>
+                </div>
+                <div class="space-y-6 p-6">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-4 text-3xl font-bold text-slate-900">2026 中医文献数字化专题论坛</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-700">论坛围绕古籍图像识别、知识组织、人才培养与多模态发布展开，展示团队在天回医简数字化方面的最新成果。</div>
+                  <div class="aspect-[16/8] rounded-[24px] bg-gradient-to-br from-sky-100 via-white to-indigo-100"></div>
+                  <div class="overflow-hidden rounded-3xl border border-slate-200">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                      <thead class="bg-slate-50"><tr><th class="px-4 py-3 text-left font-medium text-slate-500">时间</th><th class="px-4 py-3 text-left font-medium text-slate-500">议程</th></tr></thead>
+                      <tbody class="divide-y divide-slate-100 bg-white text-slate-700"><tr><td class="px-4 py-4">09:00</td><td class="px-4 py-4">开幕与项目进展汇报</td></tr><tr><td class="px-4 py-4">10:30</td><td class="px-4 py-4">专题演讲与案例分享</td></tr></tbody>
+                    </table>
+                  </div>
+                  <div class="rounded-[24px] border border-dashed border-slate-300 p-4">
+                    <div class="aspect-[16/9] rounded-[18px] bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                    <div class="mt-3 text-sm text-slate-500">视频组件：支持上传 MP4、自动截封面帧、手动替换封面图。</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">侧边配置</h3>
+                <div class="mt-5 space-y-4">
+                  ${[
+                    ["内容状态", "草稿"],
+                    ["封面样式", "自动取首图"],
+                    ["活动标签", "论坛 / 学术动态"],
+                    ["发布时间", "2026-05-12 09:00"]
+                  ]
+                    .map(
+                      item => `
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                          <div class="text-sm text-slate-500">${item[0]}</div>
+                          <div class="mt-2 text-sm font-semibold text-slate-900">${item[1]}</div>
+                        </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">实现建议</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">第一阶段直接复用现有富文本编辑器，尽快形成发布闭环。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">更复杂的可视化拖拽布局、模块模板和版本历史放到第二阶段。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">活动内容应与头条精选联动，避免重复维护标题和摘要。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>
