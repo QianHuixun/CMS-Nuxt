@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>卡片管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "资源导航管理",
+        child: "卡片管理",
+        title: "卡片管理",
+        description: "面向前台资源卡片流的排序、显隐和删除管理，第一阶段优先保证操作清晰，不强依赖复杂拖拽。",
+        badges: ["排序管理", "列表页", "静态原型"],
+        stats: [
+          { label: "可见卡片", value: "14", meta: "前台展示", tone: "emerald", help: "当前卡片流展示中的资源数量" },
+          { label: "隐藏卡片", value: "4", meta: "暂不上线", tone: "amber", help: "升级中或资料待补充的资源" },
+          { label: "排序规则", value: "手动", meta: "MVP", tone: "sky", help: "支持上移下移与输入排序值" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-900">卡片排序列表</h3>
+                  <p class="mt-1 text-sm text-slate-500">拖拽可后置，当前优先提供上移下移、删除和显隐控制。</p>
+                </div>
+                <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">保存排序</button>
+              </div>
+
+              <div class="mt-6 space-y-4">
+                ${[
+                  ["01", "天回医简全文数据库", "展示中", "数据库资源"],
+                  ["02", "本草图谱智能检索", "展示中", "分析工具"],
+                  ["03", "川派医籍知识问答", "隐藏", "分析工具"],
+                  ["04", "实验室开放数据门户", "展示中", "数据库资源"]
+                ]
+                  .map(
+                    row => `
+                      <div class="flex flex-col gap-4 rounded-3xl border border-slate-200 p-5 lg:flex-row lg:items-center">
+                        <div class="flex items-center gap-4">
+                          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-sm font-bold text-slate-700">${row[0]}</div>
+                          <div class="cursor-move rounded-2xl border border-dashed border-slate-300 px-3 py-2 text-slate-400">⋮⋮</div>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <div class="truncate text-base font-semibold text-slate-900">${row[1]}</div>
+                          <div class="mt-1 text-sm text-slate-500">${row[3]}</div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                          <span class="rounded-full px-3 py-1 text-xs font-semibold ${row[2] === "展示中" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}">${row[2]}</span>
+                          <button class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">上移</button>
+                          <button class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">下移</button>
+                          <button class="rounded-2xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600">删除</button>
+                        </div>
+                      </div>`
+                  )
+                  .join("")}
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">前台卡片流预览</h3>
+                <div class="mt-5 grid gap-4">
+                  ${["天回医简全文数据库", "本草图谱智能检索", "实验室开放数据门户"]
+                    .map(
+                      item => `
+                        <div class="rounded-[24px] bg-slate-50 p-4">
+                          <div class="rounded-[20px] bg-white p-4 ring-1 ring-slate-200">
+                            <div class="aspect-[16/9] rounded-[16px] bg-gradient-to-br from-slate-100 to-sky-100"></div>
+                            <div class="mt-3 text-sm font-semibold text-slate-900">${item}</div>
+                          </div>
+                        </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">交互说明</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">卡片删除需要二次确认，避免误删影响前台展示。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">隐藏后的卡片保留排序值，重新启用时恢复原位置。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">拖拽排序可在第二阶段补齐，当前列表操作足以支撑上线。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>
