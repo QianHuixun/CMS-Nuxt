@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>头条精选 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "活动管理",
+        child: "头条精选",
+        title: "头条精选",
+        description: "管理首页头条内容，设置推荐文章、学术动态、新闻公告的展示顺序与优先级。",
+        badges: ["配置类页面", "排序管理", "推荐设置"],
+        stats: [
+          { label: "头条总数", value: "8", meta: "条", tone: "sky", help: "当前展示的头条数量" },
+          { label: "置顶", value: "2", meta: "条", tone: "amber", help: "置顶展示的头条" },
+          { label: "曝光量", value: "12.8k", meta: "今日", tone: "emerald", help: "今日头条总曝光量" }
+        ],
+        content: `
+          <section class="space-y-6">
+            <!-- 操作栏 -->
+            <div class="flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex gap-2">
+                <button class="rounded-2xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white">+ 添加头条</button>
+                <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">批量排序</button>
+                <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">刷新缓存</button>
+              </div>
+              <div class="text-sm text-slate-500">拖拽可调整顺序 · 共 8 条</div>
+            </div>
+
+            <!-- 头条列表 -->
+            <div class="rounded-[28px] bg-white shadow-sm ring-1 ring-slate-200/80 overflow-hidden">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-50">
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-16">排序</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">内容</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-32">分类</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-24">状态</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-24">曝光</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-32">操作</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  ${[
+                    { title: "关于举办2026年国际中医药学术大会的通知", type: "学术动态", status: "置顶", exposure: "3.2k", statusColor: "amber" },
+                    { title: "我校新增3个中医药类国家级一流本科专业", type: "校园新闻", status: "正常", exposure: "2.8k", statusColor: "sky" },
+                    { title: "张明华教授团队在《Nature》发表重要研究成果", type: "科研成果", status: "置顶", exposure: "2.5k", statusColor: "amber" },
+                    { title: "2026年春季学期开学通知", type: "通知公告", status: "正常", exposure: "1.9k", statusColor: "sky" },
+                    { title: "中医药文化进校园活动圆满落幕", type: "活动回顾", status: "正常", exposure: "1.2k", statusColor: "sky" }
+                  ].map((item, i) => `
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm text-slate-400">${i + 1}</span>
+                          <div class="cursor-move text-slate-400 hover:text-slate-600">
+                            <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                              <path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <p class="font-medium text-slate-900">${item.title}</p>
+                        <p class="mt-1 text-xs text-slate-400">2026-04-20 10:30</p>
+                      </td>
+                      <td class="px-6 py-4">
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-600">${item.type}</span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 bg-${item.statusColor}-50 text-${item.statusColor}-700 ring-${item.statusColor}-100">${item.status}</span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-slate-500">${item.exposure}</td>
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <button class="text-sm text-sky-600 hover:text-sky-700">编辑</button>
+                          <button class="text-sm text-slate-400 hover:text-slate-600">|</button>
+                          <button class="text-sm text-rose-600 hover:text-rose-700">移除</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 分类配置 -->
+            <div class="grid gap-6 md:grid-cols-2">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-slate-900">头条分类</h3>
+                  <button class="text-sm text-sky-600 hover:text-sky-700">+ 添加分类</button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  ${[
+                    { name: "学术动态", count: 3, color: "sky" },
+                    { name: "校园新闻", count: 2, color: "emerald" },
+                    { name: "科研成果", count: 1, color: "violet" },
+                    { name: "通知公告", count: 1, color: "amber" },
+                    { name: "活动回顾", count: 1, color: "rose" }
+                  ].map(cat => `
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-lg bg-${cat.color}-100 flex items-center justify-center">
+                          <div class="h-2 w-2 rounded-full bg-${cat.color}-500"></div>
+                        </div>
+                        <span class="font-medium text-slate-700">${cat.name}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-slate-400">${cat.count} 条</span>
+                        <button class="text-slate-400 hover:text-slate-600">
+                          <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4">
+                            <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">显示设置</h3>
+                <div class="mt-4 space-y-4">
+                  ${[
+                    { name: "头条数量上限", value: "8", desc: "首页展示的头条数量" },
+                    { name: "自动更新", value: "开启", desc: "定时刷新头条内容" },
+                    { name: "缓存时间", value: "30分钟", desc: "头条内容缓存周期" }
+                  ].map(setting => `
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                      <div>
+                        <p class="font-medium text-slate-700">${setting.name}</p>
+                        <p class="text-xs text-slate-400">${setting.desc}</p>
+                      </div>
+                      <button class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600">${setting.value}</button>
+                    </div>
+                  `).join('')}
+                </div>
+                <button class="mt-6 w-full rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white">保存设置</button>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

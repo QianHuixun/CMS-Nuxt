@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>书籍导入 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "论文著作与成果管理",
+        child: "书籍导入",
+        title: "书籍导入",
+        description: "批量导入书籍信息，支持 Excel 格式上传、智能识别字段、自动预览与确认导入。",
+        badges: ["数据库类页面", "批量操作", "Excel 导入"],
+        stats: [
+          { label: "书籍总数", value: "1,286", meta: "本图书", tone: "sky", help: "包含教材、专著、译著等" },
+          { label: "本月导入", value: "45", meta: "本月", tone: "emerald", help: "2026年4月新增导入" },
+          { label: "待审核", value: "12", meta: "需处理", tone: "amber", help: "导入数据待管理员审核" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <!-- 导入操作 -->
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">上传书籍数据</h3>
+                <p class="mt-1 text-sm text-slate-500">支持 .xlsx / .xls / .csv 格式，请确保表头与模板一致。</p>
+                
+                <div class="mt-6">
+                  <div class="rounded-3xl border-2 border-dashed border-slate-300 p-10 text-center transition hover:border-sky-400 hover:bg-sky-50/50">
+                    <div class="mx-auto h-16 w-16 rounded-full bg-sky-100 flex items-center justify-center mb-4">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8 text-sky-600">
+                        <path d="M12 4v12m0-12-4 4m4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <p class="text-base font-medium text-slate-700">将文件拖拽到此处，或点击上传</p>
+                    <p class="mt-2 text-sm text-slate-500">单个文件不超过 10MB</p>
+                    <button class="mt-4 rounded-2xl bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white">选择文件</button>
+                  </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl bg-slate-50 p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 text-emerald-600">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-medium text-slate-700">书籍数据导入模板.xlsx</p>
+                        <p class="text-xs text-slate-500">已上传 · 2.3MB</p>
+                      </div>
+                    </div>
+                    <button class="text-sm text-sky-600 hover:text-sky-700">移除</button>
+                  </div>
+                </div>
+
+                <button class="mt-6 w-full rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white">开始导入</button>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">导入模板说明</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <span class="font-medium text-slate-700">必填字段：</span>书名、作者、ISBN、出版日期
+                  </div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <span class="font-medium text-slate-700">选填字段：</span>副标题、出版社、分类、简介、价格
+                  </div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                    <span class="font-medium text-slate-700">注意事项：</span>ISBN 需唯一，重复数据将自动跳过
+                  </div>
+                  <button class="w-full rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">下载标准模板</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 预览 -->
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-slate-900">数据预览</h3>
+                  <span class="text-sm text-slate-500">共 45 条记录</span>
+                </div>
+                
+                <div class="mt-4 overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="border-b border-slate-200 bg-slate-50">
+                        <th class="px-3 py-2 text-left font-semibold text-slate-600">#</th>
+                        <th class="px-3 py-2 text-left font-semibold text-slate-600">书名</th>
+                        <th class="px-3 py-2 text-left font-semibold text-slate-600">作者</th>
+                        <th class="px-3 py-2 text-left font-semibold text-slate-600">ISBN</th>
+                        <th class="px-3 py-2 text-left font-semibold text-slate-600">状态</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                      ${[
+                        ["中医基础理论", "张明华", "978-7-5322-0001-2", "新增", "sky"],
+                        ["中药学概论", "李芳", "978-7-5322-0002-9", "新增", "sky"],
+                        ["针灸学基础", "王建国", "978-7-5322-0003-6", "重复", "amber"],
+                        ["推拿手法学", "陈晓燕", "978-7-5322-0004-3", "新增", "sky"],
+                        ["中医诊断学", "刘德明", "978-7-5322-0005-0", "新增", "sky"]
+                      ].map((row, i) => `
+                        <tr class="hover:bg-slate-50">
+                          <td class="px-3 py-2 text-slate-500">${i + 1}</td>
+                          <td class="px-3 py-2 font-medium text-slate-900">${row[0]}</td>
+                          <td class="px-3 py-2 text-slate-600">${row[1]}</td>
+                          <td class="px-3 py-2 text-slate-600">${row[2]}</td>
+                          <td class="px-3 py-2">
+                            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 bg-${row[4]}-50 text-${row[4]}-700 ring-${row[4]}-100">${row[3]}</span>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between rounded-2xl bg-slate-50 p-3">
+                  <div class="flex gap-4 text-sm">
+                    <span class="flex items-center gap-1.5">
+                      <span class="h-2 w-2 rounded-full bg-sky-500"></span>
+                      <span class="text-slate-600">新增 43 条</span>
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                      <span class="text-slate-600">重复 2 条</span>
+                    </span>
+                  </div>
+                  <button class="text-sm text-sky-600 hover:text-sky-700">查看全部</button>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">导入历史</h3>
+                <div class="mt-4 space-y-3">
+                  ${[
+                    { date: "2026-04-15 14:30", count: 45, status: "成功", type: "emerald" },
+                    { date: "2026-04-10 09:15", count: 128, status: "成功", type: "emerald" },
+                    { date: "2026-04-05 16:45", count: 32, status: "部分失败", type: "amber" },
+                    { date: "2026-03-28 11:20", count: 56, status: "成功", type: "emerald" }
+                  ].map(item => `
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                      <div>
+                        <p class="text-sm font-medium text-slate-700">${item.date}</p>
+                        <p class="text-xs text-slate-500">导入 ${item.count} 条记录</p>
+                      </div>
+                      <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 bg-${item.type}-50 text-${item.type}-700 ring-${item.type}-100">${item.status}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

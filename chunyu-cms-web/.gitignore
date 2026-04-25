@@ -28,4 +28,6 @@ ssl
 
 .data
 uploads/
+!server/routes/uploads/
+!server/routes/uploads/**
 public/admin/

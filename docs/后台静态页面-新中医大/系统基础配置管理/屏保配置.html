@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>屏保配置 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "系统基础配置管理",
+        child: "屏保配置",
+        title: "屏保配置",
+        description: "配置系统屏保页面的背景图片、显示文案、跳转链接与自动启动时间。",
+        badges: ["配置类页面", "静态原型", "MVP 闭环"],
+        stats: [
+          { label: "屏保总数", value: "2", meta: "个配置", tone: "sky", help: "桌面端 / 移动端屏保" },
+          { label: "已启用", value: "1", meta: "当前活跃", tone: "emerald", help: "桌面端屏保已启用" },
+          { label: "最近修改", value: "昨天", meta: "3月前", tone: "amber", help: "上次修改由管理员操作" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">桌面端屏保</h3>
+                    <p class="mt-1 text-sm text-slate-500">适用于电脑浏览器的屏保配置。</p>
+                  </div>
+                  <div class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">已启用</div>
+                </div>
+
+                <div class="mt-6 space-y-5">
+                  <div class="rounded-3xl border-2 border-dashed border-slate-300 p-8 text-center">
+                    <div class="mx-auto h-40 w-full rounded-2xl bg-gradient-to-br from-sky-100 to-indigo-100 flex items-center justify-center">
+                      <div class="text-center">
+                        <div class="text-4xl mb-2">🖼️</div>
+                        <p class="text-sm text-slate-500">背景图片预览</p>
+                      </div>
+                    </div>
+                    <button class="mt-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">重新上传图片</button>
+                  </div>
+
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-medium text-slate-700">显示文案</span>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">新中医大 · 学术资源平台</div>
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-medium text-slate-700">跳转链接</span>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">/home</div>
+                  </label>
+
+                  <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                    <span class="text-sm font-medium text-slate-700">自动启动时间</span>
+                    <div class="rounded-xl border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600">5 分钟</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">移动端屏保</h3>
+                    <p class="mt-1 text-sm text-slate-500">适用于手机浏览器的屏保配置。</p>
+                  </div>
+                  <div class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">已禁用</div>
+                </div>
+
+                <div class="mt-6 space-y-5">
+                  <div class="rounded-3xl border-2 border-dashed border-slate-300 p-8 text-center">
+                    <div class="mx-auto h-32 w-24 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
+                      <div class="text-center">
+                        <div class="text-2xl mb-1">🖼️</div>
+                        <p class="text-xs text-slate-500">未设置</p>
+                      </div>
+                    </div>
+                    <button class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">上传图片</button>
+                  </div>
+
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-medium text-slate-700">显示文案</span>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-400">暂未设置</div>
+                  </label>
+
+                  <label class="block">
+                    <span class="mb-2 block text-sm font-medium text-slate-700">跳转链接</span>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-400">暂未设置</div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">保存设置</h3>
+                <div class="mt-4 space-y-3">
+                  <button class="w-full rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white">保存桌面端配置</button>
+                  <button class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">保存移动端配置</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

@@ -21,24 +21,60 @@ import { LogServices } from '~~/server/services/admin/monitor/log/log.services';
 import { SysConfigServices } from '~~/server/services/admin/system/sysConfig/sys.config.services';
 
 export class LoginServices {
-  private userServices: UserServices;
-  private sharedServices: SharedServices;
-  private menuServices: MenuServices;
-  private authServices: AuthServices;
-  private redis: Storage<string | number | null>;
-  private logServices: LogServices;
-  private sysConfigServices: SysConfigServices;
-  constructor() {
-    this.sharedServices = new SharedServices();
-    this.userServices = new UserServices();
-    this.menuServices = new MenuServices();
-    this.authServices = new AuthServices();
-    this.logServices = new LogServices();
-    this.sysConfigServices = new SysConfigServices();
-    this.redis = useStorage('redis');
+  private userServices?: UserServices;
+  private sharedServices?: SharedServices;
+  private menuServices?: MenuServices;
+  private authServices?: AuthServices;
+  private logServices?: LogServices;
+  private sysConfigServices?: SysConfigServices;
+
+  private getUserServices() {
+    if (!this.userServices) {
+      this.userServices = new UserServices();
+    }
+    return this.userServices;
   }
 
-  /* 创建验证码图片 */
+  private getSharedServices() {
+    if (!this.sharedServices) {
+      this.sharedServices = new SharedServices();
+    }
+    return this.sharedServices;
+  }
+
+  private getMenuServices() {
+    if (!this.menuServices) {
+      this.menuServices = new MenuServices();
+    }
+    return this.menuServices;
+  }
+
+  private getAuthServices() {
+    if (!this.authServices) {
+      this.authServices = new AuthServices();
+    }
+    return this.authServices;
+  }
+
+  private getLogServices() {
+    if (!this.logServices) {
+      this.logServices = new LogServices();
+    }
+    return this.logServices;
+  }
+
+  private getSysConfigServices() {
+    if (!this.sysConfigServices) {
+      this.sysConfigServices = new SysConfigServices();
+    }
+    return this.sysConfigServices;
+  }
+
+  private getRedis() {
+    return useStorage('redis') as Storage<string | number | null>;
+  }
+
+  /* 鍒涘缓楠岃瘉鐮佸浘鐗?*/
   async createImageCaptcha() {
     try {
       const { data, text } = svgCaptcha.createMathExpr({
@@ -50,9 +86,9 @@ export class LoginServices {
         width: 115.5,
         height: 38
       });
-      const uuid = this.sharedServices.generateUUID();
-      // 验证码 有效期3分钟
-      await this.redis.setItem(`${CAPTCHA_IMG_KEY}:${uuid}`, text, { ttl: 60 * 3 });
+      const uuid = this.getSharedServices().generateUUID();
+      // 楠岃瘉鐮?鏈夋晥鏈?鍒嗛挓
+      await this.getRedis().setItem(`${CAPTCHA_IMG_KEY}:${uuid}`, text, { ttl: 60 * 3 });
       return {
         img: data.toString(),
         uuid
@@ -64,37 +100,37 @@ export class LoginServices {
 
   async login(username: string, password: string, headers: any) {
     try {
-      const user = await this.authServices.validateUser(username, password, headers);
+      const user = await this.getAuthServices().validateUser(username, password, headers);
       const payload = { userId: user.userId, userName: user.userName, pv: 1 };
-      const loginTime = await this.sysConfigServices.findByConfigKey('loginTime');
+      const loginTime = await this.getSysConfigServices().findByConfigKey('loginTime');
       const token = (jwt as any).default.sign(payload, useRuntimeConfig().jwt.secret, {
         expiresIn: loginTime?.configValue ? Number(loginTime.configValue) * 1000 : '1d'
       });
-      // 存储密码版本号，防止登录期间 密码被管理员更改后 还能继续登录
-      await this.redis.setItem(`${USER_VERSION_KEY}:${user.userId}`, 1);
-      // 存储token, 防止重复登录问题，设置token过期时间(1天后 token 自动过期)，以及主动注销token。
-      await this.redis.setItem(`${USER_TOKEN_KEY}:${user.userId}`, token, {
+      // 瀛樺偍瀵嗙爜鐗堟湰鍙凤紝闃叉鐧诲綍鏈熼棿 瀵嗙爜琚鐞嗗憳鏇存敼鍚?杩樿兘缁х画鐧诲綍
+      await this.getRedis().setItem(`${USER_VERSION_KEY}:${user.userId}`, 1);
+      // 瀛樺偍token, 闃叉閲嶅鐧诲綍闂锛岃缃畉oken杩囨湡鏃堕棿(1澶╁悗 token 鑷姩杩囨湡)锛屼互鍙婁富鍔ㄦ敞閿€token銆?
+      await this.getRedis().setItem(`${USER_TOKEN_KEY}:${user.userId}`, token, {
         ttl: loginTime?.configValue ? Number(loginTime.configValue) : 60 * 60 * 24
       });
-      // 调用存储在线用户接口
-      await this.logServices.addLoginInfo(
+      // 璋冪敤瀛樺偍鍦ㄧ嚎鐢ㄦ埛鎺ュ彛
+      await this.getLogServices().addLoginInfo(
         {
           headers,
           user
         },
-        '登录成功',
+        '鐧诲綍鎴愬姛',
         `${USER_TOKEN_KEY}:${user.userId}`
       );
       return { token };
     } catch (error) {
-      throw createError({ statusCode: 400, message: (error as any).message });
+      throw createError({ statusCode: 400, message: (error as any).message || String(error) });
     }
   }
 
   async getInfo(userId: number | string) {
-    const user = await this.userServices.findOneUserAllById(userId);
+    const user = await this.getUserServices().findOneUserAllById(userId);
     if (!user) {
-      throw createError({ statusCode: 400, message: '用户信息已被修改' });
+      throw createError({ statusCode: 400, message: '鐢ㄦ埛淇℃伅宸茶淇敼' });
     }
     const deptId = user.dept ? user.dept.deptId : '';
     const deptName = user.dept ? user.dept.deptName : '';
@@ -106,17 +142,18 @@ export class LoginServices {
       permissions = ['*:*:*'];
     } else {
       const roleIdArr = user.roles.map(role => role.roleId);
-      permissions = await this.menuServices.getAllPermissionsByRoles(roleIdArr);
+      permissions = await this.getMenuServices().getAllPermissionsByRoles(roleIdArr);
     }
-    /* 将用户信息、权限数组、角色数组 存放进入缓存 */
+    /* 灏嗙敤鎴蜂俊鎭€佹潈闄愭暟缁勩€佽鑹叉暟缁?瀛樻斁杩涘叆缂撳瓨 */
+    const redis = this.getRedis();
     const promiseArr = [
-      this.redis.setItem(`${USER_USERNAME_KEY}:${userId}`, user.userName),
-      this.redis.setItem(`${USER_NICKNAME_KEY}:${userId}`, user.nickName),
-      this.redis.setItem(`${USER_DEPTID_KEY}:${userId}`, deptId),
-      this.redis.setItem(`${USER_DEPTNAME_KEY}:${userId}`, deptName),
-      this.redis.setItem(`${USER_PERMISSIONS_KEY}:${userId}`, JSON.stringify(permissions)),
-      this.redis.setItem(`${USER_ROLEKEYS_KEY}:${userId}`, JSON.stringify(roleKeyArr)),
-      this.redis.setItem(`${USER_ROLEKS_KEY}:${userId}`, JSON.stringify(user.roles))
+      redis.setItem(`${USER_USERNAME_KEY}:${userId}`, user.userName),
+      redis.setItem(`${USER_NICKNAME_KEY}:${userId}`, user.nickName),
+      redis.setItem(`${USER_DEPTID_KEY}:${userId}`, deptId),
+      redis.setItem(`${USER_DEPTNAME_KEY}:${userId}`, deptName),
+      redis.setItem(`${USER_PERMISSIONS_KEY}:${userId}`, JSON.stringify(permissions)),
+      redis.setItem(`${USER_ROLEKEYS_KEY}:${userId}`, JSON.stringify(roleKeyArr)),
+      redis.setItem(`${USER_ROLEKS_KEY}:${userId}`, JSON.stringify(user.roles))
     ];
     await Promise.all(promiseArr);
     return {
@@ -126,19 +163,20 @@ export class LoginServices {
     };
   }
 
-  /* 获取当前用户的菜单 */
+  /* 鑾峰彇褰撳墠鐢ㄦ埛鐨勮彍鍗?*/
   async getRouterByUser(userId: number) {
-    const user = await this.userServices.findOneUserAllById(userId);
+    const user = await this.getUserServices().findOneUserAllById(userId);
     const isAdmin = user.roles.some(role => role.roleKey === 'admin');
     const roleIdArr = user.roles.map(role => role.roleId);
     if (!isAdmin && !roleIdArr.length) return [];
-    return await this.menuServices.getMenuList(isAdmin, roleIdArr);
+    return await this.getMenuServices().getMenuList(isAdmin, roleIdArr);
   }
 
-  /* 退出登录 */
+  /* 閫€鍑虹櫥褰?*/
   async logout(userId: string) {
-    if (await this.redis.getItem(`${USER_TOKEN_KEY}:${userId}`)) {
-      await this.redis.removeItem(`${USER_TOKEN_KEY}:${userId}`);
+    const redis = this.getRedis();
+    if (await redis.getItem(`${USER_TOKEN_KEY}:${userId}`)) {
+      await redis.removeItem(`${USER_TOKEN_KEY}:${userId}`);
     }
   }
 }

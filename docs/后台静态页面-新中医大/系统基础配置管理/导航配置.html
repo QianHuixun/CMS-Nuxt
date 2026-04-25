@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>导航配置 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "系统基础配置管理",
+        child: "导航配置",
+        title: "导航配置",
+        description: "维护首页三大入口的名称、简介、链接与展示状态，满足后续文案和跳转目标的灵活调整。",
+        badges: ["配置类页面", "静态原型", "MVP 闭环"],
+        stats: [
+          { label: "入口总数", value: "3", meta: "固定入口", tone: "sky", help: "资源导航、知识图谱、学术动态" },
+          { label: "已启用", value: "3", meta: "前台可见", tone: "emerald", help: "全部入口当前处于启用状态" },
+          { label: "最近修改", value: "10:24", meta: "今日", tone: "amber", help: "最近一次保存来自运营管理员" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-slate-900">首页入口配置</h3>
+                    <p class="mt-1 text-sm text-slate-500">每个入口支持独立名称、简介、链接和显隐控制。</p>
+                  </div>
+                  <button class="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white">保存全部修改</button>
+                </div>
+
+                <div class="mt-6 space-y-4">
+                  ${[
+                    ["资源导航", "实验室数据库与工具的一站式入口", "/resource", "启用"],
+                    ["知识图谱", "实体关系与知识网络可视化入口", "/knowledge-map", "规划中"],
+                    ["学术动态", "人才、论文、活动与成果展示入口", "/research", "启用"]
+                  ]
+                    .map(
+                      item => `
+                        <div class="rounded-3xl border border-slate-200 p-5">
+                          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="grid flex-1 gap-4 md:grid-cols-2">
+                              <label class="block">
+                                <span class="mb-2 block text-sm font-medium text-slate-700">入口名称</span>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">${item[0]}</div>
+                              </label>
+                              <label class="block">
+                                <span class="mb-2 block text-sm font-medium text-slate-700">跳转链接</span>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">${item[2]}</div>
+                              </label>
+                              <label class="block md:col-span-2">
+                                <span class="mb-2 block text-sm font-medium text-slate-700">入口简介</span>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">${item[1]}</div>
+                              </label>
+                            </div>
+                            <div class="flex w-full gap-3 lg:w-40 lg:flex-col">
+                              <div class="rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-semibold text-slate-600">${item[3]}</div>
+                              <button class="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">编辑文案</button>
+                            </div>
+                          </div>
+                        </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">前台预览</h3>
+                <p class="mt-1 text-sm text-slate-500">模拟首页顶部的三个入口卡片。</p>
+                <div class="preview-grid mt-6 rounded-[28px] p-5">
+                  <div class="grid gap-4">
+                    ${[
+                      ["资源导航", "数据库、工具、资源入口集合", "bg-sky-50 text-sky-700 ring-sky-100"],
+                      ["知识图谱", "实体关系网络与可视分析", "bg-violet-50 text-violet-700 ring-violet-100"],
+                      ["学术动态", "人才、论文、活动与成果", "bg-emerald-50 text-emerald-700 ring-emerald-100"]
+                    ]
+                      .map(
+                        item => `
+                          <div class="rounded-3xl bg-white p-5 ring-1 ring-slate-200">
+                            <div class="flex items-start justify-between gap-3">
+                              <div>
+                                <div class="text-base font-semibold text-slate-900">${item[0]}</div>
+                                <div class="mt-2 text-sm leading-6 text-slate-500">${item[1]}</div>
+                              </div>
+                              <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ${item[2]}">可编辑</span>
+                            </div>
+                          </div>`
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">发布规则</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">入口名称建议控制在 6 个汉字以内，避免首页换行。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">简介建议控制在 18 至 26 个汉字之间，突出功能价值。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">若入口未启用，则前台自动隐藏，不参与排序展示。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

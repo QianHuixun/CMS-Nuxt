@@ -81,7 +81,7 @@
 
 <script setup>
 import Cookies from "js-cookie";
-import { useTemplateRef } from "vue";
+import { onBeforeUnmount, useTemplateRef } from "vue";
 import { getCodeImg } from "@/api/login";
 import { encrypt, decrypt } from "@/utils/jsencrypt";
 import useUserStore from "@/store/modules/user";
@@ -111,6 +111,7 @@ const captchaEnabled = ref(true);
 const register = ref(false);
 const redirect = ref(undefined);
 const loginRef = useTemplateRef("loginRef");
+let captchaRetryTimer = null;
 
 function handleLogin() {
   loginRef.value.validate((valid) => {
@@ -146,15 +147,34 @@ function handleLogin() {
   });
 }
 
-function getCode() {
-  getCodeImg().then((res) => {
-    captchaEnabled.value =
-      res.data.captchaEnabled === undefined ? true : res.data.captchaEnabled;
-    if (captchaEnabled.value) {
-      codeUrl.value = res.data.img;
-      loginForm.value.uuid = res.data.uuid;
-    }
-  });
+function clearCaptchaRetryTimer() {
+  if (captchaRetryTimer) {
+    clearTimeout(captchaRetryTimer);
+    captchaRetryTimer = null;
+  }
+}
+
+function getCode(retryCount = 0) {
+  clearCaptchaRetryTimer();
+  return getCodeImg()
+    .then((res) => {
+      captchaEnabled.value =
+        res.data.captchaEnabled === undefined ? true : res.data.captchaEnabled;
+      if (captchaEnabled.value) {
+        codeUrl.value = res.data.img;
+        loginForm.value.uuid = res.data.uuid;
+      }
+    })
+    .catch((error) => {
+      codeUrl.value = "";
+      loginForm.value.uuid = "";
+      if (retryCount < 5) {
+        captchaRetryTimer = setTimeout(() => {
+          getCode(retryCount + 1).catch(() => {});
+        }, 1500);
+      }
+      return Promise.reject(error);
+    });
 }
 
 function getCookie() {
@@ -169,8 +189,12 @@ function getCookie() {
   };
 }
 
-getCode();
+getCode().catch(() => {});
 getCookie();
+
+onBeforeUnmount(() => {
+  clearCaptchaRetryTimer();
+});
 </script>
 
 <style lang="scss" scoped>

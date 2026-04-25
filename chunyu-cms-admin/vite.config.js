@@ -30,9 +30,9 @@ export default defineConfig(({ mode, command }) => {
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         "/dev-api": {
-          target: "http://127.0.0.1:3000/api/admin",
+          target: "http://localhost:3000",
           changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/dev-api/, ""),
+          rewrite: (p) => p.replace(/^\/dev-api/, "/api/admin"),
         },
         "/oss": {
           target: "https://oss.yinchunyu.com",
@@ -40,9 +40,8 @@ export default defineConfig(({ mode, command }) => {
           rewrite: (p) => p.replace(/^\/oss/, ""),
         },
         "/uploads": {
-          target: "http://127.0.0.1:3000/uploads",
+          target: "http://localhost:3000",
           changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/uploads/, ""),
         },
       },
     },

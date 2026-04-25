@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>词云 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "自动化辅助",
+        child: "词云",
+        title: "词云生成",
+        description: "根据关键词生成可视化词云图，支持自定义样式、颜色主题、字体大小与布局参数。",
+        badges: ["工具类页面", "可视化", "自动生成"],
+        stats: [
+          { label: "已生成", value: "156", meta: "张词云", tone: "sky", help: "累计生成的词云图数量" },
+          { label: "本月使用", value: "28", meta: "次", tone: "emerald", help: "2026年4月词云生成次数" },
+          { label: "预设主题", value: "8", meta: "种样式", tone: "amber", help: "预置的颜色主题和布局" }
+        ],
+        content: `
+          <section class="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
+            <!-- 词云生成器 -->
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">词云生成器</h3>
+                <p class="mt-1 text-sm text-slate-500">输入关键词内容，配置样式参数，生成词云图。</p>
+
+                <div class="mt-6 space-y-5">
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">关键词内容</label>
+                    <textarea class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-sky-300 focus:bg-white focus:outline-none" rows="5" placeholder="请输入关键词，每行一个或多行文本，如：&#10;中医理论 30&#10;中药学 25&#10;针灸推拿 20&#10;..."></textarea>
+                    <p class="mt-1 text-xs text-slate-400">支持格式：每行 "词:权重" 或直接输入文本自动分词</p>
+                  </div>
+
+                  <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">颜色主题</label>
+                    <div class="flex flex-wrap gap-2">
+                      ${[
+                        { name: "活力蓝", colors: "from-sky-400 to-blue-500" },
+                        { name: "森林绿", colors: "from-emerald-400 to-teal-500" },
+                        { name: "落日橙", colors: "from-amber-400 to-orange-500" },
+                        { name: "浪漫紫", colors: "from-violet-400 to-purple-500" },
+                        { name: "热情红", colors: "from-rose-400 to-red-500" },
+                        { name: "科技灰", colors: "from-slate-400 to-slate-600" }
+                      ].map(theme => `
+                        <button class="rounded-xl border-2 border-transparent px-4 py-2 text-sm font-medium transition hover:border-sky-300">
+                          <div class="h-6 w-16 rounded-lg bg-gradient-to-r ${theme.colors}"></div>
+                          <span class="mt-1 block text-xs text-slate-600">${theme.name}</span>
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="mb-2 block text-sm font-medium text-slate-700">字体大小范围</label>
+                      <div class="flex items-center gap-2">
+                        <input type="number" value="14" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm" min="8" max="72">
+                        <span class="text-slate-400">-</span>
+                        <input type="number" value="64" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm" min="8" max="72">
+                      </div>
+                    </div>
+                    <div>
+                      <label class="mb-2 block text-sm font-medium text-slate-700">词云形状</label>
+                      <select class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                        <option>矩形</option>
+                        <option>圆形</option>
+                        <option>星形</option>
+                        <option>心形</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button class="w-full rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white">生成词云</button>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">历史记录</h3>
+                <div class="mt-4 space-y-3">
+                  ${[
+                    { name: "中医理论词云", date: "2026-04-20", count: 156 },
+                    { name: "中药学主题词云", date: "2026-04-18", count: 89 },
+                    { name: "学术热点词云", date: "2026-04-15", count: 234 }
+                  ].map(item => `
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                      <div>
+                        <p class="font-medium text-slate-700">${item.name}</p>
+                        <p class="text-xs text-slate-500">${item.date} · ${item.count} 个词</p>
+                      </div>
+                      <div class="flex gap-2">
+                        <button class="text-sm text-sky-600 hover:text-sky-700">查看</button>
+                        <button class="text-sm text-slate-400 hover:text-slate-600">重新生成</button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- 词云预览 -->
+            <div class="space-y-6">
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold text-slate-900">词云预览</h3>
+                  <div class="flex gap-2">
+                    <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">下载 PNG</button>
+                    <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">导出 SVG</button>
+                  </div>
+                </div>
+
+                <div class="preview-grid mt-6 flex min-h-[400px] items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-white p-8">
+                  <div class="text-center">
+                    <div class="text-6xl mb-4 opacity-30">☁️</div>
+                    <p class="text-slate-500">点击"生成词云"按钮预览效果</p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3 opacity-60">
+                      ${["中医理论", "中药学", "针灸", "诊断", "治疗", "基础研究", "临床实践", "古方新用"].map((word, i) => `
+                        <span class="rounded-full bg-gradient-to-r from-sky-100 to-blue-100 px-4 py-2 text-sm font-medium" style="font-size: ${14 + (i % 3) * 8}px">${word}</span>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                <h3 class="text-lg font-semibold text-slate-900">使用说明</h3>
+                <div class="mt-4 space-y-3 text-sm text-slate-600">
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">输入关键词后，系统会自动分析词频并按权重分配字体大小。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">支持拖拽调整关键词位置，生成后可直接下载使用。</div>
+                  <div class="rounded-2xl bg-slate-50 px-4 py-3">推荐词云词数控制在 20-100 之间，效果最佳。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

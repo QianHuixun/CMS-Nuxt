@@ -1,6 +1,4 @@
-const runtimeConfig = useRuntimeConfig();
-
-/* 放开执行的路由 */
+/* Routes that are allowed to modify data in demo mode. */
 const noVerificationRouters = [
   '/api/admin/login',
   '/api/admin/logout',
@@ -27,13 +25,13 @@ const noVerificationRouters = [
 ];
 
 export default defineEventHandler(event => {
-  // 演示环境
+  const runtimeConfig = useRuntimeConfig();
   if (
     runtimeConfig.isDemoEnvironment &&
     isMethod(event, ['POST', 'PUT', 'DELETE']) &&
     !noVerificationRouters.includes(event.path.split('?')[0]) &&
     event.context.user?.userId !== -1
   ) {
-    throw createError({ statusCode: 403, message: '演示环境禁止修改数据！' });
+    throw createError({ statusCode: 403, message: 'Demo environment forbids data changes.' });
   }
 });

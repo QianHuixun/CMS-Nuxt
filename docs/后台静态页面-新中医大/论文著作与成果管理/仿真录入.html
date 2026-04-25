@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>仿真录入 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "论文著作与成果管理",
+        child: "仿真录入",
+        title: "仿真录入",
+        description: "录入仿真相关数据，支持批量导入与手动编辑，可视化展示仿真结果。",
+        badges: ["数据库类页面", "仿真数据", "可视化"],
+        stats: [
+          { label: "仿真记录", value: "328", meta: "条记录", tone: "sky", help: "包含药材仿真、方剂仿真等" },
+          { label: "本月新增", value: "18", meta: "本月", tone: "emerald", help: "2026年4月新增仿真记录" },
+          { label: "可视化", value: "5", meta: "个模型", tone: "amber", help: "已生成可视化模型的仿真" }
+        ],
+        content: `
+          <section class="space-y-6">
+            <!-- 操作区 -->
+            <div class="flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex gap-2">
+                <button class="rounded-2xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white">+ 新增仿真</button>
+                <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">批量导入</button>
+                <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">导出数据</button>
+              </div>
+              <div class="flex gap-2">
+                <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">列表</button>
+                <button class="rounded-2xl bg-sky-50 border border-sky-200 px-4 py-2.5 text-sm font-semibold text-sky-700">卡片</button>
+              </div>
+            </div>
+
+            <!-- 筛选 -->
+            <div class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex flex-wrap items-center gap-4">
+                <input type="text" placeholder="搜索仿真名称、编号..." class="flex-1 min-w-[200px] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-sky-300 focus:bg-white focus:outline-none">
+                <select class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+                  <option>全部类型</option>
+                  <option>药材仿真</option>
+                  <option>方剂仿真</option>
+                  <option>疗效仿真</option>
+                </select>
+                <select class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+                  <option>全部状态</option>
+                  <option>已完成</option>
+                  <option>进行中</option>
+                  <option>失败</option>
+                </select>
+                <button class="rounded-2xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white">搜索</button>
+              </div>
+            </div>
+
+            <!-- 仿真卡片列表 -->
+            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              ${[
+                { name: "当归有效成分分析", type: "药材仿真", status: "已完成", progress: 100, date: "2026-04-18", author: "李芳", color: "emerald" },
+                { name: "四君子汤配伍优化", type: "方剂仿真", status: "进行中", progress: 68, date: "2026-04-17", author: "王建国", color: "amber" },
+                { name: "黄芪多糖药效预测", type: "疗效仿真", status: "已完成", progress: 100, date: "2026-04-15", author: "陈晓燕", color: "emerald" },
+                { name: "柴胡疏肝散分析", type: "方剂仿真", status: "已完成", progress: 100, date: "2026-04-12", author: "刘德明", color: "emerald" },
+                { name: "人参皂苷代谢仿真", type: "药材仿真", status: "失败", progress: 45, date: "2026-04-10", author: "张明华", color: "rose" },
+                { name: "麻黄汤疗效模拟", type: "疗效仿真", status: "进行中", progress: 82, date: "2026-04-08", author: "李芳", color: "amber" }
+              ].map(item => `
+                <div class="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <span class="inline-flex rounded-full bg-${item.color}-50 px-2.5 py-1 text-xs font-semibold text-${item.color}-700 ring-1 ring-${item.color}-100">${item.type}</span>
+                      <h4 class="mt-3 text-lg font-semibold text-slate-900">${item.name}</h4>
+                    </div>
+                    <button class="text-slate-400 hover:text-slate-600">
+                      <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+                        <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="flex justify-between text-sm mb-1.5">
+                      <span class="text-slate-500">仿真进度</span>
+                      <span class="font-medium ${
+                        item.status === '完成' ? 'text-emerald-600' : 
+                        item.status === '失败' ? 'text-rose-600' : 'text-slate-700'
+                      }">${item.progress}%</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100">
+                      <div class="h-full rounded-full ${
+                        item.status === '完成' ? 'bg-emerald-500' : 
+                        item.status === '失败' ? 'bg-rose-500' : 'bg-sky-500'
+                      }" style="width: ${item.progress}%"></div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 flex items-center justify-between text-sm text-slate-500">
+                    <span>${item.date}</span>
+                    <span>${item.author}</span>
+                  </div>
+
+                  <div class="mt-4 flex gap-2">
+                    <button class="flex-1 rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">查看</button>
+                    <button class="flex-1 rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">编辑</button>
+                    <button class="flex-1 rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">可视化</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- 分页 -->
+            <div class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-500">显示 1-6 条，共 328 条</div>
+                <div class="flex gap-2">
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">上一页</button>
+                  <button class="rounded-xl bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white">1</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">2</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">...</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">55</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">下一页</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>

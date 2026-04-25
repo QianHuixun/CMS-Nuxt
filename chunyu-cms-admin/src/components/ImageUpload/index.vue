@@ -95,11 +95,11 @@ watch(
   (val) => {
     if (val) {
       // 首先将值转为数组
-      const list = Array.isArray(val) ? val : props.modelValue.split(",");
+      const list = normalizeModelValue(val);
       // 然后将数组转为对象数组
       fileList.value = list.map((item) => {
         if (typeof item === "string") {
-          item = { name: item, url: item };
+          item = { name: getImageName(item), url: item };
         }
         return item;
       });
@@ -110,6 +110,19 @@ watch(
   },
   { deep: true, immediate: true },
 );
+
+function normalizeModelValue(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "object") return [value];
+  if (typeof value !== "string") return [];
+  if (value.startsWith("data:image/")) return [value];
+  return value.split(",").filter(Boolean);
+}
+
+function getImageName(url) {
+  if (url.startsWith("data:image/")) return "cover-frame.jpg";
+  return url.substring(url.lastIndexOf("/") + 1) || url;
+}
 
 // 上传前loading加载
 function handleBeforeUpload(file) {

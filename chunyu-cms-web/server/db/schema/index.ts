@@ -49,6 +49,7 @@ import * as movieRateSchema from './movie/rate';
 import * as commentSchema from './movie/comment';
 import * as shortSchema from './shorts/short';
 import * as videoResourceSchema from './movie/videoResource';
+import * as activitySchema from './admin/activity';
 
 export default {
   ...userSchema,
@@ -99,5 +100,6 @@ export default {
   ...memberInviteRecordSchema,
   ...movieRateSchema,
   ...commentSchema,
-  ...shortSchema
+  ...shortSchema,
+  ...activitySchema
 };

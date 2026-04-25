@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>专家库管理 - 新中医大 CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static-admin-theme.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../static-admin-shell.js"></script>
+    <script>
+      renderPage({
+        parent: "人才与对应科研管理",
+        child: "专家库管理",
+        title: "专家库管理",
+        description: "管理专家信息、学术背景、研究方向与联系方式，支持新增、编辑、批量导入与导出。",
+        badges: ["数据库类页面", "CRUD", "支持批量操作"],
+        stats: [
+          { label: "专家总数", value: "128", meta: "位专家", tone: "sky", help: "包含教授、副教授、讲师等" },
+          { label: "本月新增", value: "5", meta: "本月", tone: "emerald", help: "2026年4月新增专家" },
+          { label: "待审核", value: "2", meta: "需处理", tone: "amber", help: "新增专家待管理员审核" }
+        ],
+        content: `
+          <section class="space-y-6">
+            <!-- 工具栏 -->
+            <div class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+              <div class="flex flex-wrap items-center gap-4">
+                <div class="flex-1 min-w-[200px]">
+                  <input type="text" placeholder="搜索专家姓名、研究方向..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-sky-300 focus:bg-white focus:outline-none">
+                </div>
+                <select class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+                  <option>全部职称</option>
+                  <option>教授</option>
+                  <option>副教授</option>
+                  <option>讲师</option>
+                </select>
+                <select class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+                  <option>全部研究方向</option>
+                  <option>中医基础理论</option>
+                  <option>中药学</option>
+                  <option>针灸推拿</option>
+                </select>
+                <div class="flex gap-2">
+                  <button class="rounded-2xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white">搜索</button>
+                  <button class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600">重置</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex gap-2">
+                <button class="rounded-2xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white">+ 新增专家</button>
+                <button class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600">批量导入</button>
+                <button class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600">导出数据</button>
+              </div>
+              <div class="text-sm text-slate-500">共 128 条记录</div>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="rounded-[28px] bg-white shadow-sm ring-1 ring-slate-200/80 overflow-hidden">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b border-slate-200 bg-slate-50">
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      <input type="checkbox" class="rounded border-slate-300">
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">姓名</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">职称</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">研究方向</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">所属机构</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">联系方式</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">状态</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-slate-700">操作</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  ${[
+                    ["张明华", "教授", "中医基础理论", "中医基础医学院", "zhang@example.com", "已审核", "emerald"],
+                    ["李芳", "副教授", "中药学", "中药学院", "li@example.com", "已审核", "emerald"],
+                    ["王建国", "教授", "针灸推拿", "针灸推拿学院", "wang@example.com", "待审核", "amber"],
+                    ["陈晓燕", "讲师", "中医诊断学", "中医临床学院", "chen@example.com", "已审核", "emerald"],
+                    ["刘德明", "副教授", "中药药理学", "中药学院", "liu@example.com", "已审核", "emerald"]
+                  ].map(row => `
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-6 py-4">
+                        <input type="checkbox" class="rounded border-slate-300">
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white font-semibold">${row[0].charAt(0)}</div>
+                          <span class="font-medium text-slate-900">${row[0]}</span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-slate-600">${row[2]}</td>
+                      <td class="px-6 py-4 text-sm text-slate-600">${row[3]}</td>
+                      <td class="px-6 py-4 text-sm text-slate-600">${row[4]}</td>
+                      <td class="px-6 py-4 text-sm text-slate-600">${row[5]}</td>
+                      <td class="px-6 py-4">
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 bg-${row[7]}-50 text-${row[7]}-700 ring-${row[7]}-100">${row[6]}</span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                          <button class="text-sm text-sky-600 hover:text-sky-700">编辑</button>
+                          <button class="text-sm text-slate-400 hover:text-slate-600">|</button>
+                          <button class="text-sm text-rose-600 hover:text-rose-700">删除</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              
+              <!-- 分页 -->
+              <div class="flex items-center justify-between border-t border-slate-200 px-6 py-4">
+                <div class="text-sm text-slate-500">显示 1-5 条，共 128 条</div>
+                <div class="flex gap-2">
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">上一页</button>
+                  <button class="rounded-xl bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white">1</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">2</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">3</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">...</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">26</button>
+                  <button class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">下一页</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `
+      });
+    </script>
+  </body>
+</html>
