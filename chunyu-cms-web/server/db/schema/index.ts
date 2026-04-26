@@ -54,6 +54,8 @@ import * as paperSchema from './admin/paper';
 import * as paperKeywordSchema from './admin/paperKeyword';
 import * as patentSchema from './admin/patent';
 import * as topicSchema from './admin/topic';
+import * as bookSimulationSchema from './admin/bookSimulation';
+import * as bookSimulationPageSchema from './admin/bookSimulationPage';
 
 export default {
   ...userSchema,
@@ -109,5 +111,7 @@ export default {
   ...paperSchema,
   ...paperKeywordSchema,
   ...patentSchema,
-  ...topicSchema
+  ...topicSchema,
+  ...bookSimulationSchema,
+  ...bookSimulationPageSchema
 };

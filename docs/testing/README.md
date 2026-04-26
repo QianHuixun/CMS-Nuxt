@@ -67,6 +67,17 @@
 - 5.1 批量导入与专利视频增强已完成前后端构建验证
 - 5.1 批量导入与专利视频增强未做全量 E2E 测试
 
+## 书籍仿真录入
+
+- `book-simulation-test-plan.md`
+- `book-simulation-test-report.md`
+
+说明：
+
+- 5.2 书籍仿真录入最小版已完成最小自动化测试
+- 5.2 书籍仿真录入最小版已完成前后端构建验证
+- 5.2 书籍仿真录入最小版未做全量 E2E 测试
+
 ## 图表生成
 
 - `chart-generator-test-plan.md`
