@@ -30,7 +30,8 @@
     "vue": "3.5.13",
     "vue-clipboard3": "^2.0.0",
     "vue-cropper": "1.0.3",
-    "vue-router": "4.5.0"
+    "vue-router": "4.5.0",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@tinymce/tinymce-vue": "^5",
