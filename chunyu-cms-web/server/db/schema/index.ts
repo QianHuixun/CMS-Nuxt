@@ -52,6 +52,8 @@ import * as videoResourceSchema from './movie/videoResource';
 import * as activitySchema from './admin/activity';
 import * as paperSchema from './admin/paper';
 import * as paperKeywordSchema from './admin/paperKeyword';
+import * as patentSchema from './admin/patent';
+import * as topicSchema from './admin/topic';
 
 export default {
   ...userSchema,
@@ -105,5 +107,7 @@ export default {
   ...shortSchema,
   ...activitySchema,
   ...paperSchema,
-  ...paperKeywordSchema
+  ...paperKeywordSchema,
+  ...patentSchema,
+  ...topicSchema
 };

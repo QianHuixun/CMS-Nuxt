@@ -45,6 +45,28 @@
 - 论文数据导入最小版未做全量 E2E 测试
 - 当前需额外确认 `0018_extend_paper_for_import_and_chart.sql` 是否已在目标数据库执行
 
+## 专利/课题导入
+
+- `patent-topic-import-test-plan.md`
+- `patent-topic-import-test-report.md`
+
+说明：
+
+- 专利/课题导入最小版已完成最小自动化测试
+- 专利/课题导入最小版已完成前后端构建验证
+- 专利/课题导入最小版未做全量 E2E 测试
+
+## 批量导入与专利视频增强
+
+- `import-batch-video-enhancement-test-plan.md`
+- `import-batch-video-enhancement-test-report.md`
+
+说明：
+
+- 5.1 批量导入与专利视频增强已完成最小自动化测试
+- 5.1 批量导入与专利视频增强已完成前后端构建验证
+- 5.1 批量导入与专利视频增强未做全量 E2E 测试
+
 ## 图表生成
 
 - `chart-generator-test-plan.md`

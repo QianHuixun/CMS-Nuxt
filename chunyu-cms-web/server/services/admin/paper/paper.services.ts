@@ -20,6 +20,7 @@ type PaperPageParams = Partial<
     pageSize: number;
     title: string;
     publishYear: number | string;
+    isFeatured: string;
     status: string;
   }
 >;
@@ -64,7 +65,7 @@ export class PaperServices {
   }
 
   async pageList(params?: PaperPageParams) {
-    const { pageNum = 1, pageSize = 10, title, publishYear, status } = params || {};
+    const { pageNum = 1, pageSize = 10, title, publishYear, isFeatured, status } = params || {};
     const offset = (Number(pageNum) - 1) * Number(pageSize);
     const whereList = [eq(paperTable.delFlag, '0')];
 
@@ -78,6 +79,10 @@ export class PaperServices {
 
     if (status === '0' || status === '1') {
       whereList.push(eq(paperTable.status, status));
+    }
+
+    if (isFeatured === '0' || isFeatured === '1') {
+      whereList.push(eq(paperTable.isFeatured, isFeatured));
     }
 
     const where = and(...whereList);

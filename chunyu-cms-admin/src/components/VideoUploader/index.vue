@@ -10,7 +10,7 @@
       </div>
       <div class="panel-footer">
         <el-button size="small" @click.stop="triggerUpload">选择文件</el-button>
-        <el-button size="small" type="danger" plain @click.stop="runMockFailure">模拟失败流程</el-button>
+        <el-button v-if="showMockFailure" size="small" type="danger" plain @click.stop="runMockFailure">模拟失败流程</el-button>
       </div>
     </div>
 
@@ -65,7 +65,7 @@
       </div>
     </div>
 
-    <input ref="fileInput" type="file" accept="video/mp4,video/*" style="display: none" @change="handleFileChange" />
+    <input ref="fileInput" type="file" accept="video/mp4,.mp4" style="display: none" @change="handleFileChange" />
   </div>
 </template>
 
@@ -86,6 +86,10 @@ const props = defineProps({
   status: {
     type: String,
     default: 'idle'
+  },
+  showMockFailure: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -114,7 +118,8 @@ function handleFileChange(event) {
   event.target.value = ''
   if (!file) return
 
-  if (!file.type.startsWith('video/') && !file.name.toLowerCase().endsWith('.mp4')) {
+  const isMp4 = file.type === 'video/mp4' || file.name.toLowerCase().endsWith('.mp4')
+  if (!isMp4) {
     ElMessage.error('请上传 MP4 视频文件')
     return
   }
@@ -195,10 +200,12 @@ function emitFailure(message) {
 
 function handleRemove() {
   clearTimers()
+  const hasCover = !!props.cover
   fileName.value = ''
   emit('update:modelValue', '')
   emit('update:cover', '')
   emit('status-change', 'idle')
+  ElMessage.info(hasCover ? '已删除视频，并同步清空封面' : '已删除视频')
 }
 
 function resetUploader() {

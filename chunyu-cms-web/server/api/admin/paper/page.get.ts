@@ -4,13 +4,14 @@ const paperServices = new PaperServices();
 
 export default defineEventHandler(async event => {
   const query = getQuery(event);
-  const { pageNum = 1, pageSize = 10, title, publishYear, status } = query as Record<string, string>;
+  const { pageNum = 1, pageSize = 10, title, publishYear, isFeatured, status } = query as Record<string, string>;
 
   const result = await paperServices.pageList({
     pageNum: Number(pageNum),
     pageSize: Number(pageSize),
     title,
     publishYear,
+    isFeatured,
     status
   });
 
