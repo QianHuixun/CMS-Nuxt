@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function listTopic() {
+  return request({
+    url: '/topic/list',
+    method: 'get'
+  })
+}
+
 export function pageTopic(query) {
   return request({
     url: '/topic/page',

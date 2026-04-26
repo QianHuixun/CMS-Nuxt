@@ -21,6 +21,20 @@ type PatentMutationBody = Partial<
 >;
 
 export class PatentServices {
+  async list() {
+    const rows = await db
+      .select({
+        id: sql<number>`${patentTable.patentId}`.as('id'),
+        patentId: patentTable.patentId,
+        title: patentTable.title
+      })
+      .from(patentTable)
+      .where(eq(patentTable.delFlag, '0'))
+      .orderBy(desc(patentTable.updateTime), desc(patentTable.patentId));
+
+    return { rows };
+  }
+
   async pageList(params?: PatentPageParams) {
     const { pageNum = 1, pageSize = 10, title, applyYear, status } = params || {};
     const offset = (Number(pageNum) - 1) * Number(pageSize);

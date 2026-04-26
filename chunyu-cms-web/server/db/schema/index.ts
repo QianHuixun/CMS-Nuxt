@@ -56,6 +56,8 @@ import * as patentSchema from './admin/patent';
 import * as topicSchema from './admin/topic';
 import * as bookSimulationSchema from './admin/bookSimulation';
 import * as bookSimulationPageSchema from './admin/bookSimulationPage';
+import * as talentSchema from './admin/talent';
+import * as talentAchievementRelationSchema from './admin/talentAchievementRelation';
 
 export default {
   ...userSchema,
@@ -113,5 +115,7 @@ export default {
   ...patentSchema,
   ...topicSchema,
   ...bookSimulationSchema,
-  ...bookSimulationPageSchema
+  ...bookSimulationPageSchema,
+  ...talentSchema,
+  ...talentAchievementRelationSchema
 };

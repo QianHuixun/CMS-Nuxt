@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function listPaper() {
+  return request({
+    url: '/paper/list',
+    method: 'get'
+  })
+}
+
 export function pagePaper(query) {
   return request({
     url: '/paper/page',

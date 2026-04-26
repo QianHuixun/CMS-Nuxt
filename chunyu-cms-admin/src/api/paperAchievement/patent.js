@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function listPatent() {
+  return request({
+    url: '/patent/list',
+    method: 'get'
+  })
+}
+
 export function pagePatent(query) {
   return request({
     url: '/patent/page',

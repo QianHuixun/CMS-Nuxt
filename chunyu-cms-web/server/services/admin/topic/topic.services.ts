@@ -22,6 +22,21 @@ type TopicMutationBody = Partial<
 >;
 
 export class TopicServices {
+  async list() {
+    const rows = await db
+      .select({
+        id: sql<number>`${topicTable.topicId}`.as('id'),
+        projectId: topicTable.topicId,
+        topicId: topicTable.topicId,
+        title: topicTable.title
+      })
+      .from(topicTable)
+      .where(eq(topicTable.delFlag, '0'))
+      .orderBy(desc(topicTable.updateTime), desc(topicTable.topicId));
+
+    return { rows };
+  }
+
   async pageList(params?: TopicPageParams) {
     const { pageNum = 1, pageSize = 10, title, projectYear, status } = params || {};
     const offset = (Number(pageNum) - 1) * Number(pageSize);
