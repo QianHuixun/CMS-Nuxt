@@ -1,120 +1,123 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
-      <!-- 左侧：输入和配置区域 -->
-      <el-col :span="10">
-        <el-card shadow="never">
+    <el-row :gutter="16">
+      <el-col :span="24">
+        <el-card shadow="never" class="toolbar-card">
+          <div class="toolbar">
+            <div class="toolbar-main">
+              <div class="toolbar-title">论文词云</div>
+              <div class="toolbar-desc">支持全部论文关键词汇总展示，以及单篇论文关键词权重人工维护。</div>
+            </div>
+            <div class="toolbar-actions">
+              <el-radio-group v-model="currentMode" @change="handleModeChange">
+                <el-radio-button label="all">全部论文</el-radio-button>
+                <el-radio-button label="paper">单篇论文</el-radio-button>
+              </el-radio-group>
+              <el-select
+                v-if="currentMode === 'paper'"
+                v-model="selectedPaperId"
+                placeholder="请选择论文"
+                filterable
+                clearable
+                class="paper-select"
+                @change="handlePaperChange"
+              >
+                <el-option
+                  v-for="paper in paperOptions"
+                  :key="paper.paperId"
+                  :label="paper.title"
+                  :value="paper.paperId"
+                />
+              </el-select>
+              <el-button icon="Refresh" @click="handleRefresh">刷新</el-button>
+              <el-button
+                v-if="currentMode === 'paper'"
+                type="primary"
+                :disabled="!selectedPaperId || !editableKeywords.length"
+                :loading="saveLoading"
+                @click="handleSaveKeywords"
+              >
+                保存权重
+              </el-button>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="16" class="mt16">
+      <el-col :span="15">
+        <el-card shadow="never" class="chart-card" v-loading="previewLoading">
           <template #header>
             <div class="card-header">
-              <span>词云生成</span>
-              <el-button type="primary" size="small" icon="Refresh" @click="handleGenerate">生成词云</el-button>
+              <span>{{ currentMode === 'all' ? '全部论文词云' : '单篇论文词云' }}</span>
+              <span class="card-meta">{{ activeWordCount }} 个关键词</span>
             </div>
           </template>
 
-          <!-- 文本输入 -->
-          <el-form label-width="100px">
-            <el-form-item label="文本内容">
-              <el-input
-                v-model="form.text"
-                type="textarea"
-                :rows="8"
-                placeholder="请输入要生成词云的文本内容，每行一个词或短语"
-              />
-            </el-form-item>
-            <el-form-item label="或上传文本文件">
-              <el-upload
-                class="upload-file"
-                drag
-                action="#"
-                :auto-upload="false"
-                :limit="1"
-                accept=".txt"
-              >
-                <el-icon class="el-icon--upload"><Upload /></el-icon>
-                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                <template #tip>
-                  <div class="el-upload__tip">只能上传 txt 文件</div>
-                </template>
-              </el-upload>
-            </el-form-item>
-
-            <el-divider content-position="left">高级配置</el-divider>
-
-            <el-form-item label="词云形状">
-              <el-select v-model="form.shape" placeholder="请选择词云形状" style="width: 100%">
-                <el-option label="圆形" value="circle" />
-                <el-option label="方形" value="square" />
-                <el-option label="心形" value="heart" />
-                <el-option label="星形" value="star" />
-                <el-option label="自定义" value="custom" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="配色方案">
-              <el-select v-model="form.colorScheme" placeholder="请选择配色方案" style="width: 100%">
-                <el-option label="默认" value="default" />
-                <el-option label="渐变" value="gradient" />
-                <el-option label="中医绿" value="tcmmain" />
-                <el-option label="古典红" value="classical" />
-                <el-option label="清新蓝" value="fresh" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="最小词频">
-              <el-slider v-model="form.minFreq" :min="1" :max="10" show-stops :marks="freqMarks" />
-            </el-form-item>
-
-            <el-form-item label="最大词数">
-              <el-input-number v-model="form.maxWords" :min="10" :max="200" />
-            </el-form-item>
-
-            <el-form-item label="允许英文">
-              <el-switch v-model="form.allowEnglish" />
-            </el-form-item>
-          </el-form>
+          <el-empty v-if="!activeWordCount" description="暂无词云数据" />
+          <div v-else ref="chartRef" class="word-cloud-chart"></div>
         </el-card>
       </el-col>
 
-      <!-- 右侧：预览和导出区域 -->
-      <el-col :span="14">
-        <el-card shadow="never">
+      <el-col :span="9">
+        <el-card shadow="never" class="detail-card" v-loading="detailLoading">
           <template #header>
             <div class="card-header">
-              <span>词云预览</span>
-              <el-space>
-                <el-button size="small" icon="ZoomIn" @click="handleZoomIn">放大</el-button>
-                <el-button size="small" icon="ZoomOut" @click="handleZoomOut">缩小</el-button>
-                <el-button type="primary" size="small" icon="Download" :disabled="!hasGenerated" @click="handleExport">导出图片</el-button>
-              </el-space>
+              <span>关键词权重</span>
+              <span v-if="currentMode === 'paper' && selectedPaper.title" class="paper-title">{{ selectedPaper.title }}</span>
             </div>
           </template>
 
-          <div class="preview-area" :style="{ transform: `scale(${zoomLevel})` }">
-            <el-empty v-if="!hasGenerated" description="请在左侧输入文本内容后点击「生成词云」">
-              <template #image>
-                <el-icon :size="80" color="#409EFF"><DataAnalysis /></el-icon>
-              </template>
-            </el-empty>
-            <div v-else class="word-cloud-container">
-              <!-- 模拟词云效果 -->
-              <div class="mock-word-cloud">
-                <span v-for="(word, index) in generatedWords" :key="index" :style="{ fontSize: word.size + 'px', color: word.color, transform: `rotate(${word.rotate}deg)` }">
-                  {{ word.text }}
-                </span>
-              </div>
-            </div>
+          <div v-if="currentMode === 'paper' && selectedPaper.abstract" class="paper-abstract">
+            {{ selectedPaper.abstract }}
           </div>
 
-          <!-- 词频统计 -->
-          <el-divider content-position="left" v-if="hasGenerated">词频统计 Top 10</el-divider>
-          <el-table v-if="hasGenerated" :data="wordStats" size="small" max-height="200">
-            <el-table-column prop="word" label="词语" width="120" />
-            <el-table-column prop="count" label="频次" width="80" align="center" />
-            <el-table-column label="占比" min-width="200">
+          <el-empty
+            v-if="currentMode === 'paper' && !selectedPaperId"
+            description="请选择一篇论文查看关键词"
+          />
+
+          <el-empty
+            v-else-if="currentMode === 'paper' && !editableKeywords.length"
+            description="当前论文暂无关键词"
+          />
+
+          <el-table
+            v-else-if="currentMode === 'paper'"
+            :data="editableKeywords"
+            size="small"
+            max-height="520"
+          >
+            <el-table-column prop="keyword" label="关键词" min-width="160" show-overflow-tooltip />
+            <el-table-column prop="source" label="来源" width="100" align="center">
               <template #default="{ row }">
-                <el-progress :percentage="row.percentage" :color="row.color" />
+                <el-tag size="small" :type="row.source === '0' ? 'success' : 'info'">
+                  {{ sourceLabelMap[row.source] || '未知' }}
+                </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="权重" width="140" align="center">
+              <template #default="{ row }">
+                <el-input-number
+                  v-model="row.weight"
+                  :min="1"
+                  :max="999"
+                  controls-position="right"
+                  @change="handleWeightChange"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-table
+            v-else
+            :data="allCloudKeywords"
+            size="small"
+            max-height="520"
+          >
+            <el-table-column prop="keyword" label="关键词" min-width="160" show-overflow-tooltip />
+            <el-table-column prop="weight" label="聚合权重" width="120" align="center" />
           </el-table>
         </el-card>
       </el-col>
@@ -123,140 +126,285 @@
 </template>
 
 <script setup name="AutomationToolsWordCloudIndex">
-import { Upload } from '@element-plus/icons-vue'
-import { DataAnalysis } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
+import 'echarts-wordcloud'
+import { ElMessage } from 'element-plus'
+import { getPaperKeywordCloud, getPaperKeywords, listPapers, updatePaperKeywords } from '@/api/automationTools/wordCloud'
+import { buildKeywordSavePayload, mapKeywordsToWordCloudData } from './utils'
 
-const hasGenerated = ref(false)
-const zoomLevel = ref(1)
-const generatedWords = ref([])
+const chartRef = ref(null)
+const chartInstance = shallowRef(null)
+const currentMode = ref('all')
+const previewLoading = ref(false)
+const detailLoading = ref(false)
+const saveLoading = ref(false)
+const paperOptions = ref([])
+const selectedPaperId = ref(undefined)
+const selectedPaper = ref({ paperId: undefined, title: '', abstract: '' })
+const editableKeywords = ref([])
+const allCloudKeywords = ref([])
 
-const form = ref({
-  text: '中医 中药 针灸 推拿 养生 健康 调理 气血 阴阳 五行\n脏腑 经络 脉象 辨证 论治 处方 配伍 炮制 疗效\n望闻问切 标本兼治 未病先防 既病防变 扶正祛邪',
-  shape: 'circle',
-  colorScheme: 'default',
-  minFreq: 1,
-  maxWords: 50,
-  allowEnglish: false
+const sourceLabelMap = {
+  '0': '人工',
+  '1': '摘要',
+  '2': '导入'
+}
+
+const activeWordCount = computed(() => {
+  return currentMode.value === 'all' ? allCloudKeywords.value.length : editableKeywords.value.length
 })
 
-const freqMarks = { 1: '1', 3: '3', 5: '5', 7: '7', 10: '10' }
+onMounted(async () => {
+  await loadAllCloud()
+  initChart()
+})
 
-const colorSchemes = {
-  default: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'],
-  gradient: ['#667eea', '#764ba2', '#f093fb', '#f5576c'],
-  tcmmain: ['#2d5a27', '#4a7c44', '#6b9b63', '#8fc082'],
-  classical: ['#8B0000', '#CD5C5C', '#F08080', '#FA8072'],
-  fresh: ['#00CED1', '#20B2AA', '#48D1CC', '#40E0D0']
-}
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  if (chartInstance.value) {
+    chartInstance.value.dispose()
+    chartInstance.value = null
+  }
+})
 
-const wordStats = ref([
-  { word: '中医', count: 15, percentage: 100, color: '#409EFF' },
-  { word: '中药', count: 12, percentage: 80, color: '#67C23A' },
-  { word: '针灸', count: 10, percentage: 67, color: '#E6A23C' },
-  { word: '养生', count: 8, percentage: 53, color: '#F56C6C' },
-  { word: '健康', count: 7, percentage: 47, color: '#909399' }
-])
+async function handleModeChange(mode) {
+  currentMode.value = mode
 
-function handleGenerate() {
-  if (!form.value.text.trim()) {
-    ElMessage.warning('请输入文本内容')
+  if (mode === 'paper') {
+    await ensurePaperOptions()
+    if (selectedPaperId.value) {
+      await loadPaperKeywords(selectedPaperId.value)
+    } else {
+      editableKeywords.value = []
+      selectedPaper.value = { paperId: undefined, title: '', abstract: '' }
+      renderWordCloud([])
+    }
     return
   }
-  
-  ElMessage.success('正在生成词云...')
-  
-  // 模拟生成词云
-  const colors = colorSchemes[form.value.colorScheme] || colorSchemes.default
-  const words = form.value.text.split(/[\s,\n]+/).filter(w => w.length > 0)
-  const uniqueWords = [...new Set(words)]
-  
-  generatedWords.value = uniqueWords.slice(0, form.value.maxWords).map((word, index) => ({
-    text: word,
-    size: 14 + Math.random() * 40,
-    color: colors[index % colors.length],
-    rotate: Math.random() * 60 - 30
-  }))
-  
-  hasGenerated.value = true
-  
-  // 更新词频统计
-  wordStats.value = uniqueWords.slice(0, 10).map((word, index) => ({
-    word,
-    count: Math.floor(Math.random() * 15) + 1,
-    percentage: 100 - index * 8,
-    color: colors[index % colors.length]
-  })).sort((a, b) => b.count - a.count)
-  
-  ElMessage.success('词云生成成功')
+
+  renderWordCloud(allCloudKeywords.value)
 }
 
-function handleZoomIn() {
-  zoomLevel.value = Math.min(zoomLevel.value + 0.2, 2)
+async function handlePaperChange(paperId) {
+  if (!paperId) {
+    selectedPaper.value = { paperId: undefined, title: '', abstract: '' }
+    editableKeywords.value = []
+    renderWordCloud([])
+    return
+  }
+
+  await loadPaperKeywords(paperId)
 }
 
-function handleZoomOut() {
-  zoomLevel.value = Math.max(zoomLevel.value - 0.2, 0.5)
+async function handleRefresh() {
+  if (currentMode.value === 'paper' && selectedPaperId.value) {
+    await loadPaperKeywords(selectedPaperId.value)
+    return
+  }
+
+  await loadAllCloud()
 }
 
-function handleExport() {
-  ElMessage.success('图片导出中...')
+async function handleSaveKeywords() {
+  if (!selectedPaperId.value) {
+    ElMessage.warning('请先选择论文')
+    return
+  }
+
+  saveLoading.value = true
+  try {
+    await updatePaperKeywords(selectedPaperId.value, buildKeywordSavePayload(editableKeywords.value))
+    ElMessage.success('关键词权重已保存')
+    await loadPaperKeywords(selectedPaperId.value)
+    await loadAllCloud(false)
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+function handleWeightChange() {
+  if (currentMode.value === 'paper') {
+    renderWordCloud(editableKeywords.value)
+  }
+}
+
+async function ensurePaperOptions() {
+  if (paperOptions.value.length > 0) {
+    return
+  }
+
+  const res = await listPapers()
+  paperOptions.value = res.data?.rows || []
+}
+
+async function loadAllCloud(showLoading = true) {
+  previewLoading.value = showLoading
+  try {
+    const res = await getPaperKeywordCloud()
+    allCloudKeywords.value = res.data?.keywords || []
+    if (currentMode.value === 'all') {
+      renderWordCloud(allCloudKeywords.value)
+    }
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+async function loadPaperKeywords(paperId) {
+  detailLoading.value = true
+  previewLoading.value = true
+  try {
+    const res = await getPaperKeywords(paperId)
+    selectedPaper.value = {
+      paperId: res.data?.paperId,
+      title: res.data?.paperTitle || '',
+      abstract: res.data?.abstract || ''
+    }
+    editableKeywords.value = (res.data?.keywords || []).map(item => ({
+      id: item.id ?? null,
+      keyword: item.keyword,
+      weight: item.weight,
+      source: item.source || '0'
+    }))
+    renderWordCloud(editableKeywords.value)
+  } finally {
+    detailLoading.value = false
+    previewLoading.value = false
+  }
+}
+
+function initChart() {
+  if (!chartRef.value || chartInstance.value) {
+    return
+  }
+
+  chartInstance.value = echarts.init(chartRef.value)
+  renderWordCloud(currentMode.value === 'all' ? allCloudKeywords.value : editableKeywords.value)
+  window.addEventListener('resize', handleResize)
+}
+
+function handleResize() {
+  chartInstance.value?.resize()
+}
+
+function renderWordCloud(rows) {
+  nextTick(() => {
+    if (!chartRef.value) {
+      return
+    }
+
+    if (!chartInstance.value) {
+      chartInstance.value = echarts.init(chartRef.value)
+      window.addEventListener('resize', handleResize)
+    }
+
+    const data = mapKeywordsToWordCloudData(rows)
+    chartInstance.value.setOption({
+      backgroundColor: '#ffffff',
+      tooltip: {
+        trigger: 'item',
+        formatter: params => `${params.name}: ${params.value}`
+      },
+      series: [
+        {
+          type: 'wordCloud',
+          shape: 'circle',
+          left: 'center',
+          top: 'center',
+          width: '100%',
+          height: '100%',
+          sizeRange: [18, 64],
+          rotationRange: [-15, 15],
+          rotationStep: 15,
+          gridSize: 10,
+          drawOutOfBound: false,
+          textStyle: {
+            fontFamily: 'sans-serif',
+            fontWeight: 'bold',
+            color() {
+              const palette = ['#14532d', '#0f766e', '#0369a1', '#7c2d12', '#7f1d1d']
+              return palette[Math.floor(Math.random() * palette.length)]
+            }
+          },
+          emphasis: {
+            focus: 'self',
+            textStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.25)'
+            }
+          },
+          data
+        }
+      ]
+    })
+  })
 }
 </script>
 
 <style lang="scss" scoped>
+.mt16 {
+  margin-top: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar-main {
+  min-width: 280px;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.toolbar-desc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.paper-select {
+  width: 320px;
+}
+
 .card-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
+  gap: 12px;
 }
 
-.search-card {
-  margin-bottom: 16px;
+.card-meta,
+.paper-title {
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.mb8 {
-  margin-bottom: 16px;
-}
-
-.preview-area {
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+.paper-abstract {
+  margin-bottom: 12px;
+  padding: 12px 14px;
   border-radius: 8px;
-  padding: 20px;
-  transition: transform 0.3s ease;
+  background: #f6f8fa;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 13px;
 }
 
-.word-cloud-container {
-  width: 100%;
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mock-word-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 10px 20px;
-  
-  span {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    
-    &:hover {
-      transform: scale(1.2);
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-  }
-}
-
-.upload-file {
-  width: 100%;
+.word-cloud-chart {
+  height: 520px;
 }
 </style>

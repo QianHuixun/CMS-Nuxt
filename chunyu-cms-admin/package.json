@@ -20,6 +20,7 @@
     "@vueuse/core": "9.5.0",
     "axios": "1.7.4",
     "echarts": "5.4.0",
+    "echarts-wordcloud": "^2.1.0",
     "element-plus": "2.2.21",
     "file-saver": "2.0.5",
     "fuse.js": "6.6.2",

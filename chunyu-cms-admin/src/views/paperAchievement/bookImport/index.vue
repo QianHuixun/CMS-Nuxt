@@ -1,26 +1,16 @@
 <template>
   <div class="app-container">
-    <!-- 搜索区域 -->
     <el-card shadow="never" class="search-card">
       <el-form :model="queryParams" :inline="true">
-        <el-form-item label="书名">
-          <el-input v-model="queryParams.title" placeholder="请输入书名" clearable style="width: 180px" />
+        <el-form-item label="论文标题">
+          <el-input v-model="queryParams.title" placeholder="请输入论文标题" clearable style="width: 240px" />
         </el-form-item>
-        <el-form-item label="作者">
-          <el-input v-model="queryParams.author" placeholder="请输入作者" clearable style="width: 150px" />
-        </el-form-item>
-        <el-form-item label="类别">
-          <el-select v-model="queryParams.category" placeholder="请选择类别" clearable style="width: 150px">
-            <el-option label="中医理论" value="theory" />
-            <el-option label="临床实践" value="clinical" />
-            <el-option label="中药学" value="pharmacy" />
-            <el-option label="针灸推拿" value="acupuncture" />
-            <el-option label="养生保健" value="health" />
-          </el-select>
+        <el-form-item label="发表年份">
+          <el-input-number v-model="queryParams.publishYear" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 120px">
-            <el-option label="已发布" value="1" />
+            <el-option label="发布" value="1" />
             <el-option label="草稿" value="0" />
           </el-select>
         </el-form-item>
@@ -31,59 +21,57 @@
       </el-form>
     </el-card>
 
-    <!-- 操作按钮 -->
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增书籍</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增论文</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="Upload" @click="showImportDialog = true">批量导入</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="Download" @click="handleExport">导出</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">批量删除</el-button>
+        <el-button type="success" plain icon="Upload" @click="handleImportPlaceholder">批量导入</el-button>
       </el-col>
     </el-row>
 
-    <!-- 表格区域 -->
     <el-card shadow="never">
-      <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="50" align="center" />
-        <el-table-column label="书名" prop="title" min-width="180" show-overflow-tooltip />
-        <el-table-column label="作者" prop="author" width="120" />
-        <el-table-column label="封面" prop="cover" width="80" align="center">
+      <el-table v-loading="loading" :data="paperList">
+        <el-table-column label="标题" prop="title" min-width="220" show-overflow-tooltip />
+        <el-table-column label="年份" prop="publishYear" width="100" align="center">
           <template #default="{ row }">
-            <el-image
-              v-if="row.cover"
-              :src="row.cover"
-              :preview-src-list="[row.cover]"
-              fit="cover"
-              style="width: 40px; height: 50px; border-radius: 4px"
-            />
-            <span v-else>-</span>
+            <span>{{ row.publishYear || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="类别" prop="category" width="100" align="center">
+        <el-table-column label="关键词" prop="keywords" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag>{{ categoryLabelMap[row.category] }}</el-tag>
+            <span>{{ row.keywords || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="出版时间" prop="publishDate" width="120" align="center" />
-        <el-table-column label="ISBN" prop="isbn" width="150" />
-        <el-table-column label="状态" prop="status" width="80" align="center">
+        <el-table-column label="是否精选" prop="isFeatured" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.status === '1' ? 'success' : 'info'">
-              {{ row.status === '1' ? '已发布' : '草稿' }}
+            <el-tag :type="row.isFeatured === '1' ? 'warning' : 'info'">
+              {{ row.isFeatured === '1' ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="createTime" width="180" align="center" />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="状态" prop="status" width="100" align="center">
           <template #default="{ row }">
-            <el-button link type="primary" icon="View" @click="handleDetail(row)">详情</el-button>
+            <el-tag :type="row.status === '1' ? 'success' : 'info'">
+              {{ row.status === '1' ? '发布' : '草稿' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新时间" prop="updateTime" width="180" align="center">
+          <template #default="{ row }">
+            <span>{{ formatDateTime(row.updateTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="260" align="center" fixed="right">
+          <template #default="{ row }">
             <el-button link type="primary" icon="Edit" @click="handleUpdate(row)">编辑</el-button>
+            <el-button
+              link
+              :type="row.isFeatured === '1' ? 'warning' : 'success'"
+              @click="handleToggleFeatured(row)"
+            >
+              {{ row.isFeatured === '1' ? '取消精选' : '设为精选' }}
+            </el-button>
             <el-button link type="danger" icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -98,47 +86,31 @@
       />
     </el-card>
 
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="700px" append-to-body>
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="760px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="书名" prop="title">
-          <el-input v-model="form.title" placeholder="请输入书名" />
+        <el-form-item label="论文标题" prop="title">
+          <el-input v-model="form.title" placeholder="请输入论文标题" />
         </el-form-item>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="作者" prop="author">
-              <el-input v-model="form.author" placeholder="请输入作者" />
+            <el-form-item label="发表年份" prop="publishYear">
+              <el-input-number v-model="form.publishYear" :min="0" :max="9999" controls-position="right" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="ISBN" prop="isbn">
-              <el-input v-model="form.isbn" placeholder="请输入ISBN" />
+            <el-form-item label="是否精选" prop="isFeatured">
+              <el-radio-group v-model="form.isFeatured">
+                <el-radio label="1">是</el-radio>
+                <el-radio label="0">否</el-radio>
+              </el-radio-group>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="书籍类别" prop="category">
-              <el-select v-model="form.category" placeholder="请选择类别" style="width: 100%">
-                <el-option label="中医理论" value="theory" />
-                <el-option label="临床实践" value="clinical" />
-                <el-option label="中药学" value="pharmacy" />
-                <el-option label="针灸推拿" value="acupuncture" />
-                <el-option label="养生保健" value="health" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="出版时间" prop="publishDate">
-              <el-date-picker v-model="form.publishDate" type="date" placeholder="选择出版时间" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="封面图片">
-          <el-input v-model="form.cover" placeholder="请输入封面图片URL" />
+        <el-form-item label="关键词" prop="keywords">
+          <el-input v-model="form.keywords" type="textarea" :rows="3" placeholder="请输入关键词，建议使用逗号分隔" />
         </el-form-item>
-        <el-form-item label="书籍简介">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入书籍简介" />
+        <el-form-item label="摘要">
+          <el-input v-model="form.abstract" type="textarea" :rows="4" placeholder="请输入论文摘要" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -149,41 +121,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="书籍详情" width="700px" append-to-body>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="书名" :span="2">{{ currentBook.title }}</el-descriptions-item>
-        <el-descriptions-item label="作者">{{ currentBook.author }}</el-descriptions-item>
-        <el-descriptions-item label="ISBN">{{ currentBook.isbn }}</el-descriptions-item>
-        <el-descriptions-item label="类别">{{ categoryLabelMap[currentBook.category] }}</el-descriptions-item>
-        <el-descriptions-item label="出版时间">{{ currentBook.publishDate }}</el-descriptions-item>
-        <el-descriptions-item label="简介" :span="2">{{ currentBook.description || '暂无' }}</el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
-
-    <!-- 批量导入弹窗 -->
-    <el-dialog v-model="showImportDialog" title="批量导入" width="500px" append-to-body>
-      <el-upload
-        class="upload-demo"
-        drag
-        action="#"
-        :auto-upload="false"
-        :limit="1"
-        accept=".xlsx,.xls"
-      >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <template #tip>
-          <div class="el-upload__tip">只能上传 xlsx/xls 文件，建议先<el-link type="primary">下载导入模板</el-link></div>
-        </template>
-      </el-upload>
-      <template #footer>
-        <el-button @click="showImportDialog = false">取 消</el-button>
-        <el-button type="primary" @click="handleImportConfirm">确 定</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -191,65 +129,66 @@
 
 <script setup name="PaperAchievementBookImportIndex">
 import Pagination from '@/components/Pagination/index.vue'
-import { UploadFilled } from '@element-plus/icons-vue'
+import { addPaper, deletePaper, getPaperDetail, pagePaper, updatePaper, updatePaperFeatured } from '@/api/paperAchievement/paper'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const loading = ref(true)
-const bookList = ref([])
+const loading = ref(false)
+const submitLoading = ref(false)
+const paperList = ref([])
 const total = ref(0)
-const multiple = ref(true)
-const ids = ref([])
-
-const categoryLabelMap = { theory: '中医理论', clinical: '临床实践', pharmacy: '中药学', acupuncture: '针灸推拿', health: '养生保健' }
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const formRef = ref(null)
 
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
   title: '',
-  author: '',
-  category: '',
+  publishYear: undefined,
   status: ''
 })
 
-const dialogVisible = ref(false)
-const detailVisible = ref(false)
-const showImportDialog = ref(false)
-const dialogTitle = ref('')
-const formRef = ref(null)
-const currentBook = ref({})
-
-const form = ref({
-  id: undefined,
-  title: '',
-  author: '',
-  isbn: '',
-  category: '',
-  publishDate: '',
-  cover: '',
-  description: '',
-  status: '0'
-})
+const form = ref(createEmptyForm())
 
 const rules = {
-  title: [{ required: true, message: '书名不能为空', trigger: 'blur' }],
-  author: [{ required: true, message: '作者不能为空', trigger: 'blur' }],
-  category: [{ required: true, message: '请选择类别', trigger: 'change' }]
+  title: [{ required: true, message: '论文标题不能为空', trigger: 'blur' }]
 }
 
-// 模拟数据
-const mockData = [
-  { id: 1, title: '《伤寒论》注疏', author: '张仲景', isbn: '978-7-5322-0001-2', category: 'theory', publishDate: '2023-06-15', cover: 'https://picsum.photos/80/100?random=1', description: '对《伤寒论》的深度注解与阐释。', status: '1', createTime: '2024-01-15 10:30:00' },
-  { id: 2, title: '《本草纲目》精要', author: '李时珍', isbn: '978-7-5322-0002-3', category: 'pharmacy', publishDate: '2023-03-20', cover: 'https://picsum.photos/80/100?random=2', description: '《本草纲目》核心内容精选。', status: '1', createTime: '2024-01-14 09:20:00' },
-  { id: 3, title: '针灸学教程', author: '王医师', isbn: '978-7-5322-0003-4', category: 'acupuncture', publishDate: '2023-09-10', cover: '', description: '系统介绍针灸学理论与实践。', status: '1', createTime: '2024-01-13 14:00:00' },
-  { id: 4, title: '中医养生大全', author: '刘教授', isbn: '978-7-5322-0004-5', category: 'health', publishDate: '2023-12-01', cover: 'https://picsum.photos/80/100?random=4', description: '中医养生保健知识汇编。', status: '0', createTime: '2024-01-12 16:45:00' }
-]
+function createEmptyForm() {
+  return {
+    id: undefined,
+    paperId: undefined,
+    title: '',
+    publishYear: undefined,
+    keywords: '',
+    abstract: '',
+    isFeatured: '0',
+    status: '0'
+  }
+}
 
-function getList() {
+function formatDateTime(value) {
+  if (!value) return '-'
+  if (typeof value === 'string') return value
+  return new Date(value).toLocaleString('zh-CN', { hour12: false })
+}
+
+async function getList() {
   loading.value = true
-  setTimeout(() => {
-    bookList.value = mockData.map(item => ({ ...item }))
-    total.value = bookList.value.length
+  try {
+    const res = await pagePaper({
+      pageNum: queryParams.pageNum,
+      pageSize: queryParams.pageSize,
+      title: queryParams.title,
+      publishYear: queryParams.publishYear,
+      status: queryParams.status
+    })
+
+    paperList.value = Array.isArray(res?.data?.rows) ? res.data.rows : []
+    total.value = Number(res?.data?.total || 0)
+  } finally {
     loading.value = false
-  }, 300)
+  }
 }
 
 function handleQuery() {
@@ -259,60 +198,98 @@ function handleQuery() {
 
 function resetQuery() {
   queryParams.title = ''
-  queryParams.author = ''
-  queryParams.category = ''
+  queryParams.publishYear = undefined
   queryParams.status = ''
-  handleQuery()
-}
-
-function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.id)
-  multiple.value = !selection.length
+  queryParams.pageNum = 1
+  getList()
 }
 
 function handleAdd() {
-  form.value = { id: undefined, title: '', author: '', isbn: '', category: '', publishDate: '', cover: '', description: '', status: '0' }
-  dialogTitle.value = '新增书籍'
+  form.value = createEmptyForm()
+  dialogTitle.value = '新增论文'
   dialogVisible.value = true
 }
 
-function handleDetail(row) {
-  currentBook.value = { ...row }
-  detailVisible.value = true
-}
-
-function handleUpdate(row) {
-  form.value = { ...row }
-  dialogTitle.value = '编辑书籍'
+async function handleUpdate(row) {
+  const res = await getPaperDetail(row.paperId)
+  form.value = {
+    id: res.data?.id,
+    paperId: res.data?.paperId,
+    title: res.data?.title || '',
+    publishYear: res.data?.publishYear,
+    keywords: res.data?.keywords || '',
+    abstract: res.data?.abstract || '',
+    isFeatured: res.data?.isFeatured || '0',
+    status: res.data?.status || '0'
+  }
+  dialogTitle.value = '编辑论文'
   dialogVisible.value = true
 }
 
-function handleDelete(row) {
-  ElMessageBox.confirm(`是否确认删除书籍"${row.title || ids.value}"？`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    getList()
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(`是否确认删除论文“${row.title}”？`, '警告', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+  } catch (error) {
+    return
+  }
+
+  await deletePaper(row.paperId)
+  ElMessage.success('删除成功')
+
+  if (paperList.value.length === 1 && queryParams.pageNum > 1) {
+    queryParams.pageNum -= 1
+  }
+
+  getList()
+}
+
+async function handleToggleFeatured(row) {
+  const nextValue = row.isFeatured === '1' ? '0' : '1'
+  await updatePaperFeatured(row.paperId, { isFeatured: nextValue })
+  ElMessage.success(nextValue === '1' ? '已设为精选论文' : '已取消精选')
+  getList()
+}
+
+function handleImportPlaceholder() {
+  ElMessageBox.alert('批量导入能力后续接入', '提示', {
+    confirmButtonText: '我知道了',
+    type: 'info'
   })
 }
 
-function handleExport() {
-  ElMessage.info('导出功能开发中')
-}
-
-function handleImportConfirm() {
-  ElMessage.success('导入成功')
-  showImportDialog.value = false
-}
-
 function submitForm() {
-  formRef.value.validate(valid => {
-    if (valid) {
-      ElMessage.success(form.value.id ? '修改成功' : '新增成功')
+  formRef.value.validate(async valid => {
+    if (!valid) return
+
+    submitLoading.value = true
+    try {
+      const payload = {
+        id: form.value.id,
+        paperId: form.value.paperId,
+        title: form.value.title,
+        publishYear: form.value.publishYear,
+        keywords: form.value.keywords,
+        abstract: form.value.abstract,
+        isFeatured: form.value.isFeatured,
+        status: form.value.status
+      }
+
+      if (form.value.paperId) {
+        await updatePaper(payload)
+        ElMessage.success('修改成功')
+      } else {
+        await addPaper(payload)
+        ElMessage.success('新增成功')
+      }
+
       dialogVisible.value = false
       getList()
+    } finally {
+      submitLoading.value = false
     }
   })
 }

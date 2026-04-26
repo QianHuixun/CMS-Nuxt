@@ -23,6 +23,39 @@
 - 头条精选已完成页面交互层组件测试
 - 头条精选未做全量 E2E 测试
 
+## 词云功能
+
+- `word-cloud-test-report.md`
+
+说明：
+
+- 词云功能已完成最小自动化测试
+- 词云功能已完成前后端构建验证
+- 词云功能未做全量 E2E 测试
+
+## 论文数据导入
+
+- `paper-import-test-plan.md`
+- `paper-import-test-report.md`
+
+说明：
+
+- 论文数据导入最小版已完成最小自动化测试
+- 论文数据导入最小版已完成前后端构建验证
+- 论文数据导入最小版未做全量 E2E 测试
+- 当前需额外确认 `0018_extend_paper_for_import_and_chart.sql` 是否已在目标数据库执行
+
+## 图表生成
+
+- `chart-generator-test-plan.md`
+- `chart-generator-test-report.md`
+
+说明：
+
+- 图表生成最小版已完成最小自动化测试
+- 图表生成最小版已完成前后端构建验证
+- 图表生成最小版未做全量 E2E 测试
+
 ## 目录说明
 
 - `immersive-editor-*` 文档仅用于沉浸式编排功能

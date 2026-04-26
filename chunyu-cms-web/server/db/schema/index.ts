@@ -50,6 +50,8 @@ import * as commentSchema from './movie/comment';
 import * as shortSchema from './shorts/short';
 import * as videoResourceSchema from './movie/videoResource';
 import * as activitySchema from './admin/activity';
+import * as paperSchema from './admin/paper';
+import * as paperKeywordSchema from './admin/paperKeyword';
 
 export default {
   ...userSchema,
@@ -101,5 +103,7 @@ export default {
   ...movieRateSchema,
   ...commentSchema,
   ...shortSchema,
-  ...activitySchema
+  ...activitySchema,
+  ...paperSchema,
+  ...paperKeywordSchema
 };
