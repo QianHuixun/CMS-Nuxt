@@ -112,6 +112,15 @@ export default defineNuxtConfig({
     uploadPath: '/uploads',
     // 上传图片访问host
     imgHost: process.env.IMG_HOST || 'http://localhost:3000',
+    objectStorage: {
+      provider: process.env.PUBLIC_STORAGE_PROVIDER || 'rustfs',
+      endpoint: process.env.PUBLIC_STORAGE_ENDPOINT || '',
+      region: process.env.PUBLIC_STORAGE_REGION || 'us-east-1',
+      accessKeyId: process.env.PUBLIC_STORAGE_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.PUBLIC_STORAGE_SECRET_ACCESS_KEY || '',
+      bucket: process.env.PUBLIC_STORAGE_BUCKET_NAME || '',
+      forcePathStyle: process.env.PUBLIC_STORAGE_FORCE_PATH_STYLE !== 'false'
+    },
     // 是否演示环境
     isDemoEnvironment: process.env.IS_DEMO_ENVIRONMENT === 'true',
     // 邮箱配置
