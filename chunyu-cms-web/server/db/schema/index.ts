@@ -50,6 +50,14 @@ import * as commentSchema from './movie/comment';
 import * as shortSchema from './shorts/short';
 import * as videoResourceSchema from './movie/videoResource';
 import * as activitySchema from './admin/activity';
+import * as talentSchema from './talent/talent';
+import * as talentPaperSchema from './talent/talentPaper';
+import * as talentTopicSchema from './talent/talentTopic';
+import * as talentPatentSchema from './talent/talentPatent';
+import * as topicSchema from './talent/topic';
+import * as bookSchema from './paperAchievement/book';
+import * as bookImportBatchSchema from './paperAchievement/bookImportBatch';
+import * as bookImportDetailSchema from './paperAchievement/bookImportDetail';
 
 export default {
   ...userSchema,
@@ -101,5 +109,13 @@ export default {
   ...movieRateSchema,
   ...commentSchema,
   ...shortSchema,
-  ...activitySchema
+  ...activitySchema,
+  ...talentSchema,
+  ...talentPaperSchema,
+  ...talentTopicSchema,
+  ...talentPatentSchema,
+  ...topicSchema,
+  ...bookSchema,
+  ...bookImportBatchSchema,
+  ...bookImportDetailSchema
 };
