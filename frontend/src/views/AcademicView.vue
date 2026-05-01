@@ -14,6 +14,5 @@
   margin: 60px auto;
   padding: 0 40px;
   text-align: center;
-  font-family: "SimSun", "宋体", serif;
 }
 </style>

@@ -30,7 +30,7 @@ function enterSystem() {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: url('/home-bg.png') no-repeat center center;
+  background: url('@/assets/images/backgrounds/landing/home-bg.png') no-repeat center center;
   background-size: cover;
 }
 

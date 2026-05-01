@@ -9,6 +9,12 @@
   --color-primary: #842130;
   --color-primary-hover: #9e2a3c;
   --color-secondary: #77706D;
+  --color-text: #333;
+  --color-border: #e0d8c8;
+  --bg-page: #f8f6f0;
+  --shadow-card: 0 2px 3px rgba(255, 255, 255, 0.8) inset, 0 8px 15px rgba(0, 0, 0, 0.1), 0 3px 5px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 2px 3px rgba(255, 255, 255, 0.8) inset, 0 12px 20px rgba(0, 0, 0, 0.12), 0 5px 8px rgba(0, 0, 0, 0.1);
+  --transition-fast: all 0.2s ease;
 }
 
 * {
@@ -41,5 +47,84 @@ body {
 }
 
 .btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 40px;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  border-radius: 2px;
+  transition: var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* 知识图谱页面全局样式 */
+.graph-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-align: center;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  font-family: "SimSun", "宋体", serif;
+}
+
+.graph-node:hover {
+  transform: scale(1.05);
+}
+
+.tag-item {
+  padding: 4px 2px;
+  text-align: center;
+  border-radius: 2px;
+  background-color: var(--bg-page);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tag-item:hover {
+  background-color: #e8e3d8;
+}
+
+.tag-item.highlight {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.tag-item.highlight:hover {
+  background-color: #701f2a;
+}
+
+/* 返回首页按钮 */
+.btn-back {
+  display: block;
+  margin-left: auto;
+  margin-top: auto;
+  padding: 10px 20px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
   background-color: var(--color-primary-hover);
 }
