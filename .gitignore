@@ -22,3 +22,5 @@ logs
 ssl
 
 .data
+
+.mcp.json
