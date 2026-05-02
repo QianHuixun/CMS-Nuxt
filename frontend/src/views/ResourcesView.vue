@@ -45,11 +45,12 @@ function goBack() {
                 <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
               </div>
             </div>
-            <div class="db-card">
+            <div class="db-card db-card-vr">
+              <div class="db-card-bg"></div>
               <div class="db-card-content">
                 <h4 class="db-card-title">博物馆VR展厅</h4>
                 <p class="db-card-desc">沉浸式实景VR全景图像，全方位在线观览出土医学文物陈列展。</p>
-                <span class="db-card-icon">🗄</span>
+                <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
               </div>
             </div>
           </div>
@@ -154,6 +155,7 @@ function goBack() {
   position: relative;
   overflow: hidden;
   transition: var(--transition-fast);
+  min-height: 180px;
 }
 
 .db-card:hover {
@@ -194,10 +196,17 @@ function goBack() {
   background-image: url('@/assets/images/backgrounds/nav/bashu-guyiji-bg.svg');
 }
 
+.db-card-vr .db-card-bg {
+  background-image: url('@/assets/images/backgrounds/nav/image 2.svg');
+  background-position: right center;
+}
+
 .db-card-content {
   position: relative;
   z-index: 1;
-  padding: 32px 24px;
+  padding: 32px 24px 56px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .db-card::before {
@@ -233,13 +242,14 @@ function goBack() {
 
 .db-card-icon {
   position: absolute;
-  bottom: 24px;
   right: 24px;
+  bottom: 24px;
   width: 20px;
   height: 20px;
   filter: invert(22%) sepia(37%) saturate(2164%) hue-rotate(331deg) brightness(93%) contrast(92%);
   opacity: 0.5;
   transition: opacity 0.2s ease;
+  z-index: 3;
 }
 
 .db-card:hover .db-card-icon {
