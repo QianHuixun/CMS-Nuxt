@@ -93,13 +93,20 @@ const projectList = ref([
 ])
 
 const wordCloud = ref([
-  { text: '天回医简', top: '10%', left: '20%', height: '200px', fontSize: '18px' },
-  { text: '经络数字化', top: '5%', left: '45%', height: '280px', fontSize: '22px' },
-  { text: '针灸铜人', top: '20%', right: '30%', height: '180px', fontSize: '18px' },
-  { text: '金石篆刻', top: '15%', right: '15%', height: '220px', fontSize: '18px' },
-  { text: '天回医简', bottom: '20%', left: '30%', height: '160px', fontSize: '18px' },
-  { text: '金石篆刻', bottom: '10%', right: '20%', height: '240px', fontSize: '18px' },
-  { text: '针灸铜人', bottom: '30%', left: '50%', height: '140px', fontSize: '18px', center: true },
+  { text: '经络数字化', top: '2%', left: '36%', height: '320px', width: '52px', fontSize: '28px', opacity: 1, zIndex: 3 },
+  { text: '天回医简', top: '0%', left: '12%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.9, zIndex: 2 },
+  { text: '金石篆刻', top: '4%', right: '10%', height: '280px', width: '46px', fontSize: '24px', opacity: 0.92, zIndex: 2 },
+  { text: '针灸铜人', top: '16%', right: '26%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.85, zIndex: 2 },
+  { text: '出土文献', top: '12%', left: '54%', height: '220px', width: '30px', fontSize: '15px', opacity: 0.4, zIndex: 1 },
+  { text: '马王堆', top: '8%', left: '2%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
+  { text: '天回医简', top: '30%', left: '22%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.88, zIndex: 2 },
+  { text: '本草纲目', top: '28%', right: '16%', height: '230px', width: '36px', fontSize: '18px', opacity: 0.78, zIndex: 2 },
+  { text: '文物修复', top: '38%', left: '46%', height: '180px', width: '28px', fontSize: '13px', opacity: 0.35, zIndex: 1 },
+  { text: '金石篆刻', top: '42%', right: '6%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.82, zIndex: 2 },
+  { text: '方剂配伍', top: '48%', left: '8%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
+  { text: '天回医简', top: '55%', right: '22%', height: '270px', width: '44px', fontSize: '23px', opacity: 0.9, zIndex: 2 },
+  { text: '简帛医书', top: '52%', left: '34%', height: '200px', width: '30px', fontSize: '14px', opacity: 0.38, zIndex: 1 },
+  { text: '金石篆刻', bottom: '6%', left: '18%', height: '250px', width: '40px', fontSize: '21px', opacity: 0.86, zIndex: 2 },
 ])
 
 function goHome() {
@@ -138,11 +145,14 @@ function goHome() {
             right: word.right,
             bottom: word.bottom,
             height: word.height,
+            width: word.width,
             fontSize: word.fontSize,
-            transform: word.center ? 'translateX(-50%)' : undefined,
+            opacity: word.opacity,
+            zIndex: word.zIndex,
           }"
         >
-          {{ word.text }}
+          <img src="@/assets/images/backgrounds/academic/bamboo-slip.svg" class="word-bg" alt="" />
+          <span class="word-text">{{ word.text }}</span>
         </div>
         <div class="more-btn">
           <div class="more-text">查看更多研究成果</div>
@@ -154,7 +164,7 @@ function goHome() {
         <h2 class="section-title">获批课题</h2>
         <p class="section-subtitle">2024 科研资助项目</p>
         <div class="project-list">
-          <div v-for="(project, index) in projectList" :key="index" class="project-item">
+          <div v-for="(project, index) in projectList.slice(0, 5)" :key="index" class="project-item">
             <div class="project-tag">{{ project.tag }}</div>
             <div class="project-title">{{ project.title }}</div>
             <div class="project-meta">{{ project.meta }}</div>
@@ -167,10 +177,7 @@ function goHome() {
       </div>
     </div>
 
-    <button class="back-home-btn" @click="goHome">
-      <span class="back-home-icon">🏠</span>
-      <span>返回首页</span>
-    </button>
+    <button class="btn-back" @click="goHome">返回首页</button>
   </div>
 </template>
 
@@ -178,7 +185,8 @@ function goHome() {
 .academic-page {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: var(--bg-page);
   background-image:
     linear-gradient(rgba(220, 210, 190, 0.1) 1px, transparent 1px),
@@ -186,7 +194,12 @@ function goHome() {
   background-size: 20px 20px;
   color: var(--color-text);
   padding: 24px 40px 80px;
-  overflow-x: hidden;
+}
+
+:global(body),
+:global(html),
+:global(#app) {
+  overflow: hidden;
 }
 
 .main-container {
@@ -201,9 +214,14 @@ function goHome() {
   padding: 0 20px;
   height: 100%;
   overflow-y: scroll;
+  direction: rtl;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) var(--bg-page);
-  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.team-section > * {
+  direction: ltr;
 }
 
 .team-section::-webkit-scrollbar {
@@ -309,23 +327,36 @@ function goHome() {
 
 .word-rect {
   position: absolute;
-  background-color: rgba(240, 230, 210, 0.6);
-  border: 1px solid rgba(180, 160, 140, 0.3);
   writing-mode: vertical-rl;
-  padding: 12px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
   font-weight: bold;
   letter-spacing: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-  width: 40px;
+}
+
+.word-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.word-text {
+  position: relative;
+  z-index: 1;
+  padding: 12px 0;
+  font-family: "TengXiangFanXiaoGeJianDu", "SimSun", "宋体", serif;
 }
 
 .more-btn {
   position: absolute;
-  bottom: 40px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -343,7 +374,7 @@ function goHome() {
   width: 30px;
   height: 30px;
   border: 1px solid var(--color-primary);
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,44 +384,21 @@ function goHome() {
 
 .project-section {
   padding: 0 20px;
-  text-align: right;
+  text-align: left;
   height: 100%;
-  overflow-y: scroll;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary) var(--bg-page);
   padding-left: 8px;
-}
-
-.project-section::-webkit-scrollbar {
-  width: 4px;
-  display: block;
-}
-
-.project-section::-webkit-scrollbar-track {
-  background: var(--bg-page);
-  margin: 10px 0;
-}
-
-.project-section::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary);
-  border-radius: 2px;
-  border: 1px solid var(--bg-page);
-}
-
-.project-section::-webkit-scrollbar-button {
-  display: block;
-  height: 10px;
-  background: var(--bg-page);
 }
 
 .project-section .section-title {
   padding-left: 0;
   padding-right: 12px;
+  text-align: right;
 }
 
 .project-section .section-subtitle {
   padding-left: 0;
   padding-right: 12px;
+  text-align: right;
 }
 
 .project-list {
@@ -406,11 +414,12 @@ function goHome() {
 .project-tag {
   display: inline-block;
   padding: 2px 8px;
-  background-color: #e8e3d8;
-  color: #999;
+  background-color: #84213033;
+  color: var(--color-primary);
   font-size: 10px;
   border-radius: 2px;
   margin-bottom: 6px;
+  text-align: left;
 }
 
 .project-title {
@@ -418,12 +427,14 @@ function goHome() {
   color: #333;
   font-weight: bold;
   line-height: 1.6;
+  text-align: right;
 }
 
 .project-meta {
   font-size: 12px;
   color: #999;
   margin-top: 4px;
+  text-align: left;
 }
 
 .view-all-btn {
@@ -443,28 +454,10 @@ function goHome() {
   font-size: 12px;
 }
 
-.back-home-btn {
+.academic-page .btn-back {
   position: fixed;
   bottom: 24px;
   right: 40px;
-  padding: 10px 20px;
-  background-color: var(--color-primary);
-  color: #fff;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   z-index: 10;
-  transition: background-color 0.2s ease;
-}
-
-.back-home-btn:hover {
-  background-color: var(--color-primary-hover);
-}
-
-.back-home-icon {
-  font-size: 16px;
 }
 </style>
