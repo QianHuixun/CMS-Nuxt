@@ -3,7 +3,7 @@ import LandingView from '@/views/LandingView.vue'
 import HomeView from '@/views/HomeView.vue'
 import ResourcesView from '@/views/ResourcesView.vue'
 import KnowledgeView from '@/views/KnowledgeView.vue'
-import AcademicNews from '@/views/AcademicNews.vue'
+import AcademicView from '@/views/AcademicView.vue'
 import AchievementRegistryView from '@/views/AchievementRegistryView.vue'
 import ActivitySilhouette from '@/views/activity-silhouette.vue'
 import ActivityTimelineView from '@/views/ActivityTimelineView.vue'
@@ -15,7 +15,7 @@ const routes = [
   { path: '/home', component: HomeView },
   { path: '/resources', component: ResourcesView },
   { path: '/knowledge', component: KnowledgeView },
-  { path: '/academic', component: AcademicNews },
+  { path: '/academic', component: AcademicView },
   { path: '/achievements', component: AchievementRegistryView, name: 'Achievements' },
   { path: '/activity/:id?', component: ActivitySilhouette, name: 'ActivitySilhouette' },
   { path: '/activity-timeline', component: ActivityTimelineView, name: 'ActivityTimeline' },
