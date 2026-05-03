@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const symptoms = ref([
   '头痛', '发热', '咳嗽', '脉浮', '咳嗽', '脉浮', '咳嗽',
@@ -143,6 +146,10 @@ const detail = ref({
     { name: '邪留三焦', type: '病机描述' },
   ]
 })
+
+function goHome() {
+  router.push('/home')
+}
 </script>
 
 <template>
@@ -274,7 +281,7 @@ const detail = ref({
 
           <a href="#" class="btn-deep">深入文献归档</a>
         </div>
-        <button class="btn-back">返回首页</button>
+        <button class="btn-back" @click="goHome">返回首页</button>
       </div>
     </div>
   </div>

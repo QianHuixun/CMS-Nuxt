@@ -38,7 +38,7 @@ const activities = [
       <section class="panel paper-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>发表论文</h2>
-          <button type="button">查看全部</button>
+          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
         </header>
 
         <div class="paper-list">
@@ -63,7 +63,7 @@ const activities = [
       <section class="panel book-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>学术著作</h2>
-          <button type="button">查看全部</button>
+          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
         </header>
 
         <div class="book-content">
@@ -81,7 +81,7 @@ const activities = [
       <section class="panel patent-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>软著专利</h2>
-          <button type="button">查看全部</button>
+          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
         </header>
 
         <div class="patent-list">
@@ -113,7 +113,7 @@ const activities = [
           <section class="activity-panel">
             <header class="activity-header">
               <span>学术活动存档</span>
-              <button type="button">查看全部</button>
+              <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
             </header>
 
             <ol>
@@ -138,7 +138,7 @@ const activities = [
 <style scoped>
 .academic-page {
   min-height: calc(100vh - 64px);
-  padding: 32px max(70px, calc((100vw - 1510px) / 2 + 70px)) 24px;
+  padding: 32px 0 24px;
   overflow-x: hidden;
   background:
     linear-gradient(rgba(250, 246, 237, 0.88), rgba(250, 246, 237, 0.9)),
@@ -149,9 +149,9 @@ const activities = [
 
 .academic-hero,
 .page-actions {
-  width: min(100%, 1370px);
-  margin-right: auto;
-  margin-left: auto;
+  padding: 0 70px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .academic-hero {
@@ -173,9 +173,9 @@ const activities = [
 }
 
 .academic-grid {
-  width: min(100%, 1370px);
-  margin-right: auto;
-  margin-left: auto;
+  padding: 0 70px;
+  max-width: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr) minmax(280px, 0.78fr);
   grid-template-rows: auto auto;
@@ -571,7 +571,13 @@ const activities = [
 
 @media (max-width: 1280px) {
   .academic-page {
-    padding: 28px 28px 44px;
+    padding: 28px 0 44px;
+  }
+
+  .academic-hero,
+  .page-actions,
+  .academic-grid {
+    padding: 0 28px;
   }
 
   .academic-grid {
@@ -613,7 +619,13 @@ const activities = [
 
 @media (max-width: 768px) {
   .academic-page {
-    padding: 24px 18px 36px;
+    padding: 24px 0 36px;
+  }
+
+  .academic-hero,
+  .page-actions,
+  .academic-grid {
+    padding: 0 18px;
   }
 
   .academic-hero h1 {

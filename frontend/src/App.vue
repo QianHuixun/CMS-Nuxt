@@ -5,10 +5,16 @@ import NavBar from '@/components/NavBar.vue'
 
 const route = useRoute()
 
-const hideNavPaths = ['/']
+// 隐藏导航栏的详情页路径前缀（专家详情页需要显示导航栏）
+const hideNavPrefixes = ['/', '/paper', '/activity', '/monograph', '/patent']
 
 const shouldShowNav = computed(() => {
-  if (hideNavPaths.includes(route.path)) return false
+  // 检查当前路径是否以任何隐藏前缀开头
+  for (const prefix of hideNavPrefixes) {
+    if (route.path === prefix || route.path.startsWith(prefix + '/')) {
+      return false
+    }
+  }
   return true
 })
 </script>

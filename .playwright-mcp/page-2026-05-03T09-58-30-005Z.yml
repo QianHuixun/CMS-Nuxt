@@ -1,0 +1,44 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "logo" [ref=e6]
+      - heading "出土医学文献文物保护研究数字实验室数据集成平台" [level=1] [ref=e7]
+    - navigation [ref=e8]:
+      - link "首页" [ref=e9] [cursor=pointer]:
+        - /url: /home
+      - link "资源导航" [ref=e10] [cursor=pointer]:
+        - /url: /resources
+      - link "知识图谱" [ref=e11] [cursor=pointer]:
+        - /url: /knowledge
+      - link "学术动态" [ref=e12] [cursor=pointer]:
+        - /url: /academic
+  - main [ref=e13]:
+    - region "活动足迹·时光影卷" [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Chronicles of Excellence
+        - heading "活动足迹·时光影卷" [level=1] [ref=e17]
+        - generic [ref=e18]:
+          - text: 穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。
+          - text: 每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。
+        - generic [ref=e20]: SCROLL TO EXPLORE
+      - img [ref=e22]
+      - article [ref=e25]:
+        - generic [ref=e26]:
+          - heading "科普影响力" [level=2] [ref=e27]
+          - paragraph [ref=e28]: 为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - strong [ref=e31]: 5,000+
+              - generic [ref=e32]: 观展人次
+            - generic [ref=e33]:
+              - strong [ref=e34]: 2周
+              - generic [ref=e35]: 展览周期
+      - article "活动影像预留区域" [ref=e36]
+      - generic [ref=e39]:
+        - button "返回上一页" [ref=e40] [cursor=pointer]:
+          - generic [ref=e41]: ‹
+          - text: 返回上一页
+        - link "返回首页" [ref=e42] [cursor=pointer]:
+          - /url: /home
+          - generic [ref=e43]: ⌂
+          - text: 返回首页

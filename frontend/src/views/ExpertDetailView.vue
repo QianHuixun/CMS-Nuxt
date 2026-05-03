@@ -19,6 +19,7 @@ const dragStartX = ref(0)
 const dragOffsetX = ref(0)
 const isDraggingStrip = ref(false)
 const suppressStripClick = ref(false)
+const wasRealDrag = ref(false)  // 记录是否发生了实际拖动（移动 > 10px）
 let wheelLock = false
 let connectorResizeObserver
 
@@ -148,6 +149,18 @@ const currentExpertIndex = computed(() => {
   return index === -1 ? 0 : index
 })
 
+const getPublicationRoute = (publication, index) => {
+  if (publication.type === 'monograph' || publication.title.includes('专著') || publication.title.includes('编年')) {
+    return '/monograph/mono-001'
+  }
+
+  if (publication.type === 'patent' || publication.title.includes('专利') || publication.title.includes('装置')) {
+    return '/patent/patent-001'
+  }
+
+  return index === 0 ? '/paper/tianhui-medical-slip' : '/paper/meridian-bioelectric'
+}
+
 const normalizeOffset = (index) => {
   const half = Math.floor(experts.length / 2)
   let offset = index - currentExpertIndex.value
@@ -224,12 +237,17 @@ const handleStripPointerDown = (event) => {
   isDraggingStrip.value = true
   dragStartX.value = event.clientX
   dragOffsetX.value = 0
-  expertStrip.value?.setPointerCapture?.(event.pointerId)
+  wasRealDrag.value = false  // 每次新的交互开始时重置
 }
 
 const handleStripPointerMove = (event) => {
   if (!isDraggingStrip.value) return
-  dragOffsetX.value = Math.max(-140, Math.min(140, event.clientX - dragStartX.value))
+  const newOffset = event.clientX - dragStartX.value
+  // 只有移动超过 10px 才更新 dragOffset，避免手抖误判为拖动
+  if (Math.abs(newOffset) > 10) {
+    dragOffsetX.value = Math.max(-140, Math.min(140, newOffset))
+    wasRealDrag.value = true  // 标记为实际拖动
+  }
 }
 
 const finishStripDrag = () => {
@@ -239,7 +257,8 @@ const finishStripDrag = () => {
   isDraggingStrip.value = false
   dragOffsetX.value = 0
 
-  if (Math.abs(distance) > 70) {
+  // 如果发生了实际拖动且距离足够大，触发滑动切换
+  if (wasRealDrag.value && Math.abs(distance) > 70) {
     suppressStripClick.value = true
     goToAdjacentExpert(distance < 0 ? 1 : -1)
     window.setTimeout(() => {
@@ -248,10 +267,21 @@ const finishStripDrag = () => {
   }
 }
 
-const handleStripCardClick = (event) => {
-  if (!suppressStripClick.value) return
-  event.preventDefault()
-  event.stopPropagation()
+const handleStripCardClick = (item, event) => {
+  // 如果发生了实际拖动，阻止点击（让滑动切换生效）
+  if (wasRealDrag.value) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+  
+  // 点击当前专家卡片时，阻止导航（没有意义）
+  if (item.expert.id === currentExpert.value.id) {
+    event.preventDefault()
+    return
+  }
+  
+  // 其他情况：让 router-link 正常导航，不做任何处理
 }
 
 const updateConnectorPaths = () => {
@@ -346,7 +376,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
             v-for="(publication, index) in currentExpert.publications"
             :key="`${currentExpert.id}-${index}`"
             class="publication-item"
-            :to="index === 0 ? '/paper/tianhui-medical-slip' : '/paper/meridian-bioelectric'"
+            :to="getPublicationRoute(publication, index)"
           >
             <div class="publication-copy">
               <span>{{ publication.number }}</span>
@@ -375,7 +405,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
           :style="item.style"
           :aria-current="isCurrentStripCard(item) ? 'page' : undefined"
           :data-current="isCurrentStripCard(item) ? 'true' : undefined"
-          @click="handleStripCardClick"
+          @click="handleStripCardClick(item, $event)"
           >
             <img :src="item.expert.photo" :alt="`${item.expert.name}${item.expert.degree}`">
             <div class="expert-card-copy">
@@ -389,10 +419,10 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
     </section>
 
     <footer class="page-actions">
-      <button type="button" class="secondary-action" @click="$router.back()">
+      <router-link class="secondary-action" to="/academic">
         <img :src="backIcon" alt="" aria-hidden="true">
         返回上一页
-      </button>
+      </router-link>
       <router-link class="primary-action" to="/home">
         <img :src="homeIcon" alt="" aria-hidden="true">
         返回首页
@@ -430,7 +460,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 .page-actions {
   position: relative;
   z-index: 1;
-  width: min(1280px, 100%);
+  width: min(1440px, 100%);
   margin-right: auto;
   margin-left: auto;
 }
@@ -438,26 +468,26 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 .expert-stage {
   flex: 1;
   min-height: 0;
-  padding: 0 clamp(16px, 2.4vw, 32px) 184px;
+  padding: 24px clamp(16px, 2.4vw, 32px) 184px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
 .profile-panel {
-  width: 1160px;
+  width: 1320px;
   max-width: 100%;
   height: 570px;
-  max-height: calc(100vh - 276px);
+  max-height: calc(100vh - 300px);
   margin: 0 auto;
-  padding: 36px 48px;
+  padding: 36px 56px;
   display: grid;
-  grid-template-columns: minmax(260px, 0.86fr) clamp(56px, 8vw, 112px) minmax(340px, 1.14fr);
-  gap: clamp(16px, 2vw, 26px);
+  grid-template-columns: minmax(300px, 0.82fr) clamp(64px, 7vw, 112px) minmax(602px, 1.28fr);
+  gap: clamp(20px, 2.2vw, 34px);
   align-items: stretch;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: clamp(16px, 2vw, 24px);
-  background-color: rgba(255, 255, 255, 0.62);
+  background-color: rgb(245, 238, 234);
   backdrop-filter: blur(10px);
   box-shadow: 0 18px 42px -18px rgba(36, 28, 22, 0.28);
 }
@@ -552,22 +582,25 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
 .publication-list {
   min-width: 0;
-  min-height: 0;
+  height: min(420px, 100%);
+  min-height: 320px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: clamp(10px, 1.45vh, 16px);
+  justify-content: space-between;
+  gap: 0;
 }
 
 .publication-item {
-  min-height: clamp(46px, 5vh, 58px);
-  padding: clamp(10px, 1.2vh, 14px) 18px;
+  width: min(100%, 602px);
+  height: 63px;
+  min-height: 63px;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   border: 1px solid rgba(132, 33, 48, 0.06);
-  border-radius: 8px;
+  border-radius: 0;
   background-color: rgba(255, 255, 255, 0.82);
   box-shadow: 0 1px 2px rgba(43, 37, 32, 0.05);
   color: inherit;
@@ -629,16 +662,16 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 .expert-strip {
   width: min(1280px, 100%);
   flex: 0 0 auto;
-  height: 150px;
-  padding: 0 34px clamp(8px, 1.4vh, 14px);
+  height: 128px;
+  padding: 0 28px 10px;
   position: fixed;
   left: 50%;
-  bottom: 58px;
+  bottom: 54px;
   z-index: 2;
   transform: translateX(-50%);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
 
 .expert-strip-track {
@@ -654,26 +687,26 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 }
 
 .expert-card {
-  width: 204px;
-  min-width: 204px;
-  height: 94px;
-  padding: 10px 12px;
+  width: 214px;
+  min-width: 214px;
+  height: 78px;
+  padding: 9px 12px;
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
-  border: 1px solid rgba(223, 212, 204, 0.9);
-  border-radius: 10px;
-  background-color: rgba(250, 246, 240, 0.88);
-  box-shadow: 0 10px 24px -14px rgba(43, 37, 32, 0.32);
+  border: 1px solid rgba(220, 211, 202, 0.85);
+  border-radius: 3px;
+  background-color: rgba(250, 247, 241, 0.78);
+  box-shadow: 0 5px 12px rgba(54, 42, 32, 0.12);
   color: inherit;
   text-decoration: none;
-  opacity: 0.46;
+  opacity: 0.42;
   position: absolute;
   left: 50%;
-  bottom: 12px;
+  bottom: 18px;
   z-index: var(--z);
-  transform: translateX(calc(-50% + var(--x))) scale(0.78);
+  transform: translateX(calc(-50% + var(--x))) scale(0.86);
   transform-origin: bottom center;
   transition:
     opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1),
@@ -695,55 +728,61 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 .expert-card:hover,
 .expert-card:focus-visible {
   opacity: 1;
-  border-color: rgba(132, 33, 48, 0.28);
+  border-color: rgba(132, 33, 48, 0.22);
+  background-color: rgba(250, 247, 241, 0.96);
   outline: none;
+  z-index: 12;
+}
+
+.expert-card:not(.is-current) {
+  cursor: pointer;
 }
 
 .expert-card.is-near {
-  width: 226px;
-  min-width: 226px;
-  height: 102px;
-  opacity: 0.76;
-  transform: translateX(calc(-50% + var(--x))) scale(0.9);
-  box-shadow: 0 12px 28px -16px rgba(43, 37, 32, 0.42);
+  width: 238px;
+  min-width: 238px;
+  height: 88px;
+  opacity: 0.72;
+  transform: translateX(calc(-50% + var(--x))) scale(0.94);
+  box-shadow: 0 7px 16px rgba(54, 42, 32, 0.14);
 }
 
 .expert-card.is-mid {
-  width: 194px;
-  min-width: 194px;
-  height: 90px;
-  opacity: 0.44;
-  transform: translateX(calc(-50% + var(--x))) scale(0.78);
+  width: 204px;
+  min-width: 204px;
+  height: 74px;
+  opacity: 0.38;
+  transform: translateX(calc(-50% + var(--x))) scale(0.84);
 }
 
 .expert-card.is-far {
-  width: 164px;
-  min-width: 164px;
-  height: 78px;
-  opacity: 0.18;
-  transform: translateX(calc(-50% + var(--x))) scale(0.66);
+  width: 176px;
+  min-width: 176px;
+  height: 68px;
+  opacity: 0.16;
+  transform: translateX(calc(-50% + var(--x))) scale(0.76);
 }
 
 .expert-card.is-current {
-  width: 300px;
-  min-width: 300px;
-  height: 126px;
-  grid-template-columns: 86px minmax(0, 1fr);
-  margin-bottom: 2px;
-  border-color: rgba(132, 33, 48, 0.28);
-  background-color: rgba(250, 246, 240, 0.96);
-  box-shadow: 0 18px 34px -16px rgba(43, 37, 32, 0.48);
+  width: 286px;
+  min-width: 286px;
+  height: 104px;
+  grid-template-columns: 74px minmax(0, 1fr);
+  margin-bottom: 0;
+  border-color: rgba(132, 33, 48, 0.24);
+  background-color: rgba(250, 247, 241, 0.98);
+  box-shadow: 0 10px 22px rgba(54, 42, 32, 0.18);
   opacity: 1;
   transform: translateX(calc(-50% + var(--x))) scale(1);
 }
 
 .expert-card img {
-  width: 58px;
-  max-width: 58px;
-  height: 72px;
-  max-height: 72px;
+  width: 52px;
+  max-width: 52px;
+  height: 60px;
+  max-height: 60px;
   display: block;
-  border-radius: 5px;
+  border-radius: 2px;
   object-fit: contain;
   object-position: center;
   filter: grayscale(1);
@@ -751,10 +790,10 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 }
 
 .expert-card.is-current img {
-  width: 86px;
-  max-width: 86px;
-  height: 104px;
-  max-height: 104px;
+  width: 74px;
+  max-width: 74px;
+  height: 86px;
+  max-height: 86px;
 }
 
 .expert-card-copy {
@@ -765,7 +804,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   overflow: hidden;
   color: #2b2520;
   font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -776,7 +815,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   overflow: hidden;
   margin-top: 4px;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -787,7 +826,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   display: block;
   margin-top: 7px;
   color: #99908b;
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -849,10 +888,10 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   height: 10px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
   .profile-panel {
     width: calc(100vw - 32px);
-    grid-template-columns: minmax(260px, 0.86fr) minmax(360px, 1.14fr);
+    grid-template-columns: minmax(280px, 0.88fr) minmax(460px, 1.12fr);
   }
 
   .connector-lines {
@@ -865,7 +904,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
     height: calc(100vh - 250px);
     min-height: 430px;
     padding: 24px 34px;
-    grid-template-columns: minmax(230px, 0.8fr) clamp(40px, 6vw, 78px) minmax(320px, 1.2fr);
+    grid-template-columns: minmax(230px, 0.78fr) clamp(40px, 6vw, 78px) minmax(440px, 1.22fr);
   }
 
   .portrait-wrap {
@@ -883,39 +922,44 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
     min-height: 0;
   }
 
+  .publication-list {
+    height: min(360px, 100%);
+    min-height: 280px;
+  }
+
   .expert-strip {
-    height: 118px;
+    height: 108px;
     padding-top: 0;
     bottom: 50px;
   }
 
   .expert-card {
-    height: 88px;
+    height: 76px;
   }
 
   .expert-card.is-current {
-    height: 104px;
-    margin-bottom: 4px;
+    height: 92px;
+    margin-bottom: 0;
   }
 
   .expert-card img {
-    height: 72px;
+    height: 60px;
   }
 
   .expert-card.is-current img {
-    height: 82px;
+    height: 76px;
   }
 }
 
 @media (max-width: 820px) {
   .expert-stage {
-    padding: 0 16px 158px;
+    padding: 18px 16px 158px;
   }
 
   .profile-panel {
     width: calc(100vw - 32px);
     height: 410px;
-    max-height: calc(100vh - 244px);
+    max-height: calc(100vh - 262px);
     padding: 16px;
     grid-template-columns: minmax(140px, 0.78fr) minmax(0, 1fr);
     gap: 16px;
@@ -950,11 +994,15 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
   .publication-list {
     align-self: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
   }
 
   .publication-item {
-    min-height: 42px;
     padding: 9px 12px;
+    height: 52px;
+    min-height: 52px;
   }
 
   .publication-copy {
@@ -972,22 +1020,22 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   }
 
   .expert-strip {
-    height: 122px;
+    height: 108px;
     padding: 0 8px 10px;
     bottom: 48px;
   }
 
   .expert-card {
-    width: 190px;
-    min-width: 190px;
-    height: 92px;
+    width: 176px;
+    min-width: 176px;
+    height: 76px;
   }
 
   .expert-card.is-current {
-    width: 244px;
-    min-width: 244px;
-    height: 108px;
-    grid-template-columns: 76px minmax(0, 1fr);
+    width: 228px;
+    min-width: 228px;
+    height: 94px;
+    grid-template-columns: 66px minmax(0, 1fr);
   }
 
   .page-actions {
@@ -1041,16 +1089,16 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   }
 
   .expert-card {
-    width: 164px;
-    min-width: 164px;
-    height: 92px;
+    width: 154px;
+    min-width: 154px;
+    height: 74px;
   }
 
   .expert-card.is-current {
-    width: 210px;
-    min-width: 210px;
-    height: 96px;
-    grid-template-columns: 64px minmax(0, 1fr);
+    width: 202px;
+    min-width: 202px;
+    height: 88px;
+    grid-template-columns: 58px minmax(0, 1fr);
     transform: translateX(calc(-50% + var(--x))) scale(1.02);
   }
 
