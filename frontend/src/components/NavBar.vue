@@ -13,7 +13,10 @@ const navItems = [
 
 <template>
   <header class="header">
-    <h1 class="header-title">出土医学文献文物保护研究数字实验室数据集成平台</h1>
+    <div class="title-wrapper">
+      <img src="@/assets/icons/nav-logo.svg" alt="logo" class="nav-logo" />
+      <h1 class="header-title">出土医学文献文物保护研究数字实验室数据集成平台</h1>
+    </div>
     <nav class="nav">
       <router-link
         v-for="item in navItems"
@@ -33,17 +36,28 @@ const navItems = [
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e0d8c8;
-  background-color: #f8f6f0;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--bg-page);
   position: relative;
   z-index: 10;
+}
+
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .header-title {
   font-size: 14px;
   color: var(--color-primary);
   font-weight: normal;
-  font-family: "SimSun", "宋体", serif;
 }
 
 .nav {
@@ -53,10 +67,9 @@ const navItems = [
 
 .nav-item {
   font-size: 14px;
-  color: #333;
+  color: var(--color-text);
   text-decoration: none;
   position: relative;
-  font-family: "SimSun", "宋体", serif;
   transition: color 0.2s ease;
 }
 

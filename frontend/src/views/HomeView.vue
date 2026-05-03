@@ -13,21 +13,21 @@
 
       <div class="cards">
         <div class="card">
-          <div class="card-icon">◎</div>
+          <img src="@/assets/icons/home/Group 1.svg" alt="资源导航" class="card-icon" />
           <h3 class="card-title">资源导航</h3>
           <p class="card-desc">整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。</p>
           <router-link to="/resources" class="card-btn">进入导航</router-link>
         </div>
 
         <div class="card">
-          <div class="card-icon">☯</div>
+          <img src="@/assets/icons/home/Union2.svg" alt="知识图谱" class="card-icon" />
           <h3 class="card-title">知识图谱</h3>
           <p class="card-desc">基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。</p>
           <router-link to="/knowledge" class="card-btn">开启探索</router-link>
         </div>
 
         <div class="card">
-          <div class="card-icon">✎</div>
+          <img src="@/assets/icons/home/Union3.svg" alt="学术动态" class="card-icon" />
           <h3 class="card-title">学术动态</h3>
           <p class="card-desc">发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。</p>
           <router-link to="/academic" class="card-btn">查看详情</router-link>
@@ -52,7 +52,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: url('/home-bg2.png') no-repeat center center;
+  background: url('@/assets/images/backgrounds/home/home-bg2.png') no-repeat center center;
   background-size: cover;
   z-index: 0;
   pointer-events: none;
@@ -83,7 +83,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 40px;
-  height: 1px;
+  height: 2px;
   background-color: var(--color-primary);
 }
 
@@ -93,7 +93,6 @@
   margin: 24px 0;
   color: #000;
   letter-spacing: 2px;
-  font-family: "SimSun", "宋体", serif;
 }
 
 .desc {
@@ -102,7 +101,6 @@
   font-size: 14px;
   color: var(--color-secondary);
   line-height: 1.8;
-  font-family: "SimSun", "宋体", serif;
 }
 
 .cards {
@@ -113,28 +111,19 @@
 }
 
 .card {
-  width: 300px;
   background-color: #fff;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  border-radius: 2px;
+  width: 300px;
   padding: 40px 24px;
-  border: 1px solid #d6ccb8;
   text-align: left;
-  box-shadow:
-    0 1px 2px rgba(255, 255, 255, 0.6) inset,
-    0 12px 28px rgba(0, 0, 0, 0.18),
-    0 6px 12px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.08);
-  border-radius: 3px;
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: var(--transition-fast);
 }
 
 .card:hover {
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
-  box-shadow:
-    0 1px 2px rgba(255, 255, 255, 0.6) inset,
-    0 18px 36px rgba(0, 0, 0, 0.22),
-    0 8px 16px rgba(0, 0, 0, 0.14),
-    0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card-icon {
@@ -150,8 +139,7 @@
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 16px;
-  color: #333;
-  font-family: "SimSun", "宋体", serif;
+  color: var(--color-text);
 }
 
 .card-desc {
@@ -159,7 +147,6 @@
   color: var(--color-secondary);
   margin-bottom: 24px;
   line-height: 1.7;
-  font-family: "SimSun", "宋体", serif;
 }
 
 .card-btn {
@@ -169,7 +156,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: "SimSun", "宋体", serif;
   transition: gap 0.2s ease;
 }
 
