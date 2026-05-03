@@ -1,7 +1,12 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import SubNavBar from '@/components/SubNavBar.vue'
+import arrowIcon from '@/assets/images/pages/expert-detail/arrow-icon.svg'
+import backIcon from '@/assets/images/pages/expert-detail/back-icon.svg'
+import cardImageOne from '@/assets/images/pages/expert-detail/card-image-1-3d674a.png'
+import cardImageTwo from '@/assets/images/pages/expert-detail/card-image-2-4cbd0d.png'
+import expertPhoto from '@/assets/images/pages/expert-detail/expert-photo-24de6d.png'
+import homeIcon from '@/assets/images/pages/expert-detail/home-icon.svg'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,7 +29,7 @@ const experts = [
     degree: '博士',
     title: '首席研究员',
     subtitle: '博士生导师',
-    photo: '/images/expert-detail/expert-photo-24de6d.png',
+    photo: expertPhoto,
     focus: '出土医简保护',
     bio: '陈伟博士是将古代医学文献与现代计算诊断相结合的权威专家。他三十年的职业生涯致力于天回医简的保护工作，将失传的经脉转化为数字模型。他的工作在传统经验智慧与现代科学验证之间架起了一座桥梁，确保了中医珍贵遗产在数字时代的传承与演进。',
     publications: [
@@ -42,7 +47,7 @@ const experts = [
     degree: '博士',
     title: '图像计算专家',
     subtitle: '副研究员',
-    photo: '/images/expert-detail/card-image-1-3d674a.png',
+    photo: cardImageOne,
     focus: '多光谱影像',
     bio: '林悦博士长期从事简牍多光谱采集与低对比度字迹增强研究，负责实验室影像采集流程、图像质量评估和残损文字复原模型建设。',
     publications: [
@@ -58,7 +63,7 @@ const experts = [
     degree: '博士',
     title: '医学史研究员',
     subtitle: '教授',
-    photo: '/images/expert-detail/card-image-2-4cbd0d.png',
+    photo: cardImageTwo,
     focus: '汉代医学史',
     bio: '周明教授关注汉代医学知识体系、方剂谱系和医籍流传路径，参与多批出土医学文献的释读、编年和术语考证工作。',
     publications: [
@@ -74,7 +79,7 @@ const experts = [
     degree: '博士',
     title: '知识工程专家',
     subtitle: '研究员',
-    photo: '/images/expert-detail/expert-photo-24de6d.png',
+    photo: expertPhoto,
     focus: '知识图谱',
     bio: '徐青博士负责中医药古籍实体抽取、关系建模与知识图谱平台建设，将文献、文物、方剂和疾病概念纳入可检索的结构化网络。',
     publications: [
@@ -90,7 +95,7 @@ const experts = [
     degree: '博士',
     title: '文物保护专家',
     subtitle: '研究馆员',
-    photo: '/images/expert-detail/card-image-1-3d674a.png',
+    photo: cardImageOne,
     focus: '文物保护',
     bio: '何然博士专注出土竹木简牍稳定化处理、保存环境评估和数字化前置保护，推动文物保护流程与数字采集流程协同。',
     publications: [
@@ -106,7 +111,7 @@ const experts = [
     degree: '博士',
     title: '数据治理专家',
     subtitle: '副教授',
-    photo: '/images/expert-detail/card-image-2-4cbd0d.png',
+    photo: cardImageTwo,
     focus: '数据标准',
     bio: '万理博士负责多源医学文献数据清洗、版本管理和元数据标准设计，推动实验室数据从采集、标注到发布的全流程治理。',
     publications: [
@@ -122,7 +127,7 @@ const experts = [
     degree: '博士',
     title: '语义检索专家',
     subtitle: '研究员',
-    photo: '/images/expert-detail/expert-photo-24de6d.png',
+    photo: expertPhoto,
     focus: '智能检索',
     bio: '赵宁博士从事古医籍语义检索、跨文献问答和研究辅助系统设计，让复杂的出土医学资料能够被更自然地发现、比较和引用。',
     publications: [
@@ -307,8 +312,6 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
 <template>
   <main class="expert-detail-page">
-    <SubNavBar class="expert-sub-nav" />
-
     <section class="expert-stage" aria-label="专家详情">
       <article ref="profilePanel" class="profile-panel">
         <section class="profile-column">
@@ -349,7 +352,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
               <span>{{ publication.number }}</span>
               <h2>{{ publication.title }}</h2>
             </div>
-            <img src="/images/expert-detail/arrow-icon.svg" alt="" aria-hidden="true">
+            <img :src="arrowIcon" alt="" aria-hidden="true">
           </router-link>
         </section>
       </article>
@@ -387,11 +390,11 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
     <footer class="page-actions">
       <button type="button" class="secondary-action" @click="$router.back()">
-        <img src="/images/expert-detail/back-icon.svg" alt="" aria-hidden="true">
+        <img :src="backIcon" alt="" aria-hidden="true">
         返回上一页
       </button>
       <router-link class="primary-action" to="/home">
-        <img src="/images/expert-detail/home-icon.svg" alt="" aria-hidden="true">
+        <img :src="homeIcon" alt="" aria-hidden="true">
         返回首页
       </router-link>
     </footer>
@@ -400,13 +403,13 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
 <style scoped>
 .expert-detail-page {
-  height: 100vh;
+  height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background:
     linear-gradient(rgba(248, 245, 240, 0.88), rgba(248, 245, 240, 0.9)),
-    url('/home-bg2.png') center / cover fixed;
+    url('@/assets/images/backgrounds/home/home-bg2.png') center / cover fixed;
   color: #2b2520;
   font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
@@ -430,13 +433,6 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
   width: min(1280px, 100%);
   margin-right: auto;
   margin-left: auto;
-}
-
-.expert-sub-nav {
-  flex: 0 0 auto;
-  width: 100%;
-  margin-bottom: clamp(14px, 2vh, 26px);
-  background-color: #f8f6f0;
 }
 
 .expert-stage {

@@ -100,29 +100,31 @@ const activities = [
           <h2><span class="header-icon"></span>活动剪影</h2>
         </header>
 
-        <div class="gallery-list">
-          <figure class="gallery-card meeting-card">
-            <figcaption>2024 青年学者圆桌会</figcaption>
-          </figure>
-          <figure class="gallery-card lab-card">
-            <figcaption>实验室开放日</figcaption>
-          </figure>
+        <div class="gallery-layout">
+          <div class="gallery-list">
+            <figure class="gallery-card meeting-card">
+              <figcaption>2024 青年学者圆桌会</figcaption>
+            </figure>
+            <figure class="gallery-card lab-card">
+              <figcaption>实验室开放日</figcaption>
+            </figure>
+          </div>
+
+          <section class="activity-panel">
+            <header class="activity-header">
+              <span>学术活动存档</span>
+              <button type="button">查看全部</button>
+            </header>
+
+            <ol>
+              <li v-for="activity in activities" :key="`${activity.title}-${activity.date}`">
+                <span></span>
+                <p>{{ activity.title }}</p>
+                <time>{{ activity.date }}</time>
+              </li>
+            </ol>
+          </section>
         </div>
-      </section>
-
-      <section class="activity-panel">
-        <header class="activity-header">
-          <span>学术活动存档</span>
-          <button type="button">查看全部</button>
-        </header>
-
-        <ol>
-          <li v-for="activity in activities" :key="`${activity.title}-${activity.date}`">
-            <span></span>
-            <p>{{ activity.title }}</p>
-            <time>{{ activity.date }}</time>
-          </li>
-        </ol>
       </section>
     </section>
 
@@ -135,69 +137,79 @@ const activities = [
 
 <style scoped>
 .academic-page {
-  min-height: calc(100vh - 53px);
-  padding: 28px 62px 22px;
+  min-height: calc(100vh - 64px);
+  padding: 32px max(70px, calc((100vw - 1510px) / 2 + 70px)) 24px;
+  overflow-x: hidden;
   background:
     linear-gradient(rgba(250, 246, 237, 0.88), rgba(250, 246, 237, 0.9)),
-    url('/home-bg2.png') center center / cover fixed;
+    url('@/assets/images/backgrounds/home/home-bg2.png') center center / cover fixed;
   color: #2e2721;
-  font-family: "SimSun", "宋体", serif;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
 }
 
 .academic-hero,
-.academic-grid,
 .page-actions {
-  width: min(1200px, 95%);
+  width: min(100%, 1370px);
   margin-right: auto;
   margin-left: auto;
 }
 
 .academic-hero {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .academic-hero h1 {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--color-primary);
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .academic-hero p {
   color: #8a8078;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.65;
 }
 
 .academic-grid {
+  width: min(100%, 1370px);
+  margin-right: auto;
+  margin-left: auto;
   display: grid;
-  grid-template-columns: minmax(350px, 1.5fr) minmax(280px, 1fr) minmax(200px, 0.8fr);
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr) minmax(280px, 0.78fr);
   grid-template-rows: auto auto;
-  gap: 24px 26px;
+  gap: 24px 36px;
   align-items: stretch;
 }
 
 .panel {
   min-width: 0;
-  padding: 20px 22px;
-  background-color: rgba(255, 255, 255, 0.78);
+  padding: 24px 26px;
+  background-color: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 12px 28px rgba(90, 72, 54, 0.04);
   min-height: 280px;
 }
 
 .paper-panel {
   grid-row: 1 / span 2;
   border-left: 2px solid rgba(132, 33, 48, 0.25);
-  min-height: 600px;
+  min-height: 650px;
+  background-color: rgba(248, 247, 242, 0.86);
 }
 
 .patent-panel {
   background-color: rgba(248, 246, 240, 0.84);
 }
 
+.gallery-panel {
+  grid-column: 2 / 4;
+  min-height: 250px;
+}
+
 .activity-panel {
-  padding-top: 22px;
-  min-height: 280px;
+  min-width: 0;
+  padding-top: 0;
 }
 
 .panel-header,
@@ -206,23 +218,26 @@ const activities = [
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .panel-header h2 {
   display: flex;
   align-items: center;
-  gap: 7px;
-  color: #4a302a;
-  font-size: 16px;
-  line-height: 1.2;
+  gap: 9px;
+  color: #3f332c;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .header-icon {
-  width: 7px;
-  height: 7px;
+  width: 13px;
+  height: 13px;
   display: inline-block;
+  border: 2px solid var(--color-primary);
   background-color: var(--color-primary);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 
 .panel-header button,
@@ -231,8 +246,9 @@ const activities = [
   border: 0;
   background: transparent;
   color: var(--color-primary);
-  font-family: "SimSun", "宋体", serif;
-  font-size: 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -244,36 +260,44 @@ const activities = [
 
 .paper-list {
   height: auto;
-  max-height: 500px;
+  max-height: 560px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.paper-list::-webkit-scrollbar {
+  display: none;
 }
 
 .paper-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 78px;
-  gap: 18px;
-  min-height: 44px;
-  padding-bottom: 8px;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 22px;
+  min-height: 58px;
+  padding-bottom: 4px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .journal {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
   color: var(--color-primary);
-  font-family: Arial, sans-serif;
-  font-size: 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .paper-item h3 {
   overflow: hidden;
-  color: #1b1c19;
-  font-size: 13px;
+  color: #312821;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -285,46 +309,48 @@ const activities = [
 .paper-item time,
 .activity-panel time {
   display: block;
-  color: #968b84;
-  font-size: 10px;
-  line-height: 1.2;
+  color: #9a9188;
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .paper-item strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 8px;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .book-content {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 118px;
-  gap: 26px;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: 30px;
   align-items: center;
 }
 
 .book-copy h3 {
-  margin-bottom: 14px;
-  color: #4a302a;
-  font-size: 18px;
-  line-height: 1.4;
+  margin-bottom: 22px;
+  color: #352a24;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .book-copy p {
   color: #8a8078;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 
 .book-copy button {
-  margin-top: 46px;
-  padding: 7px 15px;
+  margin-top: 58px;
+  padding: 10px 18px;
   border: 0;
   background-color: var(--color-primary);
   color: #fff;
-  font-size: 11px;
+  font-family: inherit;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -351,33 +377,33 @@ const activities = [
 
 .patent-list {
   display: grid;
-  gap: 9px;
+  gap: 12px;
 }
 
 .patent-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-height: 41px;
-  padding: 8px 10px;
+  gap: 14px;
+  min-height: 52px;
+  padding: 10px 14px;
   border-left: 3px solid #d8a4aa;
-  background-color: rgba(255, 255, 255, 0.82);
+  background-color: rgba(255, 255, 255, 0.92);
 }
 
 .patent-item span:not(.gear) {
   display: block;
   color: #9d938c;
-  font-family: Arial, sans-serif;
-  font-size: 9px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
   line-height: 1.2;
 }
 
 .patent-item h3 {
-  color: #42352f;
-  font-size: 12px;
+  color: #3b302a;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .gear {
@@ -389,12 +415,19 @@ const activities = [
 .gallery-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 14px;
+}
+
+.gallery-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 24px;
+  align-items: start;
 }
 
 .gallery-card {
   position: relative;
-  height: 148px;
+  height: 198px;
   overflow: hidden;
   background-color: #333;
 }
@@ -464,12 +497,13 @@ const activities = [
 }
 
 .activity-header {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .activity-header span {
-  color: #6c625b;
-  font-size: 11px;
+  color: #5d524a;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .activity-panel ol {
@@ -478,10 +512,10 @@ const activities = [
 
 .activity-panel li {
   display: grid;
-  grid-template-columns: 6px minmax(0, 1fr) 62px;
-  gap: 8px;
+  grid-template-columns: 7px minmax(0, 1fr) 82px;
+  gap: 10px;
   align-items: start;
-  padding: 5px 0;
+  padding: 7px 0;
 }
 
 .activity-panel li > span {
@@ -494,7 +528,7 @@ const activities = [
 .activity-panel p {
   overflow: hidden;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -520,8 +554,8 @@ const activities = [
   justify-content: center;
   border: 0;
   text-decoration: none;
-  font-family: "SimSun", "宋体", serif;
-  font-size: 12px;
+  font-family: inherit;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -549,10 +583,13 @@ const activities = [
   .paper-panel,
   .book-panel,
   .patent-panel,
-  .gallery-panel,
-  .activity-panel {
+  .gallery-panel {
     grid-column: auto;
     grid-row: auto;
+  }
+
+  .gallery-panel {
+    grid-column: 1 / -1;
   }
 
   .paper-panel {
@@ -567,6 +604,10 @@ const activities = [
 
   .book-content {
     grid-template-columns: minmax(0, 1.5fr) 100px;
+  }
+
+  .gallery-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
   }
 }
 
@@ -599,6 +640,10 @@ const activities = [
   }
 
   .gallery-list {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-layout {
     grid-template-columns: 1fr;
   }
 

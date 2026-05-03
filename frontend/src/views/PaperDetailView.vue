@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
+import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,7 +21,7 @@ const paperArticles = [
     citations: 128,
     reads: '2.4k',
     pdfUrl: '',
-    previewImage: '/images/paper-detail/document-page.png',
+    previewImage: documentPage,
     abstract:
       '本研究旨在通过高精度生物电信号探测技术，探讨中医理论中“经络”传导路径与人体生物微弱电场分布的耦合关系。通过对500例临床样本的实时监测，数据表明在特定针刺干预下，沿经脉循行路线存在显著的低阻抗、高传导特性，为经络的生物学实质提供了新的实验支撑。',
     keywords: ['中医经络', '生物电信号', '循经感传', '系统生物学'],
@@ -37,7 +38,7 @@ const paperArticles = [
     citations: 86,
     reads: '1.9k',
     pdfUrl: '',
-    previewImage: '/images/paper-detail/document-page.png',
+    previewImage: documentPage,
     abstract:
       '文章围绕天回医简的整理、释读和数字化保护流程展开，讨论多光谱影像、文本校勘与知识标注在医简研究中的协同应用。',
     keywords: ['天回医简', '文献保护', '多光谱影像', '知识标注'],
@@ -128,7 +129,7 @@ const closePage = () => {
 
 <style scoped>
 .paper-page {
-  height: 100vh;
+  height: calc(100vh - 64px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 400px;
   background-color: #f0f0f0;

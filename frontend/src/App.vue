@@ -5,12 +5,10 @@ import NavBar from '@/components/NavBar.vue'
 
 const route = useRoute()
 
-const hideNavPaths = ['/', '/knowledge']
+const hideNavPaths = ['/']
 
 const shouldShowNav = computed(() => {
   if (hideNavPaths.includes(route.path)) return false
-  if (route.path.startsWith('/expert')) return false
-  if (route.path.startsWith('/paper')) return false
   return true
 })
 </script>

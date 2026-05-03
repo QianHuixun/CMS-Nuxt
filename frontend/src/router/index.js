@@ -4,7 +4,9 @@ import HomeView from '@/views/HomeView.vue'
 import ResourcesView from '@/views/ResourcesView.vue'
 import KnowledgeView from '@/views/KnowledgeView.vue'
 import AcademicNews from '@/views/AcademicNews.vue'
+import AchievementRegistryView from '@/views/AchievementRegistryView.vue'
 import ActivitySilhouette from '@/views/activity-silhouette.vue'
+import ActivityTimelineView from '@/views/ActivityTimelineView.vue'
 import ExpertDetailView from '@/views/ExpertDetailView.vue'
 import PaperDetailView from '@/views/PaperDetailView.vue'
 
@@ -14,7 +16,9 @@ const routes = [
   { path: '/resources', component: ResourcesView },
   { path: '/knowledge', component: KnowledgeView },
   { path: '/academic', component: AcademicNews },
+  { path: '/achievements', component: AchievementRegistryView, name: 'Achievements' },
   { path: '/activity/:id?', component: ActivitySilhouette, name: 'ActivitySilhouette' },
+  { path: '/activity-timeline', component: ActivityTimelineView, name: 'ActivityTimeline' },
   { path: '/expert/:id?', component: ExpertDetailView, name: 'ExpertDetail' },
   { path: '/paper/:id?', component: PaperDetailView, name: 'PaperDetail' },
 ]

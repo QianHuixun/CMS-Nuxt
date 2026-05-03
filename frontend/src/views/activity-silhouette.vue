@@ -1,14 +1,19 @@
 <script setup>
+import heroImage from '@/assets/images/pages/activity/hero-image-176857.png'
+import largeImage from '@/assets/images/pages/activity/large-image-50daff.png'
+import sideImageOne from '@/assets/images/pages/activity/side-image-1-56586a.png'
+import sideImageTwo from '@/assets/images/pages/activity/side-image-2-56586a.png'
+
 const galleryImages = [
-  '/images/activity/side-image-1-56586a.png',
-  '/images/activity/side-image-2-56586a.png',
+  sideImageOne,
+  sideImageTwo,
 ]
 </script>
 
 <template>
   <main class="activity-page">
     <section class="activity-hero">
-      <img src="/images/activity/hero-image-176857.png" alt="学术活动现场">
+      <img :src="heroImage" alt="学术活动现场">
       <div class="hero-copy">
         <p>活动剪影</p>
         <h1>出土医学文献数字化保护专题研讨</h1>
@@ -17,7 +22,7 @@ const galleryImages = [
 
     <section class="activity-content">
       <article class="feature-image">
-        <img src="/images/activity/large-image-50daff.png" alt="研讨会交流场景">
+        <img :src="largeImage" alt="研讨会交流场景">
       </article>
 
       <div class="activity-copy">
