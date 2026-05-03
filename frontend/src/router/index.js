@@ -19,7 +19,6 @@ const routes = [
   { path: '/resources', component: ResourcesView },
   { path: '/knowledge', component: KnowledgeView },
   { path: '/academic', component: AcademicView },
-  { path: '/academic-news', component: AcademicNews, name: 'AcademicNews' },
   { path: '/achievements', component: AchievementRegistryView, name: 'Achievements' },
   { path: '/activity/:id?', component: ActivitySilhouetteView, name: 'ActivitySilhouette' },
   { path: '/activity-timeline', component: ActivityTimelineView, name: 'ActivityTimeline' },
