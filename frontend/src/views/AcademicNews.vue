@@ -38,7 +38,7 @@ const activities = [
       <section class="panel paper-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>发表论文</h2>
-          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
+          <button type="button">查看全部</button>
         </header>
 
         <div class="paper-list">
@@ -63,7 +63,7 @@ const activities = [
       <section class="panel book-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>学术著作</h2>
-          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
+          <button type="button">查看全部</button>
         </header>
 
         <div class="book-content">
@@ -81,7 +81,7 @@ const activities = [
       <section class="panel patent-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>软著专利</h2>
-          <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
+          <button type="button">查看全部</button>
         </header>
 
         <div class="patent-list">
@@ -113,7 +113,7 @@ const activities = [
           <section class="activity-panel">
             <header class="activity-header">
               <span>学术活动存档</span>
-              <router-link to="/achievements" class="view-all-btn">查看全部</router-link>
+              <button type="button">查看全部</button>
             </header>
 
             <ol>
