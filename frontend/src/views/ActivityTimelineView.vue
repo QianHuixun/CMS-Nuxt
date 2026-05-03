@@ -3,18 +3,32 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const impactHighlights = [
-  { value: '5,000+', label: '观展人次' },
-  { value: '2周', label: '展览周期' },
+const eventCards = [
+  {
+    className: 'event-card-primary',
+    title: '科普影响力',
+    description: '为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。',
+    highlights: [
+      { value: '5,000+', label: '观展人次' },
+      { value: '2周', label: '展览周期' },
+    ],
+  },
+  {
+    className: 'event-card-secondary',
+    title: '跨学科研讨',
+    description: '邀请医学史、文物保护、人工智能团队共同参与，围绕出土医学文献数字化方法展开交流。',
+    highlights: [
+      { value: '12场', label: '专题报告' },
+      { value: '8组', label: '协作团队' },
+    ],
+  },
 ]
 
 const timelineDots = [
   { className: 'dot-large dot-one' },
-  { className: 'dot-large dot-two' },
+  { className: 'dot-medium dot-two' },
   { className: 'dot-large dot-three' },
-  { className: 'dot-medium dot-four' },
-  { className: 'dot-small dot-five' },
-  { className: 'dot-medium dot-six' },
+  { className: 'dot-small dot-four' },
 ]
 
 const back = () => {
@@ -60,22 +74,20 @@ const back = () => {
         aria-hidden="true"
       ></span>
 
-      <article class="impact-card">
+      <article
+        v-for="card in eventCards"
+        :key="card.title"
+        :class="['event-card', card.className]"
+      >
         <div class="card-content">
-          <h2>科普影响力</h2>
-          <p>为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。</p>
+          <h2>{{ card.title }}</h2>
+          <p>{{ card.description }}</p>
           <div class="impact-grid">
-            <div v-for="item in impactHighlights" :key="item.label">
+            <div v-for="item in card.highlights" :key="item.label">
               <strong>{{ item.value }}</strong>
               <span>{{ item.label }}</span>
             </div>
           </div>
-        </div>
-      </article>
-
-      <article class="future-card" aria-label="活动影像预留区域">
-        <div class="future-card-inner">
-          <span></span>
         </div>
       </article>
 
@@ -109,7 +121,7 @@ const back = () => {
   position: relative;
   width: 100%;
   max-width: 1920px;
-  min-height: max(1800px, calc(var(--canvas-width) * 1.754));
+  min-height: max(1600px, calc(var(--canvas-width) * 1.12));
   margin: 0 auto;
   overflow: hidden;
 }
@@ -192,7 +204,7 @@ const back = () => {
   top: 15.35%;
   left: 24.5%;
   width: 51%;
-  height: 63.8%;
+  height: 74%;
   color: rgba(132, 33, 48, 0.11);
   z-index: 0;
 }
@@ -213,7 +225,8 @@ const back = () => {
   position: absolute;
   border-radius: 50%;
   background-color: #d1acac;
-  z-index: 1;
+  transform: translate(-50%, -50%);
+  z-index: 2;
 }
 
 .dot-large {
@@ -231,62 +244,51 @@ const back = () => {
   aspect-ratio: 1;
 }
 
+/* 圆形点基于 SVG viewBox 坐标 (978 x 2188) 和 SVG 容器位置精确定位 */
+/* SVG 容器: top: 15.35%, left: 24.5%, width: 51%, height: 74% */
 .dot-one {
-  top: 25.85%;
-  left: 21.35%;
+  top: calc(15.35% + 74% * (252 / 2188));
+  left: calc(24.5% + 51% * (311 / 978));
   background-color: #d2aeae;
 }
 
 .dot-two {
-  top: 37.9%;
-  left: 71.1%;
+  top: calc(15.35% + 74% * (829 / 2188));
+  left: calc(24.5% + 51% * (794 / 978));
 }
 
 .dot-three {
-  top: 52.2%;
-  left: 26%;
+  top: calc(15.35% + 74% * (1325 / 2188));
+  left: calc(24.5% + 51% * (562 / 978));
 }
 
 .dot-four {
-  top: 62.55%;
-  left: 60.05%;
+  top: calc(15.35% + 74% * (1895 / 2188));
+  left: calc(24.5% + 51% * (642 / 978));
 }
 
-.dot-five {
-  top: 68.95%;
-  left: 40.5%;
-}
-
-.dot-six {
-  top: 72.95%;
-  left: 60.05%;
-}
-
-.impact-card,
-.future-card {
+.event-card {
   position: absolute;
-  width: 25.5%;
+  width: 23.5%;
   min-width: 360px;
-  aspect-ratio: 490 / 682;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
   background-color: #fff;
   border-radius: 4px;
+  border: 1px solid #f0eee9;
   box-shadow: 0 20px 50px -12px rgba(132, 33, 48, 0.15);
   z-index: 2;
 }
 
-.impact-card {
-  top: 24.35%;
-  left: 31.05%;
-  display: flex;
-  align-items: center;
-  border: 1px solid #f0eee9;
+.event-card-primary {
+  top: 25.5%;
+  left: 15%;
 }
 
-.future-card {
-  top: 61.15%;
-  right: 4.32%;
-  border-radius: 12px;
-  box-shadow: 0 4px 8.1px rgba(0, 0, 0, 0.25);
+.event-card-secondary {
+  top: 57.5%;
+  left: 58%;
 }
 
 .card-content {
@@ -340,20 +342,6 @@ const back = () => {
   font-size: 12px;
 }
 
-.future-card-inner {
-  height: 100%;
-  padding: 32px;
-}
-
-.future-card-inner span {
-  width: 100%;
-  height: 80px;
-  display: block;
-  border-radius: 2px;
-  background-color: #f5f5f4;
-  opacity: 0;
-}
-
 .page-actions {
   position: absolute;
   right: 32px;
@@ -392,8 +380,7 @@ const back = () => {
 }
 
 @media (max-width: 1200px) {
-  .impact-card,
-  .future-card {
+  .event-card {
     min-width: 320px;
   }
 }
@@ -440,26 +427,23 @@ const back = () => {
     display: none;
   }
 
-  .impact-card,
-  .future-card {
+  .event-card {
     position: relative;
     inset: auto;
     width: calc(100% - 40px);
     min-width: 0;
     max-width: 490px;
     margin: 0 auto;
-    aspect-ratio: auto;
-    min-height: 520px;
+    min-height: 420px;
   }
 
-  .impact-card {
+  .event-card-primary {
     top: auto;
     margin-top: 520px;
   }
 
-  .future-card {
-    margin-top: 260px;
-    min-height: 480px;
+  .event-card-secondary {
+    margin-top: 220px;
   }
 
   .page-actions {
@@ -482,8 +466,7 @@ const back = () => {
     display: none;
   }
 
-  .card-content,
-  .future-card-inner {
+  .card-content {
     padding: 24px;
   }
 

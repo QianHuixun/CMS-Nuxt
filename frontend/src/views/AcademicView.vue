@@ -112,6 +112,10 @@ const wordCloud = ref([
 function goHome() {
   router.push('/home')
 }
+
+function goExpert() {
+  router.push('/expert/chen-wei')
+}
 </script>
 
 <template>
@@ -121,7 +125,15 @@ function goHome() {
         <h2 class="section-title">人才队伍</h2>
         <p class="section-subtitle">核心科研力量</p>
         <div class="team-cards">
-          <div v-for="(member, index) in teamList" :key="index" class="team-card">
+          <div
+            v-for="(member, index) in teamList"
+            :key="index"
+            class="team-card"
+            role="link"
+            tabindex="0"
+            @click="goExpert"
+            @keydown.enter="goExpert"
+          >
             <div class="avatar">
               <img :src="member.avatar" :alt="member.name" />
             </div>
@@ -154,7 +166,7 @@ function goHome() {
           <img src="@/assets/images/backgrounds/academic/bamboo-slip.svg" class="word-bg" alt="" />
           <span class="word-text">{{ word.text }}</span>
         </div>
-        <div class="more-btn">
+        <div class="more-btn" @click="$router.push('/academic-news')">
           <div class="more-text">查看更多研究成果</div>
           <div class="more-icon">▼</div>
         </div>
@@ -194,12 +206,6 @@ function goHome() {
   background-size: 20px 20px;
   color: var(--color-text);
   padding: 24px 40px 80px;
-}
-
-:global(body),
-:global(html),
-:global(#app) {
-  overflow: hidden;
 }
 
 .main-container {
@@ -276,6 +282,12 @@ function goHome() {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  cursor: pointer;
+}
+
+.team-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .avatar {

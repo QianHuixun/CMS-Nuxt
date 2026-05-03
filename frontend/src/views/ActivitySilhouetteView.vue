@@ -44,7 +44,7 @@ const galleryImages = [
     </section>
   </main>
 </template>
-
+  
 <style scoped>
 .activity-page {
   min-height: calc(100vh - 57px);
