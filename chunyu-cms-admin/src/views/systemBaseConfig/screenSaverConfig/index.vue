@@ -1,22 +1,20 @@
 <template>
   <div class="app-container">
-    <!-- 搜索区域 -->
     <el-card shadow="never" class="search-card">
       <el-form :model="queryParams" :inline="true">
-        <el-form-item label="屏保名称">
-          <el-input v-model="queryParams.name" placeholder="请输入屏保名称" clearable style="width: 200px" />
+        <el-form-item label="名称">
+          <el-input v-model="queryParams.title" placeholder="请输入屏保名称" clearable style="width: 220px" @keyup.enter="handleQuery" />
         </el-form-item>
         <el-form-item label="类型">
-          <el-select v-model="queryParams.type" placeholder="请选择类型" clearable style="width: 150px">
-            <el-option label="图片轮播" value="image" />
+          <el-select v-model="queryParams.mediaType" placeholder="请选择类型" clearable style="width: 140px">
+            <el-option label="图片" value="image" />
             <el-option label="视频" value="video" />
-            <el-option label="动态特效" value="effect" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 150px">
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
+          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 140px">
+            <el-option label="启用" value="active" />
+            <el-option label="停用" value="inactive" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -26,53 +24,66 @@
       </el-form>
     </el-card>
 
-    <!-- 操作按钮 -->
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button type="primary" plain icon="Plus" @click="handleAdd">新增屏保</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete">批量删除</el-button>
-      </el-col>
     </el-row>
 
-    <!-- 表格区域 -->
     <el-card shadow="never">
-      <el-table v-loading="loading" :data="screenSaverList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="50" align="center" />
-        <el-table-column label="屏保名称" prop="name" min-width="150" show-overflow-tooltip />
-        <el-table-column label="类型" prop="type" width="100" align="center">
+      <el-table v-loading="loading" :data="screenSaverList">
+        <el-table-column label="配置名称" prop="title" min-width="180" show-overflow-tooltip />
+        <el-table-column label="类型" prop="mediaType" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="typeMap[row.type]">{{ typeLabelMap[row.type] }}</el-tag>
+            <el-tag :type="row.mediaType === 'video' ? 'warning' : 'success'">{{ row.mediaType === 'video' ? '视频' : '图片' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="预览图" prop="cover" width="120" align="center">
+        <el-table-column label="媒体预览" prop="mediaUrl" width="130" align="center">
           <template #default="{ row }">
             <el-image
-              v-if="row.cover"
-              :src="row.cover"
-              :preview-src-list="[row.cover]"
+              v-if="row.mediaType === 'image' && row.mediaUrl"
+              :src="row.mediaUrl"
+              :preview-src-list="[row.mediaUrl]"
               fit="cover"
-              style="width: 60px; height: 40px; border-radius: 4px"
+              style="width: 80px; height: 48px; border-radius: 4px"
+            />
+            <el-tag v-else-if="row.mediaType === 'video' && row.mediaUrl" type="warning" effect="plain">视频已上传</el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="视频封面" prop="coverUrl" width="120" align="center">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.coverUrl"
+              :src="row.coverUrl"
+              :preview-src-list="[row.coverUrl]"
+              fit="cover"
+              style="width: 80px; height: 48px; border-radius: 4px"
             />
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="时长(秒)" prop="duration" width="100" align="center" />
-        <el-table-column label="排序" prop="sort" width="80" align="center" />
-        <el-table-column label="状态" prop="status" width="80" align="center">
+        <el-table-column label="触发秒数" prop="triggerSeconds" width="100" align="center" />
+        <el-table-column label="状态" prop="status" width="90" align="center">
           <template #default="{ row }">
-            <el-switch v-model="row.status" active-value="1" inactive-value="0" @change="handleStatusChange(row)" />
+            <el-tag :type="row.status === 'active' ? 'success' : 'info'">{{ row.status === 'active' ? '启用' : '停用' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="createTime" width="180" align="center" />
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column label="排序" prop="sort" width="90" align="center" />
+        <el-table-column label="更新时间" prop="updateTime" width="180" align="center">
+          <template #default="{ row }">
+            <span>{{ formatTime(row.updateTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" align="center" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" icon="Edit" @click="handleUpdate(row)">编辑</el-button>
             <el-button link type="danger" icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
+
+      <el-empty v-if="!loading && !screenSaverList.length" description="暂无屏保配置" />
 
       <pagination
         v-if="total > 0"
@@ -83,41 +94,60 @@
       />
     </el-card>
 
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="700px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="屏保名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入屏保名称" />
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="820px" append-to-body>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
+        <el-form-item label="配置名称" prop="title">
+          <el-input v-model="form.title" placeholder="请输入配置名称" maxlength="150" show-word-limit />
         </el-form-item>
-        <el-form-item label="屏保类型" prop="type">
-          <el-radio-group v-model="form.type">
-            <el-radio label="image">图片轮播</el-radio>
+        <el-form-item label="媒体类型" prop="mediaType">
+          <el-radio-group v-model="form.mediaType" @change="handleMediaTypeChange">
+            <el-radio label="image">图片</el-radio>
             <el-radio label="video">视频</el-radio>
-            <el-radio label="effect">动态特效</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="封面图片" prop="cover">
-          <el-input v-model="form.cover" placeholder="请输入封面图片URL" />
+        <el-form-item v-if="form.mediaType === 'image'" label="屏保图片" prop="mediaUrl">
+          <ImageUpload v-model="form.mediaUrl" :limit="1" :file-size="10" :file-type="['png', 'jpg', 'jpeg', 'webp']" />
         </el-form-item>
-        <el-form-item label="播放时长" prop="duration">
-          <el-input-number v-model="form.duration" :min="5" :max="300" /> 秒
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="form.sort" :min="0" :max="999" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">启用</el-radio>
-            <el-radio label="0">禁用</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <template v-else>
+          <el-form-item label="屏保视频" prop="mediaUrl">
+            <VideoUploader
+              v-model="form.mediaUrl"
+              v-model:cover="form.coverUrl"
+              :status="videoUploadStatus"
+              @status-change="videoUploadStatus = $event"
+            />
+          </el-form-item>
+          <el-form-item label="视频封面">
+            <ImageUpload v-model="form.coverUrl" :limit="1" :file-size="8" :file-type="['png', 'jpg', 'jpeg', 'webp']" />
+          </el-form-item>
+        </template>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="触发秒数" prop="triggerSeconds">
+              <el-input-number v-model="form.triggerSeconds" :min="5" :max="86400" controls-position="right" style="width: 160px" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="排序">
+              <el-input-number v-model="form.sort" :min="0" :max="999999" controls-position="right" style="width: 160px" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="状态">
+              <el-radio-group v-model="form.status">
+                <el-radio label="active">启用</el-radio>
+                <el-radio label="inactive">停用</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="备注">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+          <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" maxlength="500" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确 定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -125,59 +155,79 @@
 
 <script setup name="SystemBaseConfigScreenSaverConfigIndex">
 import Pagination from '@/components/Pagination/index.vue'
+import ImageUpload from '@/components/ImageUpload/index.vue'
+import VideoUploader from '@/components/VideoUploader/index.vue'
+import {
+  addScreenSaverConfig,
+  deleteScreenSaverConfig,
+  getScreenSaverConfig,
+  pageScreenSaverConfig,
+  updateScreenSaverConfig
+} from '@/api/systemBaseConfig/screenSaverConfig'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const loading = ref(true)
+const loading = ref(false)
+const submitLoading = ref(false)
 const screenSaverList = ref([])
 const total = ref(0)
-const multiple = ref(true)
-const ids = ref([])
-
-const typeMap = { image: '', video: 'warning', effect: 'success' }
-const typeLabelMap = { image: '图片轮播', video: '视频', effect: '动态特效' }
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const formRef = ref()
+const videoUploadStatus = ref('idle')
 
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  name: '',
-  type: '',
+  title: '',
+  mediaType: '',
   status: ''
 })
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formRef = ref(null)
-
-const form = ref({
-  id: undefined,
-  name: '',
-  type: 'image',
-  cover: '',
-  duration: 30,
-  sort: 0,
-  status: '1',
-  remark: ''
-})
+const form = reactive(buildDefaultForm())
 
 const rules = {
-  name: [{ required: true, message: '屏保名称不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择屏保类型', trigger: 'change' }]
+  title: [{ required: true, message: '配置名称不能为空', trigger: 'blur' }],
+  mediaType: [{ required: true, message: '请选择媒体类型', trigger: 'change' }],
+  mediaUrl: [{ required: true, message: '请上传屏保媒体', trigger: 'change' }],
+  triggerSeconds: [{ required: true, message: '请输入触发秒数', trigger: 'change' }]
 }
 
-// 模拟数据
-const mockData = [
-  { id: 1, name: '首页轮播图', type: 'image', cover: 'https://picsum.photos/200/150?random=1', duration: 30, sort: 1, status: '1', createTime: '2024-01-15 10:30:00' },
-  { id: 2, name: '品牌宣传片', type: 'video', cover: 'https://picsum.photos/200/150?random=2', duration: 60, sort: 2, status: '1', createTime: '2024-01-14 09:20:00' },
-  { id: 3, name: '星空特效', type: 'effect', cover: 'https://picsum.photos/200/150?random=3', duration: 120, sort: 3, status: '0', createTime: '2024-01-13 14:00:00' },
-  { id: 4, name: '节日祝福', type: 'image', cover: 'https://picsum.photos/200/150?random=4', duration: 45, sort: 4, status: '1', createTime: '2024-01-12 16:45:00' }
-]
+function buildDefaultForm() {
+  return {
+    id: undefined,
+    screensaverConfigId: undefined,
+    title: '',
+    mediaType: 'image',
+    mediaUrl: '',
+    coverUrl: '',
+    triggerSeconds: 300,
+    sort: 0,
+    status: 'active',
+    remark: ''
+  }
+}
 
-function getList() {
+function resetFormData(data = buildDefaultForm()) {
+  Object.assign(form, buildDefaultForm(), data)
+  videoUploadStatus.value = form.mediaType === 'video' && form.mediaUrl ? 'success' : 'idle'
+  nextTick(() => formRef.value?.clearValidate?.())
+}
+
+function formatTime(value) {
+  if (!value) return '-'
+  if (typeof value === 'string') return value
+  return new Date(value).toLocaleString('zh-CN', { hour12: false })
+}
+
+async function getList() {
   loading.value = true
-  setTimeout(() => {
-    screenSaverList.value = mockData.map(item => ({ ...item }))
-    total.value = screenSaverList.value.length
+  try {
+    const res = await pageScreenSaverConfig(queryParams)
+    screenSaverList.value = Array.isArray(res?.data?.rows) ? res.data.rows : []
+    total.value = Number(res?.data?.total || 0)
+  } finally {
     loading.value = false
-  }, 300)
+  }
 }
 
 function handleQuery() {
@@ -186,52 +236,70 @@ function handleQuery() {
 }
 
 function resetQuery() {
-  queryParams.name = ''
-  queryParams.type = ''
+  queryParams.title = ''
+  queryParams.mediaType = ''
   queryParams.status = ''
-  handleQuery()
-}
-
-function handleSelectionChange(selection) {
-  ids.value = selection.map(item => item.id)
-  multiple.value = !selection.length
-}
-
-function handleStatusChange(row) {
-  ElMessage.success(`已${row.status === '1' ? '启用' : '禁用'}`)
+  queryParams.pageNum = 1
+  getList()
 }
 
 function handleAdd() {
-  form.value = { id: undefined, name: '', type: 'image', cover: '', duration: 30, sort: 0, status: '1', remark: '' }
   dialogTitle.value = '新增屏保'
+  resetFormData()
   dialogVisible.value = true
 }
 
-function handleUpdate(row) {
-  form.value = { ...row }
+async function handleUpdate(row) {
   dialogTitle.value = '编辑屏保'
+  const res = await getScreenSaverConfig(row.id || row.screensaverConfigId)
+  resetFormData(res?.data || row)
   dialogVisible.value = true
 }
 
-function handleDelete(row) {
-  ElMessageBox.confirm(`是否确认删除屏保"${row.name || ids.value}"？`, '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    getList()
-  })
+function handleMediaTypeChange() {
+  form.mediaUrl = ''
+  form.coverUrl = ''
+  videoUploadStatus.value = 'idle'
+  nextTick(() => formRef.value?.clearValidate?.('mediaUrl'))
 }
 
-function submitForm() {
-  formRef.value.validate(valid => {
-    if (valid) {
-      ElMessage.success(form.value.id ? '修改成功' : '新增成功')
-      dialogVisible.value = false
-      getList()
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(`确认删除屏保“${row.title}”吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+  } catch (error) {
+    return
+  }
+
+  await deleteScreenSaverConfig(row.id || row.screensaverConfigId)
+  ElMessage.success('删除成功')
+  if (screenSaverList.value.length === 1 && queryParams.pageNum > 1) {
+    queryParams.pageNum -= 1
+  }
+  getList()
+}
+
+async function submitForm() {
+  const valid = await formRef.value?.validate?.().catch(() => false)
+  if (!valid) return
+
+  submitLoading.value = true
+  try {
+    if (form.id || form.screensaverConfigId) {
+      await updateScreenSaverConfig(form)
+      ElMessage.success('修改成功')
+    } else {
+      await addScreenSaverConfig(form)
+      ElMessage.success('新增成功')
     }
-  })
+    dialogVisible.value = false
+    getList()
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 onMounted(() => {
@@ -240,10 +308,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.search-card {
-  margin-bottom: 16px;
-}
-
+.search-card,
 .mb8 {
   margin-bottom: 16px;
 }

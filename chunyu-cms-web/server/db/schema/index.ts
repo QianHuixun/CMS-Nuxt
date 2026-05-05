@@ -60,6 +60,8 @@ import * as talentSchema from './admin/talent';
 import * as talentAchievementRelationSchema from './admin/talentAchievementRelation';
 import * as resourceDatabaseSchema from './admin/resourceDatabase';
 import * as researchToolSchema from './admin/researchTool';
+import * as navConfigSchema from './admin/navConfig';
+import * as screenSaverConfigSchema from './admin/screenSaverConfig';
 
 export default {
   ...userSchema,
@@ -121,5 +123,7 @@ export default {
   ...talentSchema,
   ...talentAchievementRelationSchema,
   ...resourceDatabaseSchema,
-  ...researchToolSchema
+  ...researchToolSchema,
+  ...navConfigSchema,
+  ...screenSaverConfigSchema
 };

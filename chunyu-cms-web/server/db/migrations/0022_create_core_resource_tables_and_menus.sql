@@ -62,7 +62,7 @@ INSERT INTO `menu` (
 )
 SELECT
   '核心资源库管理',
-  6,
+  3,
   'core-resource',
   NULL,
   NULL,
@@ -72,7 +72,7 @@ SELECT
   '0',
   '0',
   NULL,
-  'database',
+  'table',
   0,
   NULL,
   '核心资源库管理目录',
@@ -86,15 +86,12 @@ WHERE NOT EXISTS (
   FROM `menu`
   WHERE `menu_name` = '核心资源库管理'
     AND `path` = 'core-resource'
-    AND IFNULL(`parent_menu_id`, 0) = 0
 );
 --> statement-breakpoint
-SET @core_resource_parent_id := (
+SET @system_base_config_id := (
   SELECT `menu_id`
   FROM `menu`
-  WHERE `menu_name` = '核心资源库管理'
-    AND `path` = 'core-resource'
-    AND IFNULL(`parent_menu_id`, 0) = 0
+  WHERE `menu_name` = '系统基础配置管理'
   ORDER BY `menu_id`
   LIMIT 1
 );
@@ -104,8 +101,63 @@ SET
   `mpath` = CONCAT(`menu_id`, '.'),
   `update_by` = 'codex',
   `update_time` = NOW()
-WHERE `menu_id` = @core_resource_parent_id
-  AND (IFNULL(`mpath`, '') = '' OR `mpath` <> CONCAT(`menu_id`, '.'));
+WHERE `menu_id` = @system_base_config_id
+  AND (IFNULL(`mpath`, '') = '');
+--> statement-breakpoint
+SET @core_resource_parent_id := (
+  SELECT `menu_id`
+  FROM `menu`
+  WHERE `menu_name` = '核心资源库管理'
+    AND `path` = 'core-resource'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+--> statement-breakpoint
+UPDATE `menu`
+SET
+  `parent_menu_id` = 0,
+  `order_num` = 2,
+  `icon` = 'table',
+  `mpath` = CONCAT(`menu_id`, '.'),
+  `update_by` = 'codex',
+  `update_time` = NOW()
+WHERE `menu_id` = @core_resource_parent_id;
+--> statement-breakpoint
+UPDATE `menu`
+SET
+  `order_num` = 3,
+  `update_by` = 'codex',
+  `update_time` = NOW()
+WHERE `menu_name` = '人才与对应科研管理'
+  AND IFNULL(`parent_menu_id`, 0) = 0
+  AND `order_num` < 3;
+--> statement-breakpoint
+UPDATE `menu`
+SET
+  `order_num` = 4,
+  `update_by` = 'codex',
+  `update_time` = NOW()
+WHERE `menu_name` = '论文著作与成果管理'
+  AND IFNULL(`parent_menu_id`, 0) = 0
+  AND `order_num` < 4;
+--> statement-breakpoint
+UPDATE `menu`
+SET
+  `order_num` = 5,
+  `update_by` = 'codex',
+  `update_time` = NOW()
+WHERE `menu_name` = '自动化辅助'
+  AND IFNULL(`parent_menu_id`, 0) = 0
+  AND `order_num` < 5;
+--> statement-breakpoint
+UPDATE `menu`
+SET
+  `order_num` = 6,
+  `update_by` = 'codex',
+  `update_time` = NOW()
+WHERE `menu_name` = '活动管理'
+  AND IFNULL(`parent_menu_id`, 0) = 0
+  AND `order_num` < 6;
 --> statement-breakpoint
 INSERT INTO `menu` (
   `menu_name`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`,
@@ -124,7 +176,7 @@ SELECT
   '0',
   '0',
   'coreResource:database:list',
-  'database',
+  'redis-list',
   @core_resource_parent_id,
   NULL,
   '数据库管理页面',
@@ -140,7 +192,6 @@ WHERE @core_resource_parent_id IS NOT NULL
     WHERE `menu_name` = '数据库管理'
       AND `path` = 'database'
       AND `component` = 'coreResource/database/index'
-      AND IFNULL(`parent_menu_id`, 0) = @core_resource_parent_id
   );
 --> statement-breakpoint
 SET @core_resource_database_id := (
@@ -149,13 +200,14 @@ SET @core_resource_database_id := (
   WHERE `menu_name` = '数据库管理'
     AND `path` = 'database'
     AND `component` = 'coreResource/database/index'
-    AND IFNULL(`parent_menu_id`, 0) = @core_resource_parent_id
   ORDER BY `menu_id`
   LIMIT 1
 );
 --> statement-breakpoint
 UPDATE `menu`
 SET
+  `parent_menu_id` = @core_resource_parent_id,
+  `icon` = 'redis-list',
   `mpath` = CONCAT(
     (SELECT `mpath` FROM (
       SELECT `mpath`
@@ -217,7 +269,6 @@ WHERE @core_resource_parent_id IS NOT NULL
     WHERE `menu_name` = '自研工具管理'
       AND `path` = 'tool'
       AND `component` = 'coreResource/tool/index'
-      AND IFNULL(`parent_menu_id`, 0) = @core_resource_parent_id
   );
 --> statement-breakpoint
 SET @core_resource_tool_id := (
@@ -226,13 +277,14 @@ SET @core_resource_tool_id := (
   WHERE `menu_name` = '自研工具管理'
     AND `path` = 'tool'
     AND `component` = 'coreResource/tool/index'
-    AND IFNULL(`parent_menu_id`, 0) = @core_resource_parent_id
   ORDER BY `menu_id`
   LIMIT 1
 );
 --> statement-breakpoint
 UPDATE `menu`
 SET
+  `parent_menu_id` = @core_resource_parent_id,
+  `icon` = 'tool',
   `mpath` = CONCAT(
     (SELECT `mpath` FROM (
       SELECT `mpath`
