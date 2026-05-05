@@ -58,6 +58,8 @@ import * as bookSimulationSchema from './admin/bookSimulation';
 import * as bookSimulationPageSchema from './admin/bookSimulationPage';
 import * as talentSchema from './admin/talent';
 import * as talentAchievementRelationSchema from './admin/talentAchievementRelation';
+import * as resourceDatabaseSchema from './admin/resourceDatabase';
+import * as researchToolSchema from './admin/researchTool';
 
 export default {
   ...userSchema,
@@ -117,5 +119,7 @@ export default {
   ...bookSimulationSchema,
   ...bookSimulationPageSchema,
   ...talentSchema,
-  ...talentAchievementRelationSchema
+  ...talentAchievementRelationSchema,
+  ...resourceDatabaseSchema,
+  ...researchToolSchema
 };
