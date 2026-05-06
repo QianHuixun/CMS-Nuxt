@@ -1,30 +1,42 @@
 <script setup>
-const papers = [
-  { journal: 'Nature Scientific Data', title: '古医籍竹简数字化重构：基于神经计算的方法研究', date: '2023年11月', author: '作者：张三等' },
-  { journal: '中医药文化遗产学报', title: '汉代早期出土医学文献处方文献学分析', date: '2025年05月', author: '作者：李四等' },
-  { journal: 'Digital Humanities Quarterly', title: '古籍医学实体知识图谱构建与应用研究', date: '2023年05月', author: '作者：王五等' },
-  { journal: '文化遗产科学', title: '荆州出土医学简牍的多光谱影像采集与复原', date: '2023年01月', author: '作者：赵六等' },
-  { journal: '中医教育', title: '数字化语境下的中医古籍教学模式探索', date: '2022年12月', author: '作者：周七等' },
-  { journal: '人工智能与医学', title: '基于深度学习的中医脉象识别系统研究', date: '2022年10月', author: '作者：孙八等' },
-  { journal: 'Nature Scientific Data', title: '出土医药文献数据集的标注体系与质量控制', date: '2023年11月', author: '作者：张三等' },
-  { journal: '中医药文化遗产学报', title: '早期方剂名物词汇的整理与知识关联', date: '2025年05月', author: '作者：李四等' },
-]
+import { ref, onMounted } from 'vue'
+import { fetchPapers, fetchSoftwarePatents, fetchActivities } from '@/api/index.js'
 
-const patents = [
-  { code: 'CN2023SR124', title: '医学实体标注工具 1.2' },
-  { code: 'CN2023SR089', title: '自动图像分割软件系统' },
-  { code: 'PAT-2024-DH', title: '古籍手稿 OCR 识别引擎' },
-  { code: 'PAT-2024-DH', title: '古籍版面结构分析系统' },
-]
+const papers = ref([])
+const patents = ref([])
+const activities = ref([])
 
-const activities = [
-  { title: '古医籍竹简数字化重构方法研讨会', date: '2023年11月12日' },
-  { title: '汉代早期出土医学文献专题讲座', date: '2025年05月05日' },
-  { title: '荆州出土医学简牍多光谱采集工作坊', date: '2023年05月08日' },
-  { title: '医学文献知识图谱建设圆桌会', date: '2025年01月22日' },
-  { title: '数字人文与中医古籍整理青年论坛', date: '2023年11月12日' },
-  { title: '实验室开放日与成果展示', date: '2023年11月12日' },
-]
+onMounted(async () => {
+  try {
+    const res = await fetchPapers({ pageNum: 1, pageSize: 8 })
+    papers.value = (res.rows || []).map(p => ({
+      journal: p.journal || '',
+      title: p.title,
+      date: p.year ? `${p.year}年` : '',
+      author: `作者：${p.firstAuthor || ''}等`,
+    }))
+  } catch (e) {
+    console.error('获取论文列表失败', e)
+  }
+  try {
+    const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 6 })
+    patents.value = (res.rows || []).map(p => ({
+      code: p.registrationNo || '',
+      title: p.title,
+    }))
+  } catch (e) {
+    console.error('获取软著专利列表失败', e)
+  }
+  try {
+    const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
+    activities.value = (res.rows || []).map(a => ({
+      title: a.title,
+      date: a.time ? new Date(a.time).toISOString().slice(0, 10).replace(/-/g, '年').replace(/-/, '月') + '日' : '',
+    }))
+  } catch (e) {
+    console.error('获取活动列表失败', e)
+  }
+})
 </script>
 
 <template>
