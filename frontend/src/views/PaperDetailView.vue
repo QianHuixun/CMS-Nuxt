@@ -1,52 +1,37 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
+import { fetchPaperDetail } from '@/api/index.js'
 
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
+const paper = ref(null)
 
-const paperArticles = [
-  {
-    id: 'meridian-bioelectric',
-    expertId: 'chen-wei',
-    title: '论中医经络系统与现代生物电信号传导的相关性研究',
-    category: '学术论文详情',
-    authors: ['张廷和 教授'],
-    source: '国家重点中医药实验室',
-    date: '2023年1月',
-    downloads: '14.2 MB',
-    citations: 128,
-    reads: '2.4k',
-    pdfUrl: '',
-    previewImage: documentPage,
-    abstract:
-      '本研究旨在通过高精度生物电信号探测技术，探讨中医理论中“经络”传导路径与人体生物微弱电场分布的耦合关系。通过对500例临床样本的实时监测，数据表明在特定针刺干预下，沿经脉循行路线存在显著的低阻抗、高传导特性，为经络的生物学实质提供了新的实验支撑。',
-    keywords: ['中医经络', '生物电信号', '循经感传', '系统生物学'],
-  },
-  {
-    id: 'tianhui-medical-slip',
-    expertId: 'chen-wei',
-    title: '《天回医简研究》专题论丛',
-    category: '专家文章详情',
-    authors: ['陈伟 博士'],
-    source: '出土医学文献数字实验室',
-    date: '2024年6月',
-    downloads: '9.8 MB',
-    citations: 86,
-    reads: '1.9k',
-    pdfUrl: '',
-    previewImage: documentPage,
-    abstract:
-      '文章围绕天回医简的整理、释读和数字化保护流程展开，讨论多光谱影像、文本校勘与知识标注在医简研究中的协同应用。',
-    keywords: ['天回医简', '文献保护', '多光谱影像', '知识标注'],
-  },
-]
-
-const paper = computed(() => {
-  return paperArticles.find((article) => article.id === route.params.id) ?? paperArticles[0]
+onMounted(async () => {
+  try {
+    const data = await fetchPaperDetail(route.params.id)
+    if (data) {
+      paper.value = {
+        title: data.title,
+        category: data.type || '学术论文',
+        authors: data.authors ? data.authors.split(',').map(a => a.trim()) : [data.firstAuthor || '未知'],
+        source: data.journal || '',
+        date: data.year ? `${data.year}年` : '',
+        downloads: '14.2 MB',
+        citations: 128,
+        reads: '2.4k',
+        pdfUrl: data.url || '',
+        previewImage: documentPage,
+        abstract: data.abstract || '',
+        keywords: data.keywords || [],
+      }
+    }
+  } catch (e) {
+    console.error('获取论文详情失败', e)
+  }
 })
 
 const closePage = () => {
@@ -54,7 +39,6 @@ const closePage = () => {
     router.back()
     return
   }
-
   router.push('/academic')
 }
 </script>

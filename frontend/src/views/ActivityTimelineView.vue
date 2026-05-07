@@ -244,8 +244,6 @@ const back = () => {
   aspect-ratio: 1;
 }
 
-/* 圆形点基于 SVG viewBox 坐标 (978 x 2188) 和 SVG 容器位置精确定位 */
-/* SVG 容器: top: 15.35%, left: 24.5%, width: 51%, height: 74% */
 .dot-one {
   top: calc(15.35% + 74% * (252 / 2188));
   left: calc(24.5% + 51% * (311 / 978));

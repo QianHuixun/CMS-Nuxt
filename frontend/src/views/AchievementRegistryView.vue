@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchPapers, fetchSoftwarePatents, fetchBooks, fetchProjects } from '@/api/index.js'
 
 const router = useRouter()
 
@@ -18,54 +19,11 @@ const currentSection = computed(() => {
 })
 
 const typeLabel = computed(() => {
-  const labels = {
-    papers: '软件著作权',
-    patents: '软件著作权',
-    books: '软件著作权',
-    topics: '软件著作权',
-  }
-
+  const labels = { papers: '软件著作权', patents: '软件著作权', books: '学术著作', topics: '获批课题' }
   return labels[currentKey.value]
 })
 
-const results = [
-  {
-    category: '软件著作权',
-    title: '出土医简文字自动识别与分析系统 V2.0',
-    number: '2024SR0129384',
-    owner: '王德明 教授',
-    date: '2024.03',
-  },
-  {
-    category: '发明专利',
-    title: '一种基于高光谱成像的简牍墨迹增强处理方法',
-    number: '2024SR0129384',
-    owner: '王德明 教授',
-    date: '2023.11',
-  },
-  {
-    category: '软件著作权',
-    title: '中医经脉穴位三维重建展示平台软件',
-    number: '2023SR0884210',
-    owner: '陈广元 副研究员',
-    date: '2023.08',
-  },
-  {
-    category: '发明专利',
-    title: '针灸铜人经络分布与测量校准装置',
-    number: 'ZL 2022 2 1582930.X',
-    owner: '赵中天 教授',
-    date: '2022.12',
-  },
-  {
-    category: '软件著作权',
-    title: '历代名医临证经方大数据检索库',
-    number: '2022SR0452109',
-    owner: '王德明 教授',
-    date: '2022.05',
-  },
-]
-
+const results = ref([])
 const chartBars = [
   { year: '2020', value: 34 },
   { year: '2021', value: 48 },
@@ -74,12 +32,58 @@ const chartBars = [
   { year: '2024(Q1)', value: 100, active: true },
 ]
 
+const loadData = async () => {
+  results.value = []
+  try {
+    if (currentKey.value === 'papers') {
+      const res = await fetchPapers({ pageNum: 1, pageSize: 10 })
+      results.value = (res.rows || []).map(p => ({
+        category: p.type || '论文',
+        title: p.title,
+        number: p.doi || '',
+        owner: p.firstAuthor || '',
+        date: p.year ? String(p.year) : '',
+      }))
+    } else if (currentKey.value === 'patents') {
+      const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 10 })
+      results.value = (res.rows || []).map(p => ({
+        category: p.type || '软著',
+        title: p.title,
+        number: p.registrationNo || '',
+        owner: p.owner || '',
+        date: p.year ? String(p.year) : '',
+      }))
+    } else if (currentKey.value === 'books') {
+      const res = await fetchBooks({ pageNum: 1, pageSize: 10 })
+      results.value = (res.rows || []).map(b => ({
+        category: '专著',
+        title: b.title,
+        number: b.isbn || '',
+        owner: b.author || '',
+        date: b.year ? String(b.year) : '',
+      }))
+    } else if (currentKey.value === 'topics') {
+      const res = await fetchProjects({ pageNum: 1, pageSize: 10 })
+      results.value = (res.rows || []).map(p => ({
+        category: p.type || '课题',
+        title: p.title,
+        number: '',
+        owner: p.leader || '',
+        date: p.startYear ? String(p.startYear) : '',
+      }))
+    }
+  } catch (e) {
+    console.error('加载成果列表失败', e)
+  }
+}
+
+onMounted(loadData)
+
 const goBack = () => {
   if (window.history.length > 1) {
     router.back()
     return
   }
-
   router.push('/academic')
 }
 </script>
@@ -98,7 +102,7 @@ const goBack = () => {
           :key="section.key"
           type="button"
           :class="['side-link', section.icon, { active: currentKey === section.key }]"
-          @click="currentKey = section.key"
+          @click="currentKey = section.key; loadData()"
         >
           <span aria-hidden="true"></span>
           {{ section.title }}
@@ -124,9 +128,9 @@ const goBack = () => {
         </div>
 
         <div class="result-list">
-          <article v-for="item in results" :key="`${currentKey}-${item.title}`" class="result-item">
+          <article v-for="item in results" :key="`${item.number}-${item.title}`" class="result-item">
             <div class="result-copy">
-              <span>{{ typeLabel || item.category }}</span>
+              <span>{{ item.category }}</span>
               <h2>{{ item.title }}</h2>
               <p>
                 登记号: {{ item.number }}
@@ -144,18 +148,18 @@ const goBack = () => {
         <section class="stats-card">
           <p>TOTAL SUBMISSIONS / 成果总数</p>
           <div class="total-count">
-            <strong>142</strong>
+            <strong>{{ results.length }}</strong>
             <span>项</span>
           </div>
 
           <dl class="stats-pair">
             <div>
-              <dt>软件著作权</dt>
-              <dd>86</dd>
+              <dt>{{ typeLabel }}</dt>
+              <dd>3</dd>
             </div>
             <div>
               <dt>发明专利</dt>
-              <dd>56</dd>
+              <dd>2</dd>
             </div>
           </dl>
 
@@ -166,7 +170,6 @@ const goBack = () => {
               :key="bar.year"
               class="bar-wrap"
             >
-              <span v-if="bar.active" class="bar-tip">26+</span>
               <i :class="{ active: bar.active }" :style="{ height: `${bar.value}%` }"></i>
               <em>{{ bar.year }}</em>
             </div>
@@ -609,15 +612,6 @@ const goBack = () => {
   font-style: normal;
 }
 
-.bar-tip {
-  position: absolute;
-  top: 6px;
-  right: 3px;
-  color: #842130;
-  font-size: 11px;
-  font-weight: 700;
-}
-
 .note-card {
   margin-top: 20px;
   min-height: 139px;
@@ -729,11 +723,6 @@ const goBack = () => {
 }
 
 @media (max-width: 620px) {
-  .brand {
-    font-size: 16px;
-    line-height: 1.5;
-  }
-
   .side-link {
     width: 100%;
   }

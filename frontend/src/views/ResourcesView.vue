@@ -1,7 +1,26 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchDatabases, fetchTools } from '@/api/index.js'
 
 const router = useRouter()
+const databases = ref([])
+const tools = ref([])
+
+onMounted(async () => {
+  try {
+    const dbRes = await fetchDatabases()
+    databases.value = dbRes.list || []
+  } catch (e) {
+    console.error('获取数据库列表失败', e)
+  }
+  try {
+    const toolRes = await fetchTools()
+    tools.value = toolRes.list || []
+  } catch (e) {
+    console.error('获取工具列表失败', e)
+  }
+})
 
 function goBack() {
   router.push('/home')
@@ -21,35 +40,16 @@ function goBack() {
             现有数据库集群
           </h3>
           <div class="database-group">
-            <div class="db-card db-card-tianhui">
+            <div
+              v-for="db in databases"
+              :key="db.id"
+              class="db-card"
+              :class="`db-card-${db.icon || 'default'}`"
+            >
               <div class="db-card-bg"></div>
               <div class="db-card-content">
-                <h4 class="db-card-title">《天回医简》数据库</h4>
-                <p class="db-card-desc">包含天回汉墓出土医简的高清原简照片、单字切分图像、释文文本及相关注释。</p>
-                <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
-              </div>
-            </div>
-            <div class="db-card db-card-wanjuan">
-              <div class="db-card-bg"></div>
-              <div class="db-card-content">
-                <h4 class="db-card-title">"万卷精华"数据库</h4>
-                <p class="db-card-desc">包含出土医学文献、出土医学文物、传世中医古籍、文史工具书四个子库的数据。</p>
-                <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
-              </div>
-            </div>
-            <div class="db-card db-card-bashu">
-              <div class="db-card-bg"></div>
-              <div class="db-card-content">
-                <h4 class="db-card-title">巴蜀古医籍数据库</h4>
-                <p class="db-card-desc">具有地域特色的古医籍扫描件及元数据，展现巴蜀医学像、释文文本及相关注释。</p>
-                <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
-              </div>
-            </div>
-            <div class="db-card db-card-vr">
-              <div class="db-card-bg"></div>
-              <div class="db-card-content">
-                <h4 class="db-card-title">博物馆VR展厅</h4>
-                <p class="db-card-desc">沉浸式实景VR全景图像，全方位在线观览出土医学文物陈列展。</p>
+                <h4 class="db-card-title">{{ db.title }}</h4>
+                <p class="db-card-desc">{{ db.info }}</p>
                 <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
               </div>
             </div>
@@ -61,18 +61,15 @@ function goBack() {
             <span class="group-bar"></span>
             自研数据分析软件
           </h3>
-          <div class="software-item">
+          <div
+            v-for="tool in tools"
+            :key="tool.id"
+            class="software-item"
+          >
             <div class="software-icon">❯</div>
             <div class="software-info">
-              <h4>出土文献实体标注工具</h4>
-              <p>Natural Language Processing</p>
-            </div>
-          </div>
-          <div class="software-item">
-            <div class="software-icon">✂</div>
-            <div class="software-info">
-              <h4>简帛自动切字软件</h4>
-              <p>Image Segmentation AI</p>
+              <h4>{{ tool.title }}</h4>
+              <p>{{ tool.description }}</p>
             </div>
           </div>
           <div class="tech-block">
@@ -184,19 +181,16 @@ function goBack() {
   background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 35%, rgba(255, 255, 255, 0.85) 65%, rgba(255, 255, 255, 0.7) 100%);
 }
 
-.db-card-tianhui .db-card-bg {
+.db-card-database .db-card-bg {
   background-image: url('@/assets/images/backgrounds/nav/tianhui-yijian-bg.svg');
 }
-
-.db-card-wanjuan .db-card-bg {
-  background-image: url('@/assets/images/backgrounds/nav/wanjuanhua-bg.svg');
-}
-
-.db-card-bashu .db-card-bg {
+.db-card-book .db-card-bg {
   background-image: url('@/assets/images/backgrounds/nav/bashu-guyiji-bg.svg');
 }
-
-.db-card-vr .db-card-bg {
+.db-card-scroll .db-card-bg {
+  background-image: url('@/assets/images/backgrounds/nav/wanjuanhua-bg.svg');
+}
+.db-card-default .db-card-bg {
   background-image: url('@/assets/images/backgrounds/nav/image 2.svg');
   background-position: right center;
 }
