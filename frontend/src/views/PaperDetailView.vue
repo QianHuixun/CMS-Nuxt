@@ -15,6 +15,19 @@ const normalizeList = (value, separator = ',') => {
   return []
 }
 
+const getAttachmentPdfUrl = (attachments) => {
+  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
+    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
+    const name = item?.name || ''
+    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
+  })
+  return file?.url || file?.fileUrl || file?.downloadUrl || ''
+}
+
+const getPdfUrl = (data) => {
+  return data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || getAttachmentPdfUrl(data?.attachments)
+}
+
 const paper = ref({
   title: '',
   category: '学术论文',
@@ -43,7 +56,7 @@ onMounted(async () => {
         downloads: '14.2 MB',
         citations: 128,
         reads: '2.4k',
-        pdfUrl: data.url || '',
+        pdfUrl: getPdfUrl(data),
         previewImage: documentPage,
         abstract: data.abstract || '',
         keywords: normalizeList(data.keywords || data.keywordsText || ''),

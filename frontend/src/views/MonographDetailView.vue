@@ -14,6 +14,19 @@ const normalizeList = (value, separator = ';') => {
   return []
 }
 
+const getAttachmentPdfUrl = (attachments) => {
+  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
+    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
+    const name = item?.name || ''
+    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
+  })
+  return file?.url || file?.fileUrl || file?.downloadUrl || ''
+}
+
+const getPdfUrl = (data) => {
+  return data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || getAttachmentPdfUrl(data?.attachments)
+}
+
 const monograph = ref({
   title: '',
   subtitle: '',
@@ -40,7 +53,7 @@ onMounted(async () => {
         date: data.year ? `${data.year}年` : '',
         edition: '第一版',
         isbn: data.isbn || '',
-        pdfUrl: '',
+        pdfUrl: getPdfUrl(data),
         abstract: data.description || '',
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '68 MB',
