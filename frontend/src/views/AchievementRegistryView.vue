@@ -33,6 +33,12 @@ const typeLabel = computed(() => {
   return labels[currentKey.value]
 })
 
+const detailRoute = (type, id) => {
+  if (!id) return ''
+  const routes = { papers: '/paper', patents: '/patent', books: '/monograph' }
+  return routes[type] ? `${routes[type]}/${id}` : ''
+}
+
 const results = ref([])
 const fallbackChartBars = [
   { year: '2020', value: 34 },
@@ -84,6 +90,8 @@ const loadData = async (key = currentKey.value) => {
     if (key === 'papers') {
       const res = await fetchPapers({ pageNum: 1, pageSize: 10 })
       nextResults = (res.rows || []).map(p => ({
+        id: p.id,
+        route: detailRoute(key, p.id),
         category: p.type || '论文',
         title: p.title,
         number: p.doi || '',
@@ -93,6 +101,8 @@ const loadData = async (key = currentKey.value) => {
     } else if (key === 'patents') {
       const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 10 })
       nextResults = (res.rows || []).map(p => ({
+        id: p.id,
+        route: detailRoute(key, p.id),
         category: p.type || '软著',
         title: p.title,
         number: p.registrationNo || '',
@@ -102,6 +112,8 @@ const loadData = async (key = currentKey.value) => {
     } else if (key === 'books') {
       const res = await fetchBooks({ pageNum: 1, pageSize: 10 })
       nextResults = (res.rows || []).map(b => ({
+        id: b.id,
+        route: detailRoute(key, b.id),
         category: '专著',
         title: b.title,
         number: b.isbn || '',
@@ -111,6 +123,8 @@ const loadData = async (key = currentKey.value) => {
     } else if (key === 'topics') {
       const res = await fetchProjects({ pageNum: 1, pageSize: 10 })
       nextResults = (res.rows || []).map(p => ({
+        id: p.id,
+        route: detailRoute(key, p.id),
         category: p.type || '课题',
         title: p.title,
         number: '',
@@ -177,7 +191,13 @@ const goBack = () => {
         </div>
 
         <div class="result-list">
-          <article v-for="item in results" :key="`${item.number}-${item.title}`" class="result-item">
+          <component
+            :is="item.route ? 'router-link' : 'article'"
+            v-for="item in results"
+            :key="`${item.number}-${item.title}`"
+            class="result-item"
+            :to="item.route || undefined"
+          >
             <div class="result-copy">
               <span>{{ item.category }}</span>
               <h2>{{ item.title }}</h2>
@@ -188,7 +208,7 @@ const goBack = () => {
               </p>
             </div>
             <time>{{ item.date }}<small>PUBLICATION DATE</small></time>
-          </article>
+          </component>
         </div>
       </section>
 
@@ -492,6 +512,8 @@ const goBack = () => {
   align-items: center;
   border-left: 4px solid rgba(132, 33, 48, 0.18);
   background-color: rgba(255, 253, 250, 0.82);
+  color: inherit;
+  text-decoration: none;
 }
 
 .result-copy span {
