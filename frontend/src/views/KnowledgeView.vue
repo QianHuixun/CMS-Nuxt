@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchKnowledgeGraph } from '@/api/index.js'
 
 const router = useRouter()
 
@@ -20,6 +21,7 @@ const medicines = ref([
 ])
 
 const causes = ref(['风热犯肺', '营分热炽', '营分热炽'])
+const totalCount = ref('12,842')
 
 const SIZE_RADIUS = {
   'size-xl': 10,
@@ -147,6 +149,22 @@ const detail = ref({
   ]
 })
 
+onMounted(async () => {
+  try {
+    const data = await fetchKnowledgeGraph()
+    symptoms.value = data.symptoms || symptoms.value
+    medicines.value = data.medicines || medicines.value
+    causes.value = data.causes || causes.value
+    totalCount.value = data.totalCount || totalCount.value
+    if (data.nodes?.length) {
+      allNodes.value = generatePositions(data.nodes)
+    }
+    detail.value = data.detail || detail.value
+  } catch (e) {
+    console.error(e)
+  }
+})
+
 function goHome() {
   router.push('/home')
 }
@@ -204,7 +222,7 @@ function goHome() {
           </div>
 
           <!-- 关联实体总量 -->
-          <div class="total-count">12,842</div>
+          <div class="total-count">{{ totalCount }}</div>
           <div class="total-desc">关联实体总量</div>
         </div>
         <span class="column-spacer"></span>

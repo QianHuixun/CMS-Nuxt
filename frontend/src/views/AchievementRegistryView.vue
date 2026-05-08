@@ -1,7 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchPapers, fetchSoftwarePatents, fetchBooks, fetchProjects } from '@/api/index.js'
+import {
+  fetchBookStats,
+  fetchBooks,
+  fetchPapers,
+  fetchPaperStats,
+  fetchProjectStats,
+  fetchProjects,
+  fetchSoftwarePatentStats,
+  fetchSoftwarePatents
+} from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
 
@@ -24,13 +34,46 @@ const typeLabel = computed(() => {
 })
 
 const results = ref([])
-const chartBars = [
+const fallbackChartBars = [
   { year: '2020', value: 34 },
   { year: '2021', value: 48 },
   { year: '2022', value: 62 },
   { year: '2023', value: 78 },
   { year: '2024(Q1)', value: 100, active: true },
 ]
+const stats = ref({ total: 0, byType: {}, byYear: [] })
+
+const chartBars = computed(() => {
+  const rows = stats.value.byYear || []
+  if (!rows.length) return fallbackChartBars
+  const max = Math.max(...rows.map(item => item.count || 0), 1)
+  return rows.map(item => ({
+    year: String(item.year),
+    value: Math.max(8, Math.round(((item.count || 0) / max) * 100)),
+    active: item.count === max
+  }))
+})
+
+const statsPairs = computed(() => {
+  const entries = Object.entries(stats.value.byType || {})
+  if (entries.length) return entries.slice(0, 2).map(([label, value]) => ({ label, value }))
+  return [
+    { label: typeLabel.value, value: results.value.length },
+    { label: '总数', value: stats.value.total || results.value.length }
+  ]
+})
+
+const loadStats = async () => {
+  try {
+    if (currentKey.value === 'papers') stats.value = await fetchPaperStats()
+    else if (currentKey.value === 'patents') stats.value = await fetchSoftwarePatentStats()
+    else if (currentKey.value === 'books') stats.value = await fetchBookStats()
+    else if (currentKey.value === 'topics') stats.value = await fetchProjectStats()
+  } catch (e) {
+    console.error('加载成果统计失败', e)
+    stats.value = { total: results.value.length, byType: {}, byYear: [] }
+  }
+}
 
 const loadData = async () => {
   results.value = []
@@ -75,16 +118,13 @@ const loadData = async () => {
   } catch (e) {
     console.error('加载成果列表失败', e)
   }
+  await loadStats()
 }
 
 onMounted(loadData)
 
 const goBack = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 
@@ -148,18 +188,14 @@ const goBack = () => {
         <section class="stats-card">
           <p>TOTAL SUBMISSIONS / 成果总数</p>
           <div class="total-count">
-            <strong>{{ results.length }}</strong>
+            <strong>{{ stats.total || results.length }}</strong>
             <span>项</span>
           </div>
 
           <dl class="stats-pair">
-            <div>
-              <dt>{{ typeLabel }}</dt>
-              <dd>3</dd>
-            </div>
-            <div>
-              <dt>发明专利</dt>
-              <dd>2</dd>
+            <div v-for="pair in statsPairs" :key="pair.label">
+              <dt>{{ pair.label }}</dt>
+              <dd>{{ pair.value }}</dd>
             </div>
           </dl>
 

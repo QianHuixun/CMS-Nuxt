@@ -1,15 +1,35 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { fetchPapers, fetchSoftwarePatents, fetchActivities } from '@/api/index.js'
+import { useRouter } from 'vue-router'
+import { fetchActivityPhotos, fetchActivities, fetchBooks, fetchPapers, fetchSoftwarePatents } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
+const router = useRouter()
 const papers = ref([])
 const patents = ref([])
 const activities = ref([])
+const books = ref([])
+const activityPhotos = ref([])
+
+const formatDate = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}年${month}月${day}日`
+}
+
+const goBack = () => {
+  safeBack(router, '/academic')
+}
 
 onMounted(async () => {
   try {
     const res = await fetchPapers({ pageNum: 1, pageSize: 8 })
     papers.value = (res.rows || []).map(p => ({
+      id: p.id,
       journal: p.journal || '',
       title: p.title,
       date: p.year ? `${p.year}年` : '',
@@ -17,6 +37,12 @@ onMounted(async () => {
     }))
   } catch (e) {
     console.error('获取论文列表失败', e)
+  }
+  try {
+    const res = await fetchBooks({ pageNum: 1, pageSize: 1 })
+    books.value = res.rows || []
+  } catch (e) {
+    console.error('获取著作列表失败', e)
   }
   try {
     const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 6 })
@@ -28,10 +54,16 @@ onMounted(async () => {
     console.error('获取软著专利列表失败', e)
   }
   try {
+    const res = await fetchActivityPhotos({ pageNum: 1, pageSize: 2 })
+    activityPhotos.value = res.rows || []
+  } catch (e) {
+    console.error('获取活动剪影失败', e)
+  }
+  try {
     const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
     activities.value = (res.rows || []).map(a => ({
       title: a.title,
-      date: a.time ? new Date(a.time).toISOString().slice(0, 10).replace(/-/g, '年').replace(/-/, '月') + '日' : '',
+      date: formatDate(a.time),
     }))
   } catch (e) {
     console.error('获取活动列表失败', e)
@@ -58,7 +90,7 @@ onMounted(async () => {
             v-for="paper in papers"
             :key="`${paper.journal}-${paper.title}-${paper.date}`"
             class="paper-item"
-            to="/paper/meridian-bioelectric"
+            :to="`/paper/${paper.id}`"
           >
             <div>
               <span class="journal">{{ paper.journal }}</span>
@@ -80,11 +112,11 @@ onMounted(async () => {
 
         <div class="book-content">
           <div class="book-copy">
-            <h3>《出土医学文献叙录》</h3>
-            <p>出土医学文献分析书目，2024 年大学出版社。</p>
-            <button type="button">阅读提要</button>
+            <h3>《{{ books[0]?.title || '出土医学文献叙录' }}》</h3>
+            <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年 {{ books[0]?.publisher || '大学出版社' }}。</p>
+            <router-link class="book-action" :to="`/monograph/${books[0]?.id || ''}`">阅读提要</router-link>
           </div>
-          <div class="book-cover" aria-label="出土医学文献叙录封面">
+          <div class="book-cover" :aria-label="`${books[0]?.title || '出土医学文献叙录'}封面`">
             <div class="book-calligraphy">医<br>简</div>
           </div>
         </div>
@@ -114,11 +146,12 @@ onMounted(async () => {
 
         <div class="gallery-layout">
           <div class="gallery-list">
-            <figure class="gallery-card meeting-card">
-              <figcaption>2024 青年学者圆桌会</figcaption>
-            </figure>
-            <figure class="gallery-card lab-card">
-              <figcaption>实验室开放日</figcaption>
+            <figure
+              v-for="(photo, index) in activityPhotos"
+              :key="photo.id"
+              :class="['gallery-card', index === 0 ? 'meeting-card' : 'lab-card']"
+            >
+              <figcaption>{{ photo.title }}</figcaption>
             </figure>
           </div>
 
@@ -141,7 +174,7 @@ onMounted(async () => {
     </section>
 
     <div class="page-actions">
-      <button type="button" class="plain-button" @click="$router.back()">返回上一页</button>
+      <button type="button" class="plain-button" @click="goBack">返回上一页</button>
       <router-link class="home-button" to="/home">返回首页</router-link>
     </div>
   </main>
@@ -355,14 +388,18 @@ onMounted(async () => {
   line-height: 1.8;
 }
 
-.book-copy button {
+.book-copy button,
+.book-action {
   margin-top: 58px;
   padding: 10px 18px;
+  display: inline-flex;
   border: 0;
   background-color: var(--color-primary);
   color: #fff;
   font-family: inherit;
   font-size: 13px;
+  line-height: 1.4;
+  text-decoration: none;
   cursor: pointer;
 }
 

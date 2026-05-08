@@ -3,10 +3,22 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
 import { fetchSoftwarePatentDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
-const patent = ref(null)
+const patent = ref({
+  title: '',
+  subtitle: '',
+  source: '',
+  inventors: [],
+  date: '',
+  patentNo: '',
+  pdfUrl: '',
+  abstract: '',
+  keywords: [],
+  downloads: '',
+})
 
 onMounted(async () => {
   try {
@@ -31,11 +43,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 

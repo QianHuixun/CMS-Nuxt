@@ -1,35 +1,52 @@
 <script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import heroImage from '@/assets/images/pages/activity/hero-image-176857.png'
 import largeImage from '@/assets/images/pages/activity/large-image-50daff.png'
 import sideImageOne from '@/assets/images/pages/activity/side-image-1-56586a.png'
 import sideImageTwo from '@/assets/images/pages/activity/side-image-2-56586a.png'
+import { fetchActivityDetail } from '@/api/index.js'
 
-const galleryImages = [
+const route = useRoute()
+const fallbackGalleryImages = [
   sideImageOne,
   sideImageTwo,
 ]
+const activity = ref(null)
+
+const pageTitle = computed(() => activity.value?.name || activity.value?.title || '出土医学文献数字化保护专题研讨')
+const pageSummary = computed(() => activity.value?.summary || '围绕出土医学文献整理、影像采集、知识标注与数字化保护流程，项目团队展示了最新阶段成果，并与考古、医学史、数字人文方向的研究者展开交流。')
+const heroSrc = computed(() => activity.value?.coverImage || heroImage)
+const featureSrc = computed(() => activity.value?.gallery?.[0] || largeImage)
+const galleryImages = computed(() => activity.value?.gallery?.slice(1, 3) || fallbackGalleryImages)
+
+onMounted(async () => {
+  try {
+    activity.value = await fetchActivityDetail(route.params.id || 'activity_001')
+  } catch (e) {
+    console.error(e)
+  }
+})
 </script>
 
 <template>
   <main class="activity-page">
     <section class="activity-hero">
-      <img :src="heroImage" alt="学术活动现场">
+      <img :src="heroSrc" alt="学术活动现场">
       <div class="hero-copy">
         <p>活动剪影</p>
-        <h1>出土医学文献数字化保护专题研讨</h1>
+        <h1>{{ pageTitle }}</h1>
       </div>
     </section>
 
     <section class="activity-content">
       <article class="feature-image">
-        <img :src="largeImage" alt="研讨会交流场景">
+        <img :src="featureSrc" alt="研讨会交流场景">
       </article>
 
       <div class="activity-copy">
         <h2>跨学科协作现场</h2>
-        <p>
-          围绕出土医学文献整理、影像采集、知识标注与数字化保护流程，项目团队展示了最新阶段成果，并与考古、医学史、数字人文方向的研究者展开交流。
-        </p>
+        <p>{{ pageSummary }}</p>
         <router-link to="/academic">返回资源动态</router-link>
       </div>
 

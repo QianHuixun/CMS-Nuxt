@@ -3,10 +3,23 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
 import { fetchBookDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
-const monograph = ref(null)
+const monograph = ref({
+  title: '',
+  subtitle: '',
+  source: '',
+  authors: [],
+  date: '',
+  edition: '',
+  isbn: '',
+  pdfUrl: '',
+  abstract: '',
+  keywords: [],
+  downloads: '',
+})
 
 onMounted(async () => {
   try {
@@ -32,11 +45,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 

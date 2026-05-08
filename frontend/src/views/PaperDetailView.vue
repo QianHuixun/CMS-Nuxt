@@ -4,11 +4,25 @@ import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchPaperDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
-const paper = ref(null)
+const paper = ref({
+  title: '',
+  category: '学术论文',
+  authors: [],
+  source: '',
+  date: '',
+  downloads: '',
+  citations: 0,
+  reads: '',
+  pdfUrl: '',
+  previewImage: documentPage,
+  abstract: '',
+  keywords: [],
+})
 
 onMounted(async () => {
   try {
@@ -35,11 +49,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 

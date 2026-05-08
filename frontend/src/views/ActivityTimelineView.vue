@@ -1,9 +1,18 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchActivityTimeline } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
 
-const eventCards = [
+const pageInfo = ref({
+  eyebrow: 'Chronicles of Excellence',
+  title: '活动足迹·时光影卷',
+  description: '穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。\n每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。'
+})
+
+const eventCards = ref([
   {
     className: 'event-card-primary',
     title: '科普影响力',
@@ -22,22 +31,32 @@ const eventCards = [
       { value: '8组', label: '协作团队' },
     ],
   },
-]
+])
 
-const timelineDots = [
+const timelineDots = ref([
   { className: 'dot-large dot-one' },
   { className: 'dot-medium dot-two' },
   { className: 'dot-large dot-three' },
   { className: 'dot-small dot-four' },
-]
+])
+
+onMounted(async () => {
+  try {
+    const data = await fetchActivityTimeline()
+    pageInfo.value = {
+      eyebrow: data.eyebrow || pageInfo.value.eyebrow,
+      title: data.title || pageInfo.value.title,
+      description: data.description || pageInfo.value.description
+    }
+    eventCards.value = data.eventCards || eventCards.value
+    timelineDots.value = data.timelineDots || timelineDots.value
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 const back = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 
@@ -45,11 +64,12 @@ const back = () => {
   <main class="chronicle-page">
     <section class="timeline-canvas" aria-labelledby="timeline-title">
       <section class="hero-copy">
-        <p>Chronicles of Excellence</p>
-        <h1 id="timeline-title">活动足迹·时光影卷</h1>
+        <p>{{ pageInfo.eyebrow }}</p>
+        <h1 id="timeline-title">{{ pageInfo.title }}</h1>
         <div class="hero-description">
-          穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。<br>
-          每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。
+          <template v-for="line in pageInfo.description.split('\n')" :key="line">
+            {{ line }}<br>
+          </template>
         </div>
         <div class="scroll-hint">
           <span>SCROLL TO EXPLORE</span>
