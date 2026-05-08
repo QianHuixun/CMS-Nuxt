@@ -12,26 +12,29 @@
       </p>
 
       <div class="cards">
-        <div class="card">
+        <router-link to="/resources" class="card">
           <img src="@/assets/icons/home/Group 1.svg" alt="资源导航" class="card-icon" />
           <h3 class="card-title">资源导航</h3>
           <p class="card-desc">整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。</p>
-          <router-link to="/resources" class="card-btn">进入导航</router-link>
-        </div>
+          <span class="card-btn">进入导航</span>
+          <img src="@/assets/images/backgrounds/home/card-resource.svg" alt="" class="card-decor card-decor-shift" />
+        </router-link>
 
-        <div class="card">
+        <router-link to="/knowledge" class="card">
           <img src="@/assets/icons/home/Union2.svg" alt="知识图谱" class="card-icon" />
           <h3 class="card-title">知识图谱</h3>
           <p class="card-desc">基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。</p>
-          <router-link to="/knowledge" class="card-btn">开启探索</router-link>
-        </div>
+          <span class="card-btn">开启探索</span>
+          <img src="@/assets/images/backgrounds/home/card-academic.svg" alt="" class="card-decor" />
+        </router-link>
 
-        <div class="card">
+        <router-link to="/academic" class="card">
           <img src="@/assets/icons/home/Union3.svg" alt="学术动态" class="card-icon" />
           <h3 class="card-title">学术动态</h3>
           <p class="card-desc">发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。</p>
-          <router-link to="/academic" class="card-btn">查看详情</router-link>
-        </div>
+          <span class="card-btn">查看详情</span>
+          <img src="@/assets/images/backgrounds/home/card-knowledge.svg" alt="" class="card-decor" />
+        </router-link>
       </div>
     </div>
   </div>
@@ -41,9 +44,9 @@
 .home-page {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: calc(100vh - 53px);
   text-align: center;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .bg-layer {
@@ -63,7 +66,7 @@
   z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 120px 40px 80px;
+  padding: 40px 40px 0;
 }
 
 .sub-english {
@@ -111,6 +114,8 @@
 }
 
 .card {
+  position: relative;
+  display: block;
   background-color: #fff;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
@@ -118,6 +123,8 @@
   width: 300px;
   padding: 40px 24px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
   transition: var(--transition-fast);
 }
 
@@ -166,5 +173,28 @@
 .card-btn::after {
   content: "→";
   font-size: 10px;
+}
+
+.card-decor {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 75%;
+  width: auto;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-icon,
+.card-title,
+.card-desc,
+.card-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.card-decor-shift {
+  transform: translateX(50%);
 }
 </style>

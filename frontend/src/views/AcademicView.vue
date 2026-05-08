@@ -149,7 +149,7 @@ function goExpert(id) {
 .academic-page {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 53px);
   overflow: hidden;
   background-color: var(--bg-page);
   background-image:
@@ -165,7 +165,7 @@ function goExpert(id) {
   grid-template-columns: 30% 40% 30%;
   gap: 20px;
   align-items: flex-start;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 53px - 104px);
 }
 
 .team-section {
