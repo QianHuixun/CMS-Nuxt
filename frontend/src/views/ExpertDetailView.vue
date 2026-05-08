@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { fetchTalentDetail } from '@/api/index.js'
 import arrowIcon from '@/assets/images/pages/expert-detail/arrow-icon.svg'
 import backIcon from '@/assets/images/pages/expert-detail/back-icon.svg'
 import cardImageOne from '@/assets/images/pages/expert-detail/card-image-1-3d674a.png'
@@ -19,173 +20,83 @@ const dragStartX = ref(0)
 const dragOffsetX = ref(0)
 const isDraggingStrip = ref(false)
 const suppressStripClick = ref(false)
-const wasRealDrag = ref(false)  // 记录是否发生了实际拖动（移动 > 10px）
+const wasRealDrag = ref(false)
 let wheelLock = false
 let connectorResizeObserver
 
-const experts = [
-  {
-    id: 'chen-wei',
-    name: '陈伟',
-    degree: '博士',
-    title: '首席研究员',
-    subtitle: '博士生导师',
-    photo: expertPhoto,
-    focus: '出土医简保护',
-    bio: '陈伟博士是将古代医学文献与现代计算诊断相结合的权威专家。他三十年的职业生涯致力于天回医简的保护工作，将失传的经脉转化为数字模型。他的工作在传统经验智慧与现代科学验证之间架起了一座桥梁，确保了中医珍贵遗产在数字时代的传承与演进。',
-    publications: [
-      { number: '01', title: '《天回医简研究》专题论丛' },
-      { number: '02', title: '《汉代医学文献编年》学术专著' },
-      { number: '03', title: '多光谱技术在出土竹木简牍中的应用研究' },
-      { number: '04', title: '古代经脉文献数字模型构建方法' },
-      { number: '05', title: '天回医简保护修复技术报告' },
-      { number: '06', title: '出土医学文献知识标注规范' },
-    ],
-  },
-  {
-    id: 'lin-yue',
-    name: '林悦',
-    degree: '博士',
-    title: '图像计算专家',
-    subtitle: '副研究员',
-    photo: cardImageOne,
-    focus: '多光谱影像',
-    bio: '林悦博士长期从事简牍多光谱采集与低对比度字迹增强研究，负责实验室影像采集流程、图像质量评估和残损文字复原模型建设。',
-    publications: [
-      { number: '01', title: '多光谱影像在竹木简牍识读中的应用' },
-      { number: '02', title: '低对比度墨迹增强算法评估' },
-      { number: '03', title: '出土文献影像采集质量控制规范' },
-      { number: '04', title: '残损医简文字复原实验报告' },
-    ],
-  },
-  {
-    id: 'zhou-ming',
-    name: '周明',
-    degree: '博士',
-    title: '医学史研究员',
-    subtitle: '教授',
-    photo: cardImageTwo,
-    focus: '汉代医学史',
-    bio: '周明教授关注汉代医学知识体系、方剂谱系和医籍流传路径，参与多批出土医学文献的释读、编年和术语考证工作。',
-    publications: [
-      { number: '01', title: '汉代医学文献编年与术语演变' },
-      { number: '02', title: '出土方剂文本的知识谱系研究' },
-      { number: '03', title: '早期医籍流传路径考辨' },
-      { number: '04', title: '简帛医学术语校释札记' },
-    ],
-  },
-  {
-    id: 'xu-qing',
-    name: '徐青',
-    degree: '博士',
-    title: '知识工程专家',
-    subtitle: '研究员',
-    photo: expertPhoto,
-    focus: '知识图谱',
-    bio: '徐青博士负责中医药古籍实体抽取、关系建模与知识图谱平台建设，将文献、文物、方剂和疾病概念纳入可检索的结构化网络。',
-    publications: [
-      { number: '01', title: '出土医学文献实体识别体系研究' },
-      { number: '02', title: '面向古医籍的知识图谱建模方法' },
-      { number: '03', title: '方剂、药物与病证关系抽取实验' },
-      { number: '04', title: '医学文献数字平台语义检索设计' },
-    ],
-  },
-  {
-    id: 'he-ran',
-    name: '何然',
-    degree: '博士',
-    title: '文物保护专家',
-    subtitle: '研究馆员',
-    photo: cardImageOne,
-    focus: '文物保护',
-    bio: '何然博士专注出土竹木简牍稳定化处理、保存环境评估和数字化前置保护，推动文物保护流程与数字采集流程协同。',
-    publications: [
-      { number: '01', title: '竹木简牍保存环境风险评估' },
-      { number: '02', title: '出土医学文物数字化前置保护流程' },
-      { number: '03', title: '简牍材料病害识别与记录规范' },
-      { number: '04', title: '文物保护数据集成平台建设实践' },
-    ],
-  },
-  {
-    id: 'wan-li',
-    name: '万理',
-    degree: '博士',
-    title: '数据治理专家',
-    subtitle: '副教授',
-    photo: cardImageTwo,
-    focus: '数据标准',
-    bio: '万理博士负责多源医学文献数据清洗、版本管理和元数据标准设计，推动实验室数据从采集、标注到发布的全流程治理。',
-    publications: [
-      { number: '01', title: '出土医学文献元数据标准研究' },
-      { number: '02', title: '多源文献数据质量评估模型' },
-      { number: '03', title: '数字实验室数据治理流程设计' },
-      { number: '04', title: '医学文献版本管理与溯源机制' },
-    ],
-  },
-  {
-    id: 'zhao-ning',
-    name: '赵宁',
-    degree: '博士',
-    title: '语义检索专家',
-    subtitle: '研究员',
-    photo: expertPhoto,
-    focus: '智能检索',
-    bio: '赵宁博士从事古医籍语义检索、跨文献问答和研究辅助系统设计，让复杂的出土医学资料能够被更自然地发现、比较和引用。',
-    publications: [
-      { number: '01', title: '古医籍语义检索系统设计' },
-      { number: '02', title: '跨文献证据链组织方法' },
-      { number: '03', title: '面向医学史研究的问答模型评估' },
-      { number: '04', title: '出土文献智能检索交互研究' },
-    ],
-  },
-]
+const experts = ref([
+  { id: 'chen-wei', name: '陈伟', degree: '博士', title: '首席研究员', subtitle: '博士生导师', photo: expertPhoto, focus: '出土医简保护', bio: '' },
+  { id: 'lin-yue', name: '林悦', degree: '博士', title: '图像计算专家', subtitle: '副研究员', photo: cardImageOne, focus: '多光谱影像', bio: '' },
+  { id: 'zhou-ming', name: '周明', degree: '博士', title: '医学史研究员', subtitle: '教授', photo: cardImageTwo, focus: '汉代医学史', bio: '' },
+  { id: 'xu-qing', name: '徐青', degree: '博士', title: '知识工程专家', subtitle: '研究员', photo: expertPhoto, focus: '知识图谱', bio: '' },
+  { id: 'he-ran', name: '何然', degree: '博士', title: '文物保护专家', subtitle: '研究馆员', photo: cardImageOne, focus: '文物保护', bio: '' },
+  { id: 'wan-li', name: '万理', degree: '博士', title: '数据治理专家', subtitle: '副教授', photo: cardImageTwo, focus: '数据标准', bio: '' },
+  { id: 'zhao-ning', name: '赵宁', degree: '博士', title: '语义检索专家', subtitle: '研究员', photo: expertPhoto, focus: '智能检索', bio: '' },
+])
+
+const publications = ref([])
+
+const loadExpert = async (id) => {
+  try {
+    const numericId = Number(id)
+    const data = await fetchTalentDetail(numericId)
+    if (data) {
+      const idx = experts.value.findIndex(e => e.id === route.params.id)
+      if (idx >= 0) {
+        experts.value[idx].bio = data.bio || ''
+      }
+      publications.value = (data.achievements || []).map((a, i) => ({
+        number: String(i + 1).padStart(2, '0'),
+        title: a.title,
+        type: a.type,
+        id: a.id,
+      }))
+    }
+  } catch (e) {
+    console.error('获取人才详情失败', e)
+  }
+}
+
+onMounted(() => {
+  if (route.params.id) {
+    loadExpert(route.params.id)
+  }
+})
+
+watch(() => route.params.id, (newId) => {
+  if (newId) loadExpert(newId)
+})
 
 const currentExpert = computed(() => {
-  return experts.find((expert) => expert.id === route.params.id) ?? experts[0]
+  return experts.value.find((expert) => expert.id === route.params.id) ?? experts.value[0]
 })
 
 const currentExpertIndex = computed(() => {
-  const index = experts.findIndex((expert) => expert.id === currentExpert.value.id)
+  const index = experts.value.findIndex((expert) => expert.id === currentExpert.value.id)
   return index === -1 ? 0 : index
 })
 
-const getPublicationRoute = (publication, index) => {
-  if (publication.type === 'monograph' || publication.title.includes('专著') || publication.title.includes('编年')) {
-    return '/monograph/mono-001'
-  }
-
-  if (publication.type === 'patent' || publication.title.includes('专利') || publication.title.includes('装置')) {
-    return '/patent/patent-001'
-  }
-
-  return index === 0 ? '/paper/tianhui-medical-slip' : '/paper/meridian-bioelectric'
+const getPublicationRoute = (publication) => {
+  if (publication.type === 'book') return `/monograph/${publication.id}`
+  if (publication.type === 'paper') return `/paper/${publication.id}`
+  return '#'
 }
 
 const normalizeOffset = (index) => {
-  const half = Math.floor(experts.length / 2)
+  const half = Math.floor(experts.value.length / 2)
   let offset = index - currentExpertIndex.value
-
-  if (offset > half) offset -= experts.length
-  if (offset < -half) offset += experts.length
+  if (offset > half) offset -= experts.value.length
+  if (offset < -half) offset += experts.value.length
   return offset
 }
 
 const getOffsetX = (offset) => {
-  const positions = {
-    '-3': -760,
-    '-2': -520,
-    '-1': -315,
-    0: 0,
-    1: 315,
-    2: 520,
-    3: 760,
-  }
-
+  const positions = { '-3': -760, '-2': -520, '-1': -315, 0: 0, 1: 315, 2: 520, 3: 760 }
   return positions[offset] ?? offset * 260
 }
 
 const stripExperts = computed(() => {
-  return experts.map((expert, index) => {
+  return experts.value.map((expert, index) => {
     const offset = normalizeOffset(index)
     const distance = Math.abs(offset)
     return {
@@ -207,13 +118,11 @@ const getStripCardClass = (distance) => {
   return 'is-far'
 }
 
-const isCurrentStripCard = (item) => {
-  return item.offset === 0
-}
+const isCurrentStripCard = (item) => item.offset === 0
 
 const goToExpertByIndex = (index) => {
-  const nextIndex = (index + experts.length) % experts.length
-  router.push(`/expert/${experts[nextIndex].id}`)
+  const nextIndex = (index + experts.value.length) % experts.value.length
+  router.push(`/expert/${experts.value[nextIndex].id}`)
 }
 
 const goToAdjacentExpert = (direction) => {
@@ -222,93 +131,73 @@ const goToAdjacentExpert = (direction) => {
 
 const handleStripWheel = (event) => {
   const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
-
   if (Math.abs(delta) < 18 || wheelLock) return
-
   event.preventDefault()
   wheelLock = true
   goToAdjacentExpert(delta > 0 ? 1 : -1)
-  window.setTimeout(() => {
-    wheelLock = false
-  }, 560)
+  window.setTimeout(() => { wheelLock = false }, 560)
 }
 
 const handleStripPointerDown = (event) => {
   isDraggingStrip.value = true
   dragStartX.value = event.clientX
   dragOffsetX.value = 0
-  wasRealDrag.value = false  // 每次新的交互开始时重置
+  wasRealDrag.value = false
 }
 
 const handleStripPointerMove = (event) => {
   if (!isDraggingStrip.value) return
   const newOffset = event.clientX - dragStartX.value
-  // 只有移动超过 10px 才更新 dragOffset，避免手抖误判为拖动
   if (Math.abs(newOffset) > 10) {
     dragOffsetX.value = Math.max(-140, Math.min(140, newOffset))
-    wasRealDrag.value = true  // 标记为实际拖动
+    wasRealDrag.value = true
   }
 }
 
 const finishStripDrag = () => {
   if (!isDraggingStrip.value) return
-
   const distance = dragOffsetX.value
   isDraggingStrip.value = false
   dragOffsetX.value = 0
-
-  // 如果发生了实际拖动且距离足够大，触发滑动切换
   if (wasRealDrag.value && Math.abs(distance) > 70) {
     suppressStripClick.value = true
     goToAdjacentExpert(distance < 0 ? 1 : -1)
-    window.setTimeout(() => {
-      suppressStripClick.value = false
-    }, 0)
+    window.setTimeout(() => { suppressStripClick.value = false }, 0)
   }
 }
 
 const handleStripCardClick = (item, event) => {
-  // 如果发生了实际拖动，阻止点击（让滑动切换生效）
   if (wasRealDrag.value) {
     event.preventDefault()
     event.stopPropagation()
     return
   }
-  
-  // 点击当前专家卡片时，阻止导航（没有意义）
   if (item.expert.id === currentExpert.value.id) {
     event.preventDefault()
     return
   }
-  
-  // 其他情况：让 router-link 正常导航，不做任何处理
 }
 
 const updateConnectorPaths = () => {
   const panelEl = profilePanel.value
   const svgEl = connectorSvg.value
   const listEl = publicationList.value
-
   if (!panelEl || !svgEl || !listEl) {
     connectorPaths.value = []
     return
   }
-
   const svgRect = svgEl.getBoundingClientRect()
   const listRect = listEl.getBoundingClientRect()
   const itemEls = [...listEl.querySelectorAll('.publication-item')]
-
   if (!svgRect.width || !svgRect.height || !itemEls.length) {
     connectorPaths.value = []
     return
   }
-
   const startX = 0
   const startY = svgRect.height / 2
   const endX = svgRect.width
   const listLeftInSvg = listRect.left - svgRect.left
   const targetX = Math.min(endX, Math.max(startX, listLeftInSvg))
-
   connectorPaths.value = itemEls.map((itemEl) => {
     const itemRect = itemEl.getBoundingClientRect()
     const targetY = itemRect.top + itemRect.height / 2 - svgRect.top
@@ -337,7 +226,7 @@ onBeforeUnmount(() => {
 })
 
 watch(() => route.params.id, syncLayout)
-watch(() => currentExpert.value.publications.length, () => nextTick(updateConnectorPaths))
+watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 </script>
 
 <template>
@@ -359,7 +248,7 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
               <p>{{ currentExpert.title }}<br>{{ currentExpert.subtitle }}</p>
             </div>
 
-            <p class="bio">{{ currentExpert.bio }}</p>
+            <p class="bio">{{ currentExpert.bio || '暂无简介' }}</p>
           </div>
         </section>
 
@@ -373,10 +262,10 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
 
         <section ref="publicationList" class="publication-list" aria-label="专家成果">
           <router-link
-            v-for="(publication, index) in currentExpert.publications"
+            v-for="(publication, index) in publications"
             :key="`${currentExpert.id}-${index}`"
             class="publication-item"
-            :to="getPublicationRoute(publication, index)"
+            :to="getPublicationRoute(publication)"
           >
             <div class="publication-copy">
               <span>{{ publication.number }}</span>
@@ -398,14 +287,14 @@ watch(() => currentExpert.value.publications.length, () => nextTick(updateConnec
           @pointerleave="finishStripDrag"
         >
           <router-link
-          v-for="item in stripExperts"
-          :key="item.expert.id"
-          :to="`/expert/${item.expert.id}`"
-          :class="['expert-card', getStripCardClass(item.distance), { 'is-dragging': isDraggingStrip }]"
-          :style="item.style"
-          :aria-current="isCurrentStripCard(item) ? 'page' : undefined"
-          :data-current="isCurrentStripCard(item) ? 'true' : undefined"
-          @click="handleStripCardClick(item, $event)"
+            v-for="item in stripExperts"
+            :key="item.expert.id"
+            :to="`/expert/${item.expert.id}`"
+            :class="['expert-card', getStripCardClass(item.distance), { 'is-dragging': isDraggingStrip }]"
+            :style="item.style"
+            :aria-current="isCurrentStripCard(item) ? 'page' : undefined"
+            :data-current="isCurrentStripCard(item) ? 'true' : undefined"
+            @click="handleStripCardClick(item, $event)"
           >
             <img :src="item.expert.photo" :alt="`${item.expert.name}${item.expert.degree}`">
             <div class="expert-card-copy">

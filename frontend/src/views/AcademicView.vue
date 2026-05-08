@@ -1,120 +1,72 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchTalents, fetchWordClouds, fetchProjects } from '@/api/index.js'
 
 const router = useRouter()
 
-const teamList = ref([
-  {
-    name: 'Dr. Chen Wei',
-    title: '首席研究员',
-    desc: '"Pioneering the digitization of meridian systems through..."',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Prof. Li Na',
-    title: '基因组学专家',
-    desc: 'Focusing on the Herbone project and traditional...',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Researcher Wang',
-    title: '临床分析师',
-    desc: 'Leading trials on the integration of Tianhui...',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Dr. Chen Wei',
-    title: '首席研究员',
-    desc: '"Pioneering the digitization of meridian systems through..."',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Dr. Chen Wei',
-    title: '首席研究员',
-    desc: '"Pioneering the digitization of meridian systems through..."',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Dr. Zhang Li',
-    title: '数据分析师',
-    desc: 'Focus on TCM literature data mining and visualization...',
-    avatar: 'https://via.placeholder.com/48',
-  },
-  {
-    name: 'Prof. Wang Hong',
-    title: '中医药传承专家',
-    desc: 'Research on inheritance and innovation of ancient TCM prescriptions...',
-    avatar: 'https://via.placeholder.com/48',
-  },
-])
+const teamList = ref([])
+const wordCloud = ref([])
+const projectList = ref([])
 
-const projectList = ref([
-  {
-    tag: 'NATIONAL NATURAL SCIENCE FOUNDATION',
-    title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts',
-    meta: 'PI: Dr. Zhou Ming · ¥2.4M',
-  },
-  {
-    tag: 'STATE KEY LABORATORY FUND',
-    title: 'Digital Reconstruction of the Song Dynasty Bronze Figure',
-    meta: 'PI: Prof. Zhang Hua · ¥1.8M',
-  },
-  {
-    tag: 'PROVINCIAL HEALTH GRANT',
-    title: 'Metabolomics in Herb-Drug Interaction Studies',
-    meta: 'PI: Dr. Sun Qian · ¥0.9M',
-  },
-  {
-    tag: 'INSTITUTIONAL CORE FUND',
-    title: 'Machine Learning for Pulse Pattern Recognition',
-    meta: 'PI: Researcher Liu · ¥1.2M',
-  },
-  {
-    tag: 'INSTITUTIONAL CORE FUND',
-    title: 'Machine Learning for Pulse Pattern Recognition',
-    meta: 'PI: Researcher Liu · ¥1.2M',
-  },
-  {
-    tag: 'INSTITUTIONAL CORE FUND',
-    title: 'Machine Learning for Pulse Pattern Recognition',
-    meta: 'PI: Researcher Liu · ¥1.2M',
-  },
-  {
-    tag: 'NATIONAL SOCIAL SCIENCE FUND',
-    title: 'Textual Research on Tianhui Medical Bamboo Slips',
-    meta: 'PI: Prof. Li Ming · ¥1.5M',
-  },
-  {
-    tag: 'MINISTRY OF EDUCATION FUND',
-    title: 'TCM Meridian Digital Model Construction',
-    meta: 'PI: Dr. Zhao Jie · ¥0.8M',
-  },
-])
+const wordLayouts = [
+  { top: '2%', left: '36%', height: '320px', width: '52px', fontSize: '28px', opacity: 1, zIndex: 3 },
+  { top: '0%', left: '12%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.9, zIndex: 2 },
+  { top: '4%', right: '10%', height: '280px', width: '46px', fontSize: '24px', opacity: 0.92, zIndex: 2 },
+  { top: '16%', right: '26%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.85, zIndex: 2 },
+  { top: '12%', left: '54%', height: '220px', width: '30px', fontSize: '15px', opacity: 0.4, zIndex: 1 },
+  { top: '8%', left: '2%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
+  { top: '30%', left: '22%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.88, zIndex: 2 },
+  { top: '28%', right: '16%', height: '230px', width: '36px', fontSize: '18px', opacity: 0.78, zIndex: 2 },
+  { top: '38%', left: '46%', height: '180px', width: '28px', fontSize: '13px', opacity: 0.35, zIndex: 1 },
+  { top: '42%', right: '6%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.82, zIndex: 2 },
+  { top: '48%', left: '8%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
+  { top: '55%', right: '22%', height: '270px', width: '44px', fontSize: '23px', opacity: 0.9, zIndex: 2 },
+  { top: '52%', left: '34%', height: '200px', width: '30px', fontSize: '14px', opacity: 0.38, zIndex: 1 },
+  { bottom: '6%', left: '18%', height: '250px', width: '40px', fontSize: '21px', opacity: 0.86, zIndex: 2 },
+]
 
-const wordCloud = ref([
-  { text: '经络数字化', top: '2%', left: '36%', height: '320px', width: '52px', fontSize: '28px', opacity: 1, zIndex: 3 },
-  { text: '天回医简', top: '0%', left: '12%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.9, zIndex: 2 },
-  { text: '金石篆刻', top: '4%', right: '10%', height: '280px', width: '46px', fontSize: '24px', opacity: 0.92, zIndex: 2 },
-  { text: '针灸铜人', top: '16%', right: '26%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.85, zIndex: 2 },
-  { text: '出土文献', top: '12%', left: '54%', height: '220px', width: '30px', fontSize: '15px', opacity: 0.4, zIndex: 1 },
-  { text: '马王堆', top: '8%', left: '2%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
-  { text: '天回医简', top: '30%', left: '22%', height: '260px', width: '42px', fontSize: '22px', opacity: 0.88, zIndex: 2 },
-  { text: '本草纲目', top: '28%', right: '16%', height: '230px', width: '36px', fontSize: '18px', opacity: 0.78, zIndex: 2 },
-  { text: '文物修复', top: '38%', left: '46%', height: '180px', width: '28px', fontSize: '13px', opacity: 0.35, zIndex: 1 },
-  { text: '金石篆刻', top: '42%', right: '6%', height: '240px', width: '38px', fontSize: '20px', opacity: 0.82, zIndex: 2 },
-  { text: '方剂配伍', top: '48%', left: '8%', height: '160px', width: '26px', fontSize: '12px', opacity: 0.3, zIndex: 1 },
-  { text: '天回医简', top: '55%', right: '22%', height: '270px', width: '44px', fontSize: '23px', opacity: 0.9, zIndex: 2 },
-  { text: '简帛医书', top: '52%', left: '34%', height: '200px', width: '30px', fontSize: '14px', opacity: 0.38, zIndex: 1 },
-  { text: '金石篆刻', bottom: '6%', left: '18%', height: '250px', width: '40px', fontSize: '21px', opacity: 0.86, zIndex: 2 },
-])
+onMounted(async () => {
+  try {
+    const talentRes = await fetchTalents()
+    teamList.value = (talentRes.list || []).map(t => ({
+      id: t.id,
+      name: t.name,
+      title: t.title,
+      desc: t.researchArea,
+      avatar: t.avatar,
+    }))
+  } catch (e) {
+    console.error('获取人才列表失败', e)
+  }
+  try {
+    const wordRes = await fetchWordClouds()
+    const words = (wordRes.list || []).flatMap(w => w.words || [])
+    wordCloud.value = words.slice(0, wordLayouts.length).map((w, i) => ({
+      text: w.text,
+      ...wordLayouts[i],
+    }))
+  } catch (e) {
+    console.error('获取词云失败', e)
+  }
+  try {
+    const projectRes = await fetchProjects({ pageNum: 1, pageSize: 5 })
+    projectList.value = (projectRes.rows || []).map(p => ({
+      tag: p.type,
+      title: p.title,
+      meta: `负责人: ${p.leader} · ${p.startYear}-${p.endYear}`,
+    }))
+  } catch (e) {
+    console.error('获取课题列表失败', e)
+  }
+})
 
 function goHome() {
   router.push('/home')
 }
 
-function goExpert() {
-  router.push('/expert/chen-wei')
+function goExpert(id) {
+  router.push(`/expert/${id || 'chen-wei'}`)
 }
 </script>
 
@@ -126,13 +78,13 @@ function goExpert() {
         <p class="section-subtitle">核心科研力量</p>
         <div class="team-cards">
           <div
-            v-for="(member, index) in teamList"
-            :key="index"
+            v-for="member in teamList"
+            :key="member.id"
             class="team-card"
             role="link"
             tabindex="0"
-            @click="goExpert"
-            @keydown.enter="goExpert"
+            @click="goExpert(member.id)"
+            @keydown.enter="goExpert(member.id)"
           >
             <div class="avatar">
               <img :src="member.avatar" :alt="member.name" />
@@ -176,7 +128,7 @@ function goExpert() {
         <h2 class="section-title">获批课题</h2>
         <p class="section-subtitle">2024 科研资助项目</p>
         <div class="project-list">
-          <div v-for="(project, index) in projectList.slice(0, 5)" :key="index" class="project-item">
+          <div v-for="(project, index) in projectList" :key="index" class="project-item">
             <div class="project-tag">{{ project.tag }}</div>
             <div class="project-title">{{ project.title }}</div>
             <div class="project-meta">{{ project.meta }}</div>
