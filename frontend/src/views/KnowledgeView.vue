@@ -54,9 +54,20 @@ function interleave(scholars, books) {
   return list
 }
 
+function isGraphNodeValid(node) {
+  return node?.name && node?.type && SIZE_RADIUS[node.size]
+}
+
+function canRenderNodes(nodes) {
+  return Array.isArray(nodes) && nodes.some(n => n.size === 'size-xl') && nodes.every(isGraphNodeValid)
+}
+
 function generatePositions(rawNodes) {
-  const centerNode = rawNodes.find(n => n.size === 'size-xl')
-  const rest = rawNodes.filter(n => n.size !== 'size-xl')
+  const validNodes = Array.isArray(rawNodes) ? rawNodes.filter(isGraphNodeValid) : []
+  const centerNode = validNodes.find(n => n.size === 'size-xl')
+  if (!centerNode) return []
+
+  const rest = validNodes.filter(n => n.size !== 'size-xl')
 
   const scholars = rest.filter(n => n.type === 'scholar')
   const books = rest.filter(n => n.type === 'book')
@@ -156,7 +167,7 @@ onMounted(async () => {
     medicines.value = data.medicines || medicines.value
     causes.value = data.causes || causes.value
     totalCount.value = data.totalCount || totalCount.value
-    if (data.nodes?.length) {
+    if (canRenderNodes(data.nodes)) {
       allNodes.value = generatePositions(data.nodes)
     }
     detail.value = data.detail || detail.value

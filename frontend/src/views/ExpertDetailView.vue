@@ -38,6 +38,8 @@ const experts = ref([...fallbackExperts])
 
 const publications = ref([])
 
+const isNumericId = (id) => id !== undefined && id !== null && id !== '' && Number.isFinite(Number(id))
+
 const loadExperts = async () => {
   try {
     const data = await fetchTalents()
@@ -62,6 +64,11 @@ const loadExperts = async () => {
 }
 
 const loadExpert = async (id) => {
+  if (!isNumericId(id)) {
+    publications.value = []
+    return
+  }
+
   try {
     const numericId = Number(id)
     const data = await fetchTalentDetail(numericId)

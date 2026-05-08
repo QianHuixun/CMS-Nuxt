@@ -18,7 +18,10 @@ const pageTitle = computed(() => activity.value?.name || activity.value?.title |
 const pageSummary = computed(() => activity.value?.summary || '围绕出土医学文献整理、影像采集、知识标注与数字化保护流程，项目团队展示了最新阶段成果，并与考古、医学史、数字人文方向的研究者展开交流。')
 const heroSrc = computed(() => activity.value?.coverImage || heroImage)
 const featureSrc = computed(() => activity.value?.gallery?.[0] || largeImage)
-const galleryImages = computed(() => activity.value?.gallery?.slice(1, 3) || fallbackGalleryImages)
+const galleryImages = computed(() => {
+  const images = Array.isArray(activity.value?.gallery) ? activity.value.gallery.slice(1, 3) : []
+  return [...images, ...fallbackGalleryImages].slice(0, 2)
+})
 
 onMounted(async () => {
   try {

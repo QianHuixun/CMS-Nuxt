@@ -10,6 +10,11 @@ const patents = ref([])
 const activities = ref([])
 const books = ref([])
 const activityPhotos = ref([])
+const fallbackPaperId = 'meridian-bioelectric'
+const fallbackBookId = 'book_001'
+
+const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
+const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -90,7 +95,7 @@ onMounted(async () => {
             v-for="paper in papers"
             :key="`${paper.journal}-${paper.title}-${paper.date}`"
             class="paper-item"
-            :to="`/paper/${paper.id}`"
+            :to="paperRoute(paper.id)"
           >
             <div>
               <span class="journal">{{ paper.journal }}</span>
@@ -114,7 +119,7 @@ onMounted(async () => {
           <div class="book-copy">
             <h3>《{{ books[0]?.title || '出土医学文献叙录' }}》</h3>
             <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年 {{ books[0]?.publisher || '大学出版社' }}。</p>
-            <router-link class="book-action" :to="`/monograph/${books[0]?.id || ''}`">阅读提要</router-link>
+            <router-link class="book-action" :to="bookRoute(books[0]?.id)">阅读提要</router-link>
           </div>
           <div class="book-cover" :aria-label="`${books[0]?.title || '出土医学文献叙录'}封面`">
             <div class="book-calligraphy">医<br>简</div>

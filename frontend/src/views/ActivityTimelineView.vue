@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchActivityTimeline } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
@@ -40,6 +40,8 @@ const timelineDots = ref([
   { className: 'dot-small dot-four' },
 ])
 
+const descriptionLines = computed(() => String(pageInfo.value.description || '').split('\n'))
+
 onMounted(async () => {
   try {
     const data = await fetchActivityTimeline()
@@ -67,7 +69,7 @@ const back = () => {
         <p>{{ pageInfo.eyebrow }}</p>
         <h1 id="timeline-title">{{ pageInfo.title }}</h1>
         <div class="hero-description">
-          <template v-for="line in pageInfo.description.split('\n')" :key="line">
+          <template v-for="line in descriptionLines" :key="line">
             {{ line }}<br>
           </template>
         </div>

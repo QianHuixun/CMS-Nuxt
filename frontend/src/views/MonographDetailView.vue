@@ -2,11 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
+import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchBookDetail } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
+const normalizeList = (value, separator = ';') => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
+  return []
+}
+
 const monograph = ref({
   title: '',
   subtitle: '',
@@ -35,7 +42,7 @@ onMounted(async () => {
         isbn: data.isbn || '',
         pdfUrl: '',
         abstract: data.description || '',
-        keywords: [],
+        keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '68 MB',
       }
     }
@@ -54,6 +61,7 @@ const closePage = () => {
     <section class="monograph-workspace" aria-label="专著阅读区">
       <PdfReader
         :src="monograph.pdfUrl"
+        :fallback-image="documentPage"
       />
     </section>
 

@@ -9,6 +9,12 @@ import { safeBack } from '@/router/navigation.js'
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
+const normalizeList = (value, separator = ',') => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
+  return []
+}
+
 const paper = ref({
   title: '',
   category: '学术论文',
@@ -31,7 +37,7 @@ onMounted(async () => {
       paper.value = {
         title: data.title,
         category: data.type || '学术论文',
-        authors: data.authors ? data.authors.split(',').map(a => a.trim()) : [data.firstAuthor || '未知'],
+        authors: normalizeList(data.authors).length ? normalizeList(data.authors) : [data.firstAuthor || '未知'],
         source: data.journal || '',
         date: data.year ? `${data.year}年` : '',
         downloads: '14.2 MB',
@@ -40,7 +46,7 @@ onMounted(async () => {
         pdfUrl: data.url || '',
         previewImage: documentPage,
         abstract: data.abstract || '',
-        keywords: data.keywords || [],
+        keywords: normalizeList(data.keywords || data.keywordsText || ''),
       }
     }
   } catch (e) {
