@@ -4,19 +4,28 @@ import { useRouter } from 'vue-router'
 import { fetchDatabases, fetchTools } from '@/api/index.js'
 
 const router = useRouter()
-const databases = ref([])
-const tools = ref([])
+const fallbackDatabases = [
+  { id: 'db_tianhui', title: '天回医简数据库', info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。', icon: 'database' },
+  { id: 'db_bashu', title: '巴蜀古籍医籍数据库', info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。', icon: 'book' },
+  { id: 'db_wanjuan', title: '万卷华章数据库', info: '整合出土医学文献与传世医籍，构建多维度知识关联。', icon: 'scroll' },
+]
+const fallbackTools = [
+  { id: 'tool_annotation', title: '出土医学文献标注工具', description: '支持原简图像、释文、注释、实体和关系的协同标注。' },
+  { id: 'tool_digitize', title: '简牍图像数字化处理工具', description: '提供简牍图像增强、切分、字符识别与批量导出功能。' },
+]
+const databases = ref([...fallbackDatabases])
+const tools = ref([...fallbackTools])
 
 onMounted(async () => {
   try {
     const dbRes = await fetchDatabases()
-    databases.value = dbRes.list || []
+    if (dbRes.list?.length) databases.value = dbRes.list
   } catch (e) {
     console.error('获取数据库列表失败', e)
   }
   try {
     const toolRes = await fetchTools()
-    tools.value = toolRes.list || []
+    if (toolRes.list?.length) tools.value = toolRes.list
   } catch (e) {
     console.error('获取工具列表失败', e)
   }

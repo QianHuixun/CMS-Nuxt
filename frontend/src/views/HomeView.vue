@@ -1,40 +1,68 @@
 <script setup>
+import { onMounted, ref } from 'vue'
+import iconResources from '@/assets/icons/home/Group 1.svg'
+import iconKnowledge from '@/assets/icons/home/Union2.svg'
+import iconAcademic from '@/assets/icons/home/Union3.svg'
+import decorResources from '@/assets/images/backgrounds/home/card-resource.svg'
+import decorAcademic from '@/assets/images/backgrounds/home/card-academic.svg'
+import decorKnowledge from '@/assets/images/backgrounds/home/card-knowledge.svg'
+import { fetchHomeConfig } from '@/api/index.js'
+
+const iconMap = {
+  resources: iconResources,
+  knowledge: iconKnowledge,
+  academic: iconAcademic
+}
+
+const decorMap = {
+  resources: decorResources,
+  knowledge: decorAcademic,
+  academic: decorKnowledge
+}
+
+const decorShiftMap = {
+  resources: true,
+  knowledge: false,
+  academic: false
+}
+
+const pageConfig = ref({
+  eyebrow: 'DIGITAL HUMANITIES ARCHIVE',
+  title: '传承出土文献，赓续中医文脉',
+  description: '本中心致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。',
+  cards: [
+    { key: 'resources', title: '资源导航', description: '整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。', route: '/resources', actionText: '进入导航' },
+    { key: 'knowledge', title: '知识图谱', description: '基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。', route: '/knowledge', actionText: '开启探索' },
+    { key: 'academic', title: '学术动态', description: '发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。', route: '/academic', actionText: '查看详情' }
+  ]
+})
+
+onMounted(async () => {
+  try {
+    const data = await fetchHomeConfig()
+    pageConfig.value = { ...pageConfig.value, ...data }
+  } catch (e) {
+    console.error(e)
+  }
+})
 </script>
 
 <template>
   <div class="home-page">
     <div class="bg-layer"></div>
     <div class="content">
-      <div class="sub-english">DIGITAL HUMANITIES ARCHIVE</div>
-      <h2 class="main-title">传承出土文献，赓续中医文脉</h2>
-      <p class="desc">
-        本中心致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。
-      </p>
+      <div class="sub-english">{{ pageConfig.eyebrow }}</div>
+      <h2 class="main-title">{{ pageConfig.title }}</h2>
+      <p class="desc">{{ pageConfig.description }}</p>
 
       <div class="cards">
-        <router-link to="/resources" class="card">
-          <img src="@/assets/icons/home/Group 1.svg" alt="资源导航" class="card-icon" />
-          <h3 class="card-title">资源导航</h3>
-          <p class="card-desc">整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。</p>
-          <span class="card-btn">进入导航</span>
-          <img src="@/assets/images/backgrounds/home/card-resource.svg" alt="" class="card-decor card-decor-shift" />
-        </router-link>
-
-        <router-link to="/knowledge" class="card">
-          <img src="@/assets/icons/home/Union2.svg" alt="知识图谱" class="card-icon" />
-          <h3 class="card-title">知识图谱</h3>
-          <p class="card-desc">基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。</p>
-          <span class="card-btn">开启探索</span>
-          <img src="@/assets/images/backgrounds/home/card-academic.svg" alt="" class="card-decor" />
-        </router-link>
-
-        <router-link to="/academic" class="card">
-          <img src="@/assets/icons/home/Union3.svg" alt="学术动态" class="card-icon" />
-          <h3 class="card-title">学术动态</h3>
-          <p class="card-desc">发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。</p>
-          <span class="card-btn">查看详情</span>
-          <img src="@/assets/images/backgrounds/home/card-knowledge.svg" alt="" class="card-decor" />
-        </router-link>
+        <div v-for="card in pageConfig.cards" :key="card.key" class="card">
+          <img :src="iconMap[card.key] || iconResources" :alt="card.title" class="card-icon" />
+          <h3 class="card-title">{{ card.title }}</h3>
+          <p class="card-desc">{{ card.description }}</p>
+          <router-link :to="card.route" class="card-btn">{{ card.actionText }}</router-link>
+          <img :src="decorMap[card.key]" alt="" class="card-decor" :class="{ 'card-decor-shift': decorShiftMap[card.key] }" />
+        </div>
       </div>
     </div>
   </div>

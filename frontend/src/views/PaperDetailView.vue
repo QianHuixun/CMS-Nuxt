@@ -4,11 +4,31 @@ import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchPaperDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
-const paper = ref(null)
+const normalizeList = (value, separator = ',') => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
+  return []
+}
+
+const paper = ref({
+  title: '',
+  category: '学术论文',
+  authors: [],
+  source: '',
+  date: '',
+  downloads: '',
+  citations: 0,
+  reads: '',
+  pdfUrl: '',
+  previewImage: documentPage,
+  abstract: '',
+  keywords: [],
+})
 
 onMounted(async () => {
   try {
@@ -17,7 +37,7 @@ onMounted(async () => {
       paper.value = {
         title: data.title,
         category: data.type || '学术论文',
-        authors: data.authors ? data.authors.split(',').map(a => a.trim()) : [data.firstAuthor || '未知'],
+        authors: normalizeList(data.authors).length ? normalizeList(data.authors) : [data.firstAuthor || '未知'],
         source: data.journal || '',
         date: data.year ? `${data.year}年` : '',
         downloads: '14.2 MB',
@@ -26,7 +46,7 @@ onMounted(async () => {
         pdfUrl: data.url || '',
         previewImage: documentPage,
         abstract: data.abstract || '',
-        keywords: data.keywords || [],
+        keywords: normalizeList(data.keywords || data.keywordsText || ''),
       }
     }
   } catch (e) {
@@ -35,11 +55,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 

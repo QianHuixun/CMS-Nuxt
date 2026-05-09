@@ -1,5 +1,3 @@
-import Mock from 'mockjs'
-
 const wrap = (data) => ({ code: 200, message: 'success', data })
 
 const databases = [
@@ -245,6 +243,121 @@ const activities = [
   }
 ]
 
+const landingConfig = {
+  title: '出土医学文献文物保护研究数字重点实验室',
+  subtitle: '数据集成平台',
+  actionText: '进入系统 →'
+}
+
+const homeConfig = {
+  eyebrow: 'DIGITAL HUMANITIES ARCHIVE',
+  title: '传承出土文献，赓续中医文脉',
+  description: '本中心致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。',
+  cards: [
+    {
+      key: 'resources',
+      title: '资源导航',
+      description: '整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。',
+      route: '/resources',
+      actionText: '进入导航'
+    },
+    {
+      key: 'knowledge',
+      title: '知识图谱',
+      description: '基于本体建模技术，可视化展示古医籍、中药、方剂与经络的内在关联。',
+      route: '/knowledge',
+      actionText: '开启探索'
+    },
+    {
+      key: 'academic',
+      title: '学术动态',
+      description: '发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。',
+      route: '/academic',
+      actionText: '查看详情'
+    }
+  ]
+}
+
+const knowledgeGraph = {
+  symptoms: [
+    '头痛', '发热', '咳嗽', '脉浮', '咳嗽', '脉浮', '咳嗽',
+    '头痛', '咳嗽', '脉浮', '咳嗽', '脉浮', '咳嗽', '脉浮',
+    '头痛', '咳嗽', '脉浮', '咳嗽', '发热', '脉浮', '咳嗽',
+    '头痛', '咳嗽', '发热', '脉浮', '咳嗽', '脉浮', '咳嗽'
+  ],
+  medicines: [
+    '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
+    '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
+    '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
+    '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
+    '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '薄荷'
+  ],
+  causes: ['风热犯肺', '营分热炽', '营分热炽'],
+  totalCount: '12,842',
+  nodes: [
+    { name: '叶天士', type: 'scholar', size: 'size-xl' },
+    { name: '张仲景', type: 'scholar', size: 'size-m' },
+    { name: '孙思邈', type: 'scholar', size: 'size-m' },
+    { name: '李时珍', type: 'scholar', size: 'size-s' },
+    { name: '王清任', type: 'scholar', size: 'size-s' },
+    { name: '皇甫谧', type: 'scholar', size: 'size-s' },
+    { name: '温热论', type: 'book', size: 'size-m' },
+    { name: '临证指南', type: 'book', size: 'size-s' },
+    { name: '温病条辨', type: 'book', size: 'size-s' },
+    { name: '伤寒论', type: 'book', size: 'size-m' },
+    { name: '金匮要略', type: 'book', size: 'size-s' },
+    { name: '千金要方', type: 'book', size: 'size-s' },
+    { name: '千金翼方', type: 'book', size: 'size-xs' },
+    { name: '本草纲目', type: 'book', size: 'size-xs' },
+    { name: '叶氏医案', type: 'book', size: 'size-xs' },
+    { name: '医林改错', type: 'book', size: 'size-xs' }
+  ],
+  detail: {
+    title: '温热论',
+    subtitle: '学术思想：卫气营血辨证',
+    year: '清代(1746年)',
+    citations: '2,482 次',
+    abstract: '温邪上受，首先犯肺，逆传心包。肺主气属卫，心主血属营。大凡看法，卫之后方言气，营之后方言血...',
+    relatedCount: 12,
+    related: [
+      { name: '银翘散', type: '治疗方剂' },
+      { name: '邪留三焦', type: '病机描述' }
+    ]
+  }
+}
+
+const activityTimeline = {
+  eyebrow: 'Chronicles of Excellence',
+  title: '活动足迹·时光影卷',
+  description: '穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。\n每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。',
+  eventCards: [
+    {
+      className: 'event-card-primary',
+      title: '科普影响力',
+      description: '为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。',
+      highlights: [
+        { value: '5,000+', label: '观展人次' },
+        { value: '2周', label: '展览周期' }
+      ]
+    },
+    {
+      className: 'event-card-secondary',
+      title: '跨学科研讨',
+      description: '邀请医学史、文物保护、人工智能团队共同参与，围绕出土医学文献数字化方法展开交流。',
+      highlights: [
+        { value: '12场', label: '专题报告' },
+        { value: '8组', label: '协作团队' }
+      ]
+    }
+  ],
+  timelineDots: [
+    { className: 'dot-large dot-one' },
+    { className: 'dot-medium dot-two' },
+    { className: 'dot-large dot-three' },
+    { className: 'dot-small dot-four' }
+  ]
+}
+
 function paginate(list, pageNum = 1, pageSize = 10) {
   const start = (pageNum - 1) * pageSize
   const rows = list.slice(start, start + pageSize)
@@ -252,6 +365,21 @@ function paginate(list, pageNum = 1, pageSize = 10) {
 }
 
 export default [
+  {
+    url: '/api/v1/site/landing',
+    method: 'get',
+    response: () => wrap(landingConfig)
+  },
+  {
+    url: '/api/v1/site/home',
+    method: 'get',
+    response: () => wrap(homeConfig)
+  },
+  {
+    url: '/api/v1/knowledge/graph',
+    method: 'get',
+    response: () => wrap(knowledgeGraph)
+  },
   // ------ 静态列表/无参路由（必须排在 :id 路由前面，避免匹配冲突） ------
 
   // 1. 获取数据库列表
@@ -408,6 +536,11 @@ export default [
       }))
       return wrap(paginate(list, query.pageNum, query.pageSize))
     }
+  },
+  {
+    url: '/api/v1/activities/timeline',
+    method: 'get',
+    response: () => wrap(activityTimeline)
   },
 
   // ------ 以下为带 :id 参数的路由（放在后面，避免误匹配） ------
