@@ -32,14 +32,18 @@ const navItems = [
 
 <style scoped>
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   padding: 16px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--bg-page);
-  position: relative;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .title-wrapper {

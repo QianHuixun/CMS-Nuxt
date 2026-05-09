@@ -3,12 +3,27 @@ import { onMounted, ref } from 'vue'
 import iconResources from '@/assets/icons/home/Group 1.svg'
 import iconKnowledge from '@/assets/icons/home/Union2.svg'
 import iconAcademic from '@/assets/icons/home/Union3.svg'
+import decorResources from '@/assets/images/backgrounds/home/card-resource.svg'
+import decorAcademic from '@/assets/images/backgrounds/home/card-academic.svg'
+import decorKnowledge from '@/assets/images/backgrounds/home/card-knowledge.svg'
 import { fetchHomeConfig } from '@/api/index.js'
 
 const iconMap = {
   resources: iconResources,
   knowledge: iconKnowledge,
   academic: iconAcademic
+}
+
+const decorMap = {
+  resources: decorResources,
+  knowledge: decorAcademic,
+  academic: decorKnowledge
+}
+
+const decorShiftMap = {
+  resources: true,
+  knowledge: false,
+  academic: false
 }
 
 const pageConfig = ref({
@@ -46,6 +61,7 @@ onMounted(async () => {
           <h3 class="card-title">{{ card.title }}</h3>
           <p class="card-desc">{{ card.description }}</p>
           <router-link :to="card.route" class="card-btn">{{ card.actionText }}</router-link>
+          <img :src="decorMap[card.key]" alt="" class="card-decor" :class="{ 'card-decor-shift': decorShiftMap[card.key] }" />
         </div>
       </div>
     </div>
@@ -56,9 +72,9 @@ onMounted(async () => {
 .home-page {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: calc(100vh - 53px);
   text-align: center;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .bg-layer {
@@ -78,7 +94,7 @@ onMounted(async () => {
   z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 120px 40px 80px;
+  padding: 40px 40px 0;
 }
 
 .sub-english {
@@ -126,6 +142,8 @@ onMounted(async () => {
 }
 
 .card {
+  position: relative;
+  display: block;
   background-color: #fff;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
@@ -133,6 +151,8 @@ onMounted(async () => {
   width: 300px;
   padding: 40px 24px;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
   transition: var(--transition-fast);
 }
 
@@ -181,5 +201,28 @@ onMounted(async () => {
 .card-btn::after {
   content: "→";
   font-size: 10px;
+}
+
+.card-decor {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 75%;
+  width: auto;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-icon,
+.card-title,
+.card-desc,
+.card-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.card-decor-shift {
+  transform: translateX(50%);
 }
 </style>
