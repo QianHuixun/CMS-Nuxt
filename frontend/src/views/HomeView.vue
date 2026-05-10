@@ -198,9 +198,23 @@ const pageConfig = {
   right: 0;
   height: 75%;
   width: auto;
-  opacity: 0.12;
+  opacity: 0;
   pointer-events: none;
   z-index: 0;
+  animation: decorFadeIn 1.2s ease-out 1.5s both;
+}
+
+.card-decor-shift {
+  transform: translateX(50%);
+}
+
+@keyframes decorFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.12;
+  }
 }
 
 .card-icon,
@@ -211,7 +225,30 @@ const pageConfig = {
   z-index: 1;
 }
 
-.card-decor-shift {
-  transform: translateX(50%);
+.card {
+  animation: cardFadeIn 0.8s ease-out both;
+}
+
+.card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.card:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.card:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
