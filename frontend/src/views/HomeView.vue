@@ -45,13 +45,13 @@ const pageConfig = {
       <p class="desc">{{ pageConfig.description }}</p>
 
       <div class="cards">
-        <div v-for="card in pageConfig.cards" :key="card.key" class="card">
+        <router-link v-for="card in pageConfig.cards" :key="card.key" :to="card.route" class="card">
           <img :src="iconMap[card.key] || iconResources" :alt="card.title" class="card-icon" />
           <h3 class="card-title">{{ card.title }}</h3>
           <p class="card-desc">{{ card.description }}</p>
-          <router-link :to="card.route" class="card-btn">{{ card.actionText }}</router-link>
+          <span class="card-btn">{{ card.actionText }}</span>
           <img :src="decorMap[card.key]" alt="" class="card-decor" :class="{ 'card-decor-shift': decorShiftMap[card.key] }" />
-        </div>
+        </router-link>
       </div>
     </div>
   </div>
