@@ -13,7 +13,7 @@ const fallbackTeamList = [
 ]
 
 // 示例词库
-const fallbackWords = ['天回医简', '经脉数字化', '出土文献', '知识服务', '简牍', '中医药', '古籍', '针灸铜人', '金石篆刻', '黄帝内经', '汉代医学', '现代医学']
+const fallbackWords = ['天回医简', '经脉数字化', '出土文献', '知识服务', '简牍', '中医药', '古籍', '针灸铜人', '金石篆刻', '黄帝内经', '汉代医学', '现代医学', '数据挖掘', '古籍修复']
 
 const fallbackProjectList = [
   { tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },
@@ -24,23 +24,23 @@ const fallbackProjectList = [
 ]
 
 /**
- * 碰撞检测算法 + 权重分区分布
+ * 水平分轨错落算法 (复刻设计图的竹简散落美学)
  */
 const createWordCloud = (words) => {
-  const MAX_WORDS = 14 // 限制最大数量，保持画面留白
+  const MAX_WORDS = 15 
   const displayWords = words.slice(0, MAX_WORDS)
   const totalWords = displayWords.length
   
   if (totalWords === 0) return []
 
-  // 1. 生成或计算权重分布 (0.0 到 1.0)
+  // 1. 权重分布 (0.0 到 1.0)
   let wordsWithWeight = displayWords.map((word) => {
     let text = typeof word === 'string' ? word : word.text
     let weight = typeof word === 'object' && word.weight ? word.weight / 100 : null
     return { text, weight }
   })
 
-  // 如果没有后端返回的真实权重，则打乱数组并赋予渐进式曲线权重
+  // 模拟指数级权重，拉开大小差距
   if (wordsWithWeight[0].weight === null) {
     wordsWithWeight.sort(() => Math.random() - 0.5)
     wordsWithWeight = wordsWithWeight.map((w, i) => {
@@ -50,69 +50,55 @@ const createWordCloud = (words) => {
     })
   }
 
-  // 关键一：按权重从大到小排序，优先放置大竹简，让小竹简见缝插针
+  // 按权重严格降序
   wordsWithWeight.sort((a, b) => b.weight - a.weight)
 
-  const placed = [] // 记录已放置的竹简位置信息，用于碰撞检测
-  // 预估词云容器的宽高比例，用于计算碰撞面积百分比
-  const estContainerW = 600
-  const estContainerH = 800
+  // 2. 准备水平轨道 (Lanes) 保证左右不重叠
+  const lanes = Array.from({ length: totalWords }, (_, i) => i)
+  
+  // 提取中间的几条轨道，专门留给权重最高的前几个词
+  const centerLaneCount = Math.min(4, totalWords)
+  const startIndex = Math.floor((totalWords - centerLaneCount) / 2)
+  const centerLanes = lanes.splice(startIndex, centerLaneCount)
 
-  return wordsWithWeight.map((wordObj) => {
+  return wordsWithWeight.map((wordObj, i) => {
     const { text, weight } = wordObj
     
     // --- 视觉特征映射 ---
-    const height = Math.floor(140 + weight * 260) 
-    const width = Math.floor(22 + weight * 32)    
-    const fontSize = Math.floor(13 + weight * 16) 
-    
+    const height = Math.floor(160 + weight * 280) // 160px ~ 440px
+    const width = Math.floor(22 + weight * 30)    // 22px ~ 52px
+    const fontSize = Math.floor(13 + weight * 16) // 13px ~ 29px
     const opacity = (0.2 + weight * 0.8).toFixed(2)
     const zIndex = Math.floor(weight * 10) + 1
 
-    // 将 px 转换为大致的百分比宽度，用于碰撞计算
-    const widthPct = (width / estContainerW) * 100
-    const heightPct = (height / estContainerH) * 100
-
-    let leftNum, topNum
-    let attempts = 0
-    const maxAttempts = 150 // 给每个词 150 次找空地的机会
-    let isCollision = true
-
-    // 关键二：基于碰撞检测的 while 循环寻找安全位置
-    while (isCollision && attempts < maxAttempts) {
-      attempts++
-
-      // 权重高的倾向中间，权重低的全局随机
-      if (weight > 0.6) {
-        leftNum = 35 + Math.random() * 30 // X: 35% ~ 65% (居中区域)
-        topNum = 5 + Math.random() * 25   // Y: 5% ~ 30% 
-      } else {
-        leftNum = 12 + Math.random() * 76 // X: 12% ~ 88% (避免太贴边)
-        topNum = 5 + Math.random() * 45   // Y: 5% ~ 50% 
-      }
-
-      // 遍历已放置的竹简，判断是否有矩形相交（重叠）
-      isCollision = placed.some(p => {
-        // 设置安全间距（Padding）：水平方向留多点空间防挡字，垂直方向允许微微交错
-        const padX = 2.5 
-        const padY = 2.0 
-        const overlapX = leftNum < (p.left + p.widthPct + padX) && (leftNum + widthPct + padX) > p.left
-        const overlapY = topNum < (p.top + p.heightPct + padY) && (topNum + heightPct + padY) > p.top
-        return overlapX && overlapY
-      })
+    // --- 分配轨道 ---
+    let assignedLane
+    if (i < centerLaneCount && centerLanes.length > 0) {
+      // 核心词汇：随机分配到中间轨道
+      const randIdx = Math.floor(Math.random() * centerLanes.length)
+      assignedLane = centerLanes.splice(randIdx, 1)[0]
+    } else {
+      // 其他词汇：随机分配到剩余轨道
+      const randIdx = Math.floor(Math.random() * lanes.length)
+      assignedLane = lanes.splice(randIdx, 1)[0]
     }
 
-    // 找到合适的位置后，记录到 placed 数组中
-    placed.push({ left: leftNum, top: topNum, widthPct, heightPct })
+    // --- 坐标计算 ---
+    const laneWidthPct = 100 / totalWords
+    // 在自己的轨道内产生一定左右偏移，打破死板的对齐感
+    const jitterX = (0.1 + Math.random() * 0.8) * laneWidthPct
+    const leftPct = assignedLane * laneWidthPct + jitterX
 
-    const left = `${leftNum}%`
-    const top = `${topNum}%` 
+    // Y轴：完全随机的高低错落 (允许 0% ~ 45% 的顶部空间)
+    const topPct = Math.random() * 45
 
     const floatDelay = `${(Math.random() * 4).toFixed(2)}s`
     const entranceDelay = `${(Math.random() * 1.5).toFixed(2)}s`
 
     return {
-      text, left, top, 
+      text, 
+      left: `${leftPct}%`, 
+      top: `${topPct}%`, 
       height: `${height}px`, 
       width: `${width}px`, 
       fontSize: `${fontSize}px`, 
@@ -201,7 +187,7 @@ function goExpert(id) {
         </div>
       </div>
 
-      <!-- 中间：不规则分布的竹简词云 -->
+      <!-- 中间：专业算法分布的竹简词云 -->
       <div class="wordcloud-section">
         <div class="wordcloud-wrapper">
           <div
@@ -225,7 +211,7 @@ function goExpert(id) {
           </div>
         </div>
         
-        <!-- 新增：中间底部的渐变遮罩与查看更多按钮 -->
+        <!-- 中间底部的渐变遮罩与查看更多按钮 -->
         <div class="bottom-fade-mask">
           <div class="more-btn" @click="$router.push('/academic-news')">
             <div class="more-text">查看更多研究成果</div>
@@ -268,10 +254,7 @@ function goExpert(id) {
   height: calc(100vh - 53px);
   overflow: hidden;
   background-color: var(--bg-page, #f8f5f0);
-  background-image:
-    linear-gradient(rgba(220, 210, 190, 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(220, 210, 190, 0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
+  /* 去除了背景网格 */
   color: var(--color-text, #333);
   padding: 24px 40px 80px;
 }
@@ -281,7 +264,6 @@ function goExpert(id) {
   grid-template-columns: 30% 40% 30%;
   gap: 20px;
   align-items: flex-start;
-  /* 固定主容器高度 */
   height: calc(100vh - 150px);
 }
 
@@ -291,6 +273,16 @@ function goExpert(id) {
   font-weight: bold;
   margin-bottom: 8px;
   position: relative;
+  
+  /* 强制去除可能从全局继承的左侧竖线和内边距 */
+  border-left: none !important;
+  padding-left: 0 !important;
+}
+
+/* 强力覆盖：清除可能用于绘制竖线的伪元素 */
+.section-title::before,
+.section-title::after {
+  display: none !important;
 }
 
 .section-subtitle {
@@ -301,7 +293,6 @@ function goExpert(id) {
 
 /* =========== 左侧：人才队伍 =========== */
 .team-section {
-  /* 严格固定高度，防止弹性撑大 */
   height: 100%;
   overflow-y: auto;
   direction: rtl;
@@ -318,7 +309,6 @@ function goExpert(id) {
   border-radius: 2px;
 }
 
-/* 去除 flex，使用传统的 block 布局 */
 .team-cards { 
   display: block; 
 }
@@ -327,10 +317,10 @@ function goExpert(id) {
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-radius: 4px;
-  display: flex; /* 卡片内部保留弹性排版 */
+  display: flex; 
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 16px; /* 替代原来的 gap */
+  margin-bottom: 16px; 
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -344,10 +334,9 @@ function goExpert(id) {
 
 /* =========== 中间：竹简词云 =========== */
 .wordcloud-section {
-  /* 固定高度，为底部遮罩留出相对定位空间 */
   height: 100%;
   position: relative; 
-  display: block; /* 移除 flex */
+  display: block; 
 }
 
 .wordcloud-wrapper {
@@ -355,12 +344,10 @@ function goExpert(id) {
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  /* 使用 mask-image 实现内部竹简淡出，且绝对不会遮挡背景网格 */
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 95%);
   mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 95%);
 }
 
-/* 动效：水墨显影入场与呼吸悬浮 */
 @keyframes slip-entrance {
   0% { 
     opacity: 0; 
@@ -388,7 +375,7 @@ function goExpert(id) {
   font-weight: bold;
   letter-spacing: 6px;
   cursor: pointer;
-  opacity: var(--target-opacity); /* 绑定目标透明度变量 */
+  opacity: var(--target-opacity); 
   
   animation: 
     slip-entrance 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) both,
@@ -432,7 +419,6 @@ function goExpert(id) {
   pointer-events: none;
 }
 
-/* 底部按钮包裹区域 (已移除原来的背景渐变色，仅作定位使用) */
 .bottom-fade-mask {
   position: absolute;
   bottom: 0;
@@ -444,12 +430,12 @@ function goExpert(id) {
   align-items: center;
   justify-content: flex-end;
   padding-bottom: 24px;
-  z-index: 50; /* 层级高于大部分词云 */
-  pointer-events: none; /* 让鼠标透过区域正常点击后方词云 */
+  z-index: 50; 
+  pointer-events: none; 
 }
 
 .more-btn {
-  pointer-events: auto; /* 恢复按钮本身的点击响应 */
+  pointer-events: auto; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -480,31 +466,34 @@ function goExpert(id) {
 
 .more-btn:hover .more-icon-box {
   background-color: rgba(132, 33, 48, 0.15);
-  transform: translateY(4px); /* 悬浮时下压反馈 */
+  transform: translateY(4px); 
 }
 
 /* =========== 右侧：获批课题 =========== */
 .project-section {
-  /* 严格固定高度 */
   height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   text-align: right;
   padding-left: 8px;
   padding-right: 20px;
+}
+
+/* 让列表承接滚动能力，撑开中间区域 */
+.project-list { 
+  flex: 1;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary, #842130) transparent;
+  padding-right: 4px;
 }
-.project-section::-webkit-scrollbar { width: 4px; }
-.project-section::-webkit-scrollbar-track { background: transparent; }
-.project-section::-webkit-scrollbar-thumb {
+.project-list::-webkit-scrollbar { width: 4px; }
+.project-list::-webkit-scrollbar-track { background: transparent; }
+.project-list::-webkit-scrollbar-thumb {
   background-color: var(--color-primary, #842130);
   border-radius: 2px;
 }
 
-/* 去除 flex */
-.project-list { 
-  display: block; 
-}
 .project-item { 
   margin-bottom: 24px; 
   transition: opacity 0.2s; 
@@ -519,12 +508,13 @@ function goExpert(id) {
   font-size: 10px;
   border-radius: 2px;
   margin-bottom: 8px;
-  text-transform: uppercase; /* 根据图示全大写 */
+  text-transform: uppercase; 
 }
 .project-title { font-size: 16px; color: #333; line-height: 1.4; font-family: serif; }
 .project-meta { font-size: 12px; color: #999; margin-top: 6px; }
 
 .view-all-btn {
+  flex-shrink: 0;
   width: 50px;
   height: 50px;
   background-color: rgba(132, 33, 48, 0.05);
@@ -536,8 +526,8 @@ function goExpert(id) {
   justify-content: center;
   cursor: pointer;
   margin-left: auto;
-  margin-top: 24px;
-  margin-bottom: 24px;
+  margin-top: 16px;
+  margin-bottom: 0; /* 修改为0，使其完全贴底 */
   font-size: 12px;
   font-weight: bold;
   transition: all 0.2s ease;
