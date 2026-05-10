@@ -1,162 +1,493 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import * as d3 from 'd3'
+import { fetchKnowledgeGraph } from '@/api/index.js'
 
 const router = useRouter()
 
-const symptoms = ref([
-  '头痛', '发热', '咳嗽', '脉浮', '咳嗽', '脉浮', '咳嗽',
-  '头痛', '咳嗽', '脉浮', '咳嗽', '脉浮', '咳嗽', '脉浮',
-  '头痛', '咳嗽', '脉浮', '咳嗽', '发热', '脉浮', '咳嗽',
-  '头痛', '咳嗽', '发热', '脉浮', '咳嗽', '脉浮', '咳嗽'
+const graphSvg = ref(null)
+const bookListContainer = ref(null)
+const entityTypesContainer = ref(null)
+const graphLegendContainer = ref(null)
+const detailDynamicContent = ref(null)
+
+const colorMap = {
+  center: '#6e1c24',
+  book: '#944046',
+  case: '#b67b73',
+  visit: '#cba891',
+  symptom: '#c1bba4',
+  formula: '#d5ccaa',
+  herb: '#abb698',
+  pathology: '#d9c8b3',
+  patient: '#e3e3e3'
+}
+
+const books = ref([
+  { id: 'b1', name: '《临证指南医案》', count: 224, active: true },
+  { id: 'b2', name: '《叶天士晚年方案真本》', count: 200, active: false },
+  { id: 'b3', name: '《叶氏医案存真》', count: 200, active: false },
+  { id: 'b4', name: '《未刻本叶氏医案》', count: 200, active: false },
+  { id: 'b5', name: '《眉寿堂方案选存》', count: 200, active: false },
+  { id: 'b6', name: '《三家医案合刻》', count: 50, active: false },
+  { id: 'b7', name: '《种福堂公选医案》', count: 50, active: false }
 ])
 
-const medicines = ref([
-  '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
-  '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
-  '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
-  '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '连翘',
-  '薄荷', '连翘', '荆芥', '薄荷', '连翘', '荆芥', '薄荷'
-])
+const entityTypes = [
+  { type: 'formula', label: '方剂' },
+  { type: 'herb', label: '中药' },
+  { type: 'visit', label: '诊次' },
+  { type: 'symptom', label: '症状' },
+  { type: 'pathology', label: '病因病机' },
+  { type: 'patient', label: '患者信息' }
+]
 
-const causes = ref(['风热犯肺', '营分热炽', '营分热炽'])
-const totalCount = ref('12,842')
+const legends = [
+  { type: 'book', label: '古籍' },
+  { type: 'case', label: '医案' },
+  { type: 'visit', label: '诊次' },
+  { type: 'symptom', label: '症状' },
+  { type: 'formula', label: '方剂' },
+  { type: 'herb', label: '中药' }
+]
 
-const SIZE_RADIUS = {
-  'size-xl': 10,
-  'size-m': 6.5,
-  'size-s': 5.5,
-  'size-xs': 4.5,
-}
-
-function distance(a, b) {
-  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
-}
-
-function interleave(scholars, books) {
-  const list = []
-  let si = 0, bi = 0
-  let turn = Math.random() > 0.5 ? 's' : 'b'
-  while (si < scholars.length || bi < books.length) {
-    if (turn === 's' && si < scholars.length) {
-      list.push(scholars[si++])
-      turn = 'b'
-    } else if (turn === 'b' && bi < books.length) {
-      list.push(books[bi++])
-      turn = 's'
-    } else if (si < scholars.length) {
-      list.push(scholars[si++])
-    } else if (bi < books.length) {
-      list.push(books[bi++])
-    }
-  }
-  return list
-}
-
-function isGraphNodeValid(node) {
-  return node?.name && node?.type && SIZE_RADIUS[node.size]
-}
-
-function canRenderNodes(nodes) {
-  return Array.isArray(nodes) && nodes.some(n => n.size === 'size-xl') && nodes.every(isGraphNodeValid)
-}
-
-function generatePositions(rawNodes) {
-  const validNodes = Array.isArray(rawNodes) ? rawNodes.filter(isGraphNodeValid) : []
-  const centerNode = validNodes.find(n => n.size === 'size-xl')
-  if (!centerNode) return []
-
-  const rest = validNodes.filter(n => n.size !== 'size-xl')
-
-  const scholars = rest.filter(n => n.type === 'scholar')
-  const books = rest.filter(n => n.type === 'book')
-  const queue = interleave([...scholars].sort(() => Math.random() - 0.5), [...books].sort(() => Math.random() - 0.5))
-
-  const placed = [{
-    ...centerNode,
-    x: 50,
-    y: 38,
-  }]
-
-  const placedAngles = []
-
-  for (const node of queue) {
-    const nodeR = SIZE_RADIUS[node.size]
-    const centerR = SIZE_RADIUS['size-xl']
-
-    let bestX = 0, bestY = 0
-    let bestScore = -Infinity
-
-    for (let attempt = 0; attempt < 200; attempt++) {
-      const angle = Math.random() * Math.PI * 2
-      const jitterR = nodeR + centerR + 6 + Math.random() * 32
-
-      const cx = 50 + jitterR * Math.cos(angle)
-      const cy = 38 + jitterR * Math.sin(angle)
-
-      if (cx < 6 || cx > 94 || cy < 5 || cy > 92) continue
-
-      let ok = true
-      for (const p of placed) {
-        if (distance({ x: cx, y: cy }, p) < nodeR + SIZE_RADIUS[p.size] + 2.5) {
-          ok = false
-          break
-        }
-      }
-      if (!ok) continue
-
-      let angleScore = 0
-      for (const pa of placedAngles) {
-        const da = Math.abs(angle - pa)
-        const d = da > Math.PI ? 2 * Math.PI - da : da
-        if (d < 0.35) angleScore += 1
-      }
-
-      const score = -jitterR * 0.15 - angleScore * 1.5
-      if (score > bestScore) {
-        bestScore = score
-        bestX = cx
-        bestY = cy
-      }
-    }
-
-    placed.push({ ...node, x: bestX, y: bestY })
-    placedAngles.push(Math.atan2(bestY - 38, bestX - 50))
-  }
-
-  return placed
-}
-
-const allNodes = ref(generatePositions([
-  { name: '叶天士', type: 'scholar', size: 'size-xl' },
-  { name: '张仲景', type: 'scholar', size: 'size-m' },
-  { name: '孙思邈', type: 'scholar', size: 'size-m' },
-  { name: '李时珍', type: 'scholar', size: 'size-s' },
-  { name: '王清任', type: 'scholar', size: 'size-s' },
-  { name: '皇甫谧', type: 'scholar', size: 'size-s' },
-  { name: '温热论', type: 'book', size: 'size-m' },
-  { name: '临证指南', type: 'book', size: 'size-s' },
-  { name: '温病条辨', type: 'book', size: 'size-s' },
-  { name: '伤寒论', type: 'book', size: 'size-m' },
-  { name: '金匮要略', type: 'book', size: 'size-s' },
-  { name: '千金要方', type: 'book', size: 'size-s' },
-  { name: '千金翼方', type: 'book', size: 'size-xs' },
-  { name: '本草纲目', type: 'book', size: 'size-xs' },
-  { name: '叶氏医案', type: 'book', size: 'size-xs' },
-  { name: '医林改错', type: 'book', size: 'size-xs' },
-]))
-
-const detail = ref({
-  title: '温热论',
-  subtitle: '学术思想：卫气营血辨证',
-  year: '清代(1746年)',
-  citations: '2,482 次',
-  abstract: '温邪上受，首先犯肺，逆传心包。肺主气属卫，心主血属营。大凡看法，卫之后方言气，营之后方言血...',
-  relatedCount: 12,
-  related: [
-    { name: '银翘散', type: '治疗方剂' },
-    { name: '邪留三焦', type: '病机描述' },
+const caseDetail = ref({
+  title: '《临证指南医案》',
+  subtitle: 'Case_1-4 · 叶天士医案知识图谱',
+  text: '稚年纯阳体质，热症最多。病偏右胸高，呼气不利，肺气不能清肃。热郁内蒸，逆传膻中，致天君震动，状若痫症。夫肺主卫，心主营，二气循环于肺胃脉中。',
+  tags: [
+    { label: '肺气不能清肃', type: 'pathology' },
+    { label: '痫症', type: 'symptom' },
+    { label: '四苓', type: 'formula' },
+    { label: '茯苓', type: 'herb' },
+    { label: '淡竹叶', type: 'herb' }
+  ],
+  summary: [
+    { label: '来源', value: '《临证指南医案》' },
+    { label: '诊次', value: '5 次，默认显示诊次1' },
+    { label: '实体', value: '症状 7 · 病机 6 · 方剂 5 · 中药 28' },
+    { label: '关系', value: '组成、加味、减味、诊次用方' }
   ]
+})
+
+const graphData = ref({
+  nodes: [
+    { id: 'center', label: '叶天士医案\n知识图谱', type: 'center', level: 1, rings: 3 },
+    { id: 'n1', label: '叶天士晚年\n方案真本', type: 'book', level: 2, rings: 1 },
+    { id: 'n2', label: '案1-4', type: 'center', level: 3, rings: 1 },
+    { id: 'n3', label: '眉寿堂\n方案选存', type: 'visit', level: 2, rings: 0 },
+    { id: 'n4', label: '未刻本\n叶氏医案', type: 'symptom', level: 2, rings: 0 },
+    { id: 'n5', label: '病因病机\n肺热', type: 'pathology', level: 2, rings: 1 },
+    { id: 'n6', label: '症状\n咳嗽', type: 'formula', level: 3, rings: 1 },
+    { id: 'n7', label: '方剂\n四苓', type: 'formula', level: 3, rings: 1 },
+    { id: 'n8', label: '诊次1', type: 'center', level: 3, rings: 1 },
+    { id: 'n9', label: '组成\n草药', type: 'formula', level: 3, rings: 1 },
+    ...Array.from({ length: 40 }, (_, i) => ({
+      id: `p${i}`,
+      label: '',
+      type: ['herb', 'symptom', 'case', 'formula', 'pathology'][Math.floor(Math.random() * 5)],
+      level: Math.random() > 0.6 ? 4 : 5,
+      rings: 0
+    }))
+  ],
+  links: [
+    { source: 'center', target: 'n1' },
+    { source: 'center', target: 'n2' },
+    { source: 'center', target: 'n3' },
+    { source: 'center', target: 'n4' },
+    { source: 'center', target: 'n5' },
+    { source: 'n1', target: 'n6' },
+    { source: 'n1', target: 'n9' },
+    { source: 'center', target: 'n8' },
+    { source: 'center', target: 'n7' },
+    { source: 'n2', target: 'n7' },
+    { source: 'n5', target: 'n6' },
+    ...Array.from({ length: 40 }, (_, i) => ({
+      source: ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8'][Math.floor(Math.random() * 8)],
+      target: `p${i}`
+    }))
+  ]
+})
+
+function renderSidebar() {
+  if (bookListContainer.value) {
+    bookListContainer.value.innerHTML = books.value.map(book => `
+      <div class="kg-book-item ${book.active ? 'active' : ''}">
+        <span>${book.name}</span>
+        <span class="kg-book-count">${book.count}</span>
+      </div>
+    `).join('')
+  }
+  if (entityTypesContainer.value) {
+    entityTypesContainer.value.innerHTML = entityTypes.map(tag => `
+      <span class="kg-entity-tag" style="background-color: ${colorMap[tag.type]}">${tag.label}</span>
+    `).join('')
+  }
+  if (graphLegendContainer.value) {
+    graphLegendContainer.value.innerHTML = legends.map(leg => `
+      <div class="kg-legend-item">
+        <div class="kg-legend-dot" style="background-color: ${colorMap[leg.type]}"></div>
+        <span>${leg.label}</span>
+      </div>
+    `).join('')
+  }
+}
+
+function renderCaseDetail() {
+  const data = caseDetail.value
+  if (!detailDynamicContent.value) return
+
+  const tagsHtml = data.tags.map(tag => `
+    <span class="kg-c-tag" style="background-color: ${colorMap[tag.type]}">${tag.label}</span>
+  `).join('')
+
+  const summaryHtml = data.summary.map(item => `
+    <div class="kg-summary-row">
+      <span class="kg-s-label">${item.label}</span>
+      <span class="kg-s-value">${item.value}</span>
+    </div>
+  `).join('')
+
+  detailDynamicContent.value.innerHTML = `
+    <div class="kg-detail-title">${data.title}</div>
+    <div class="kg-detail-subtitle">${data.subtitle}</div>
+    <div class="kg-detail-tabs">
+      <button class="kg-d-tab active">原文</button>
+      <button class="kg-d-tab">诊次</button>
+      <button class="kg-d-tab">实体</button>
+      <button class="kg-d-tab">关系</button>
+    </div>
+    <div class="kg-content-box">
+      <div class="kg-content-text">${data.text}</div>
+      <div class="kg-content-tags">${tagsHtml}</div>
+    </div>
+    <div class="kg-summary-section">
+      <div class="kg-summary-header">结构化摘要</div>
+      <div class="kg-summary-list">${summaryHtml}</div>
+    </div>
+  `
+}
+
+function updateSidePanel(node) {
+  if (!node.label) return
+  const title = node.label.replace(/\n/g, '')
+  caseDetail.value.title = title
+  caseDetail.value.subtitle = '当前选中节点 · 知识图谱'
+  caseDetail.value.text = `这是关于【${title}】的详细描述。当前为动态生成的交互数据。在真实系统中，此处将请求并展示该实体相关的医案内容、病症分析或古籍段落。`
+  renderCaseDetail()
+}
+
+function copyToClipboard() {
+  try {
+    document.execCommand('copy')
+    showToast('医案ID已复制')
+  } catch (err) {
+    console.error('复制失败', err)
+  }
+}
+
+function showToast(message) {
+  const toast = document.createElement('div')
+  toast.textContent = message
+  toast.style.cssText = `
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7); color: white; padding: 10px 20px;
+    border-radius: 4px; z-index: 1000; font-size: 14px;
+    transition: opacity 0.5s;
+  `
+  document.body.appendChild(toast)
+  setTimeout(() => {
+    toast.style.opacity = '0'
+    setTimeout(() => toast.remove(), 500)
+  }, 2000)
+}
+
+let simulation = null
+let resizeHandler = null
+
+function getInitialPosition(node, index, width, height) {
+  const centerX = width / 2
+  const centerY = height / 2
+  if (node.level === 1) {
+    return { x: centerX, y: centerY, fx: centerX, fy: centerY }
+  }
+
+  const minSide = Math.min(width, height)
+  const layerRadiusMap = {
+    2: minSide * 0.18,
+    3: minSide * 0.32,
+    4: minSide * 0.43,
+    5: minSide * 0.52
+  }
+  const sameLevelNodes = graphData.value.nodes.filter(item => item.level === node.level)
+  const levelIndex = sameLevelNodes.findIndex(item => item.id === node.id)
+  const count = Math.max(sameLevelNodes.length, 1)
+  const angleOffset = node.level * Math.PI / 9
+  const angle = (Math.PI * 2 * levelIndex / count) + angleOffset
+  const jitter = node.level >= 4 ? ((index % 3) - 1) * minSide * 0.025 : 0
+  const radius = (layerRadiusMap[node.level] || minSide * 0.52) + jitter
+
+  return {
+    x: centerX + Math.cos(angle) * radius,
+    y: centerY + Math.sin(angle) * radius
+  }
+}
+
+function initD3Graph() {
+  const svgElement = graphSvg.value
+  if (!svgElement) return
+
+  const parentRect = svgElement.parentElement.getBoundingClientRect()
+  const width = parentRect.width || 800
+  const height = parentRect.height || 600
+
+  const svg = d3.select(svgElement)
+    .attr('viewBox', [0, 0, width, height])
+  svg.selectAll('*').remove()
+
+  const g = svg.append('g')
+  const zoom = d3.zoom()
+    .scaleExtent([0.3, 4])
+    .on('zoom', (event) => g.attr('transform', event.transform))
+  svg.call(zoom)
+
+  const nodes = graphData.value.nodes.map((node, index) => ({ ...node, ...getInitialPosition(node, index, width, height) }))
+  const links = graphData.value.links.map(link => ({ ...link }))
+
+  const getRadius = (level) => {
+    const sizes = { 1: 55, 2: 38, 3: 28, 4: 15, 5: 10 }
+    return sizes[level] || 10
+  }
+
+  const getLayerRadius = (level) => {
+    const minSide = Math.min(width, height)
+    const layers = {
+      1: 0,
+      2: minSide * 0.18,
+      3: minSide * 0.32,
+      4: minSide * 0.43,
+      5: minSide * 0.52
+    }
+    return layers[level] || minSide * 0.52
+  }
+
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+      const sourceLevel = d.source.level || 3
+      const targetLevel = d.target.level || 3
+      return 45 + Math.max(sourceLevel, targetLevel) * 18
+    }))
+    .force('charge', d3.forceManyBody().strength(d => d.level <= 2 ? -460 : -180))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collide', d3.forceCollide().radius(d => getRadius(d.level) + 12))
+    .force('radial', d3.forceRadial(d => getLayerRadius(d.level), width / 2, height / 2).strength(d => d.level === 1 ? 1 : 0.35))
+    .force('x', d3.forceX(width / 2).strength(d => d.level === 1 ? 0.35 : 0.02))
+    .force('y', d3.forceY(height / 2).strength(d => d.level === 1 ? 0.35 : 0.02))
+
+  const link = g.append('g')
+    .selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('stroke', '#dfd3c3')
+    .attr('stroke-opacity', 0.9)
+    .attr('stroke-width', 1.5)
+
+  const node = g.append('g')
+    .selectAll('g')
+    .data(nodes)
+    .join('g')
+    .call(drag(simulation))
+
+  node.each(function (d) {
+    const el = d3.select(this)
+    const r = getRadius(d.level)
+    const color = colorMap[d.type] || '#ccc'
+
+    if (d.rings > 0) {
+      for (let i = 1; i <= d.rings; i++) {
+        el.append('circle')
+          .attr('fill', 'none')
+          .attr('stroke-dasharray', '4, 4')
+          .attr('pointer-events', 'none')
+          .attr('r', r + i * 8)
+          .attr('stroke', color)
+          .attr('opacity', 0.7 - (i * 0.15))
+      }
+    }
+
+    el.append('circle')
+      .attr('r', r)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', d.level === 1 ? 3 : 2)
+      .style('cursor', 'pointer')
+      .on('mouseover', function () {
+        d3.select(this)
+          .transition().duration(200)
+          .attr('stroke', 'rgba(110,28,36,0.4)')
+          .attr('stroke-width', 4)
+          .attr('transform', 'scale(1.05)')
+      })
+      .on('mouseout', function () {
+        d3.select(this)
+          .transition().duration(200)
+          .attr('stroke', '#fff')
+          .attr('stroke-width', d.level === 1 ? 3 : 2)
+          .attr('transform', 'scale(1)')
+      })
+
+    if (d.label) {
+      const lines = d.label.split('\n')
+      const textEl = el.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('pointer-events', 'none')
+        .attr('fill', '#fff')
+        .attr('font-size', d.level === 1 ? '18px' : '12px')
+        .attr('font-family', '"SimSun", "宋体", serif')
+        .style('text-shadow', '0 1px 2px rgba(0,0,0,0.3)')
+
+      lines.forEach((line, i) => {
+        textEl.append('tspan')
+          .attr('x', 0)
+          .attr('y', lines.length > 1 ? (i === 0 ? '-0.6em' : '0.6em') : '0')
+          .text(line)
+      })
+    }
+  })
+
+  node.on('click', function (event, d) {
+    if (event.defaultPrevented || d.__dragged) return
+    updateSidePanel(d)
+  })
+
+  let mousePos = null
+  svg.on('mousemove', (event) => {
+    mousePos = d3.pointer(event, g.node())
+  })
+  svg.on('mouseleave', () => {
+    mousePos = null
+  })
+
+  simulation.on('tick', () => {
+    if (mousePos) {
+      nodes.forEach(d => {
+        if (d.level > 3) {
+          const dx = mousePos[0] - d.x
+          const dy = mousePos[1] - d.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 150 && dist > 5) {
+            d.vx += (dx / dist) * 0.4
+            d.vy += (dy / dist) * 0.4
+          }
+        }
+      })
+    }
+
+    link
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y)
+
+    node
+      .attr('transform', d => `translate(${d.x},${d.y})`)
+  })
+
+  function drag(simulation) {
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart()
+      d.fx = d.x
+      d.fy = d.y
+      d.__dragged = false
+    }
+    function dragged(event, d) {
+      d.fx = event.x
+      d.fy = event.y
+      d.__dragged = true
+    }
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0)
+      if (d.level === 1) {
+        d.fx = width / 2
+        d.fy = height / 2
+        return
+      }
+      d.fx = null
+      d.fy = null
+    }
+    return d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended)
+  }
+
+  resizeHandler = () => {
+    const newRect = svgElement.parentElement.getBoundingClientRect()
+    const w = newRect.width || 800
+    const h = newRect.height || 600
+    const centerX = w / 2
+    const centerY = h / 2
+    svg.attr('viewBox', [0, 0, w, h])
+    nodes.forEach(node => {
+      if (node.level === 1) {
+        node.fx = centerX
+        node.fy = centerY
+      }
+    })
+    simulation.force('center', d3.forceCenter(centerX, centerY))
+    simulation.force('radial', d3.forceRadial(d => {
+      const minSide = Math.min(w, h)
+      const layers = {
+        1: 0,
+        2: minSide * 0.18,
+        3: minSide * 0.32,
+        4: minSide * 0.43,
+        5: minSide * 0.52
+      }
+      return layers[d.level] || minSide * 0.52
+    }, centerX, centerY).strength(d => d.level === 1 ? 1 : 0.35))
+    simulation.force('x', d3.forceX(centerX).strength(d => d.level === 1 ? 0.35 : 0.02))
+    simulation.force('y', d3.forceY(centerY).strength(d => d.level === 1 ? 0.35 : 0.02))
+    simulation.alpha(0.3).restart()
+  }
+
+  window.addEventListener('resize', resizeHandler)
+}
+
+onMounted(async () => {
+  try {
+    const data = await fetchKnowledgeGraph()
+    if (data?.books?.length) {
+      books.value = data.books
+    }
+    if (data?.detail) {
+      caseDetail.value = data.detail
+    }
+    if (data?.nodes?.length && data?.links?.length) {
+      graphData.value = {
+        nodes: data.nodes,
+        links: data.links
+      }
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
+  await nextTick()
+  renderSidebar()
+  renderCaseDetail()
+  setTimeout(initD3Graph, 150)
+})
+
+onBeforeUnmount(() => {
+  if (simulation) {
+    simulation.stop()
+  }
+  if (resizeHandler) {
+    window.removeEventListener('resize', resizeHandler)
+  }
 })
 
 function goHome() {
@@ -166,548 +497,428 @@ function goHome() {
 
 <template>
   <div class="knowledge-page">
-    <!-- 核心三栏布局 -->
-    <div class="main-container">
-      <!-- 左侧：图谱检索区 -->
-      <div class="left-column">
-        <div class="search-panel card">
-          <h2 class="panel-title">图谱检索</h2>
-
-          <!-- 症状分类 -->
-          <div class="search-category">
-            <div class="category-label">症状</div>
-            <div class="tag-grid">
-              <div
-                v-for="(item, index) in symptoms"
-                :key="index"
-                :class="['tag-item', { highlight: item === '发热' }]"
-              >
-                {{ item }}
-              </div>
-            </div>
-          </div>
-
-          <!-- 药物分类 -->
-          <div class="search-category">
-            <div class="category-label">药物</div>
-            <div class="tag-grid">
-              <div
-                v-for="(item, index) in medicines"
-                :key="index"
-                class="tag-item"
-              >
-                {{ item }}
-              </div>
-            </div>
-          </div>
-
-          <!-- 病因病机 -->
-          <div class="search-category">
-            <div class="category-label">病因病机</div>
-            <div class="cause-list">
-              <div
-                v-for="(item, index) in causes"
-                :key="index"
-                class="cause-item"
-              >
-                {{ item }}
-              </div>
-            </div>
-          </div>
-
-          <!-- 关联实体总量 -->
-          <div class="total-count">{{ totalCount }}</div>
-          <div class="total-desc">关联实体总量</div>
-        </div>
-        <span class="column-spacer"></span>
+    <aside class="sidebar-left">
+      <div class="logo-title">图谱浏览</div>
+      <div class="main-tabs">
+        <button class="main-tab active">古籍总览</button>
+        <button class="main-tab">医案浏览</button>
       </div>
-
-      <!-- 中间：图谱可视化区 -->
-      <div class="middle-column">
-        <div class="graph-panel">
-          <div
-            v-for="(node, index) in allNodes"
-            :key="index"
-            :class="['graph-node', `node-${node.type}`, node.size]"
-            :style="{ left: node.x + '%', top: node.y + '%', '--i': index }"
-          >
-            {{ node.name }}
-          </div>
-
-          <!-- 图谱图例 -->
-          <div class="graph-legend">
-            <div class="legend-item">
-              <div class="legend-dot dot-scholar" />
-              <span>核心学者</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot dot-book" />
-              <span>文献古籍</span>
-            </div>
-          </div>
-        </div>
-        <span class="column-spacer"></span>
+      <div class="section-title">来源古籍</div>
+      <div class="book-list" ref="bookListContainer"></div>
+      <div class="entity-types-container">
+        <div class="section-title">实体类型</div>
+        <div class="entity-tags" ref="entityTypesContainer"></div>
       </div>
+    </aside>
 
-      <!-- 右侧：详情面板 -->
-      <div class="right-column">
-        <div class="detail-panel card">
-          <div class="close-btn">×</div>
+    <main class="main-content">
+      <svg ref="graphSvg" id="graph-svg"></svg>
+      <div class="graph-legend" ref="graphLegendContainer"></div>
+    </main>
 
-          <h2 class="detail-title">{{ detail.title }}</h2>
-          <p class="detail-subtitle">{{ detail.subtitle }}</p>
-
-          <!-- 信息卡片 -->
-          <div class="info-cards">
-            <div class="info-card">
-              <div class="info-card-label">成书年代</div>
-              <div class="info-card-value">{{ detail.year }}</div>
-            </div>
-            <div class="info-card">
-              <div class="info-card-label">引用频次</div>
-              <div class="info-card-value">{{ detail.citations }}</div>
-            </div>
-          </div>
-
-          <!-- 核心论述 -->
-          <div class="abstract-block">
-            <h3 class="abstract-title">核心论述摘要</h3>
-            <p class="abstract-content">"{{ detail.abstract }}"</p>
-          </div>
-
-          <!-- 相关实体 -->
-          <div class="related-entities">
-            <h3 class="entities-title">
-              相关联实体
-              <span class="entities-count">{{ detail.relatedCount }}</span>
-            </h3>
-            <div
-              v-for="(item, index) in detail.related"
-              :key="index"
-              class="entity-item"
-            >
-              <span class="entity-name">{{ item.name }}</span>
-              <span class="entity-type">{{ item.type }}</span>
-            </div>
-          </div>
-
-          <a href="#" class="btn-deep">深入文献归档</a>
-        </div>
-        <button class="btn-back" @click="goHome">返回首页</button>
+    <aside class="sidebar-right">
+      <div class="search-wrapper">
+        <input type="text" class="search-input" placeholder="搜索医案 / 古籍 / 实体" />
+        <button class="search-btn">检索</button>
       </div>
-    </div>
+      <div class="detail-card">
+        <div class="detail-label">医案详情</div>
+        <div ref="detailDynamicContent"></div>
+        <div class="action-row">
+          <button class="action-btn" @click="copyToClipboard">复制医案ID</button>
+          <button class="action-btn">分享当前视图</button>
+        </div>
+      </div>
+      <button class="btn-back" @click="goHome">返回首页</button>
+    </aside>
   </div>
 </template>
 
-<style scoped>
+<style>
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d5c8bb; border-radius: 3px; }
+
+.knowledge-page,
+.knowledge-page * {
+  box-sizing: border-box;
+}
+
 .knowledge-page {
-  min-height: calc(100vh - 70px);
+  width: 100%;
+  height: calc(100vh - 53px);
+  display: flex;
   background-color: var(--bg-page);
+  color: var(--color-text);
+  overflow: hidden;
+  font-family: "SimSun", "宋体", serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* 核心布局：三栏结构 */
-.main-container {
-  display: grid;
-  grid-template-columns: 300px 1fr 400px;
-  gap: 20px;
-  padding: 24px 40px;
-  min-height: calc(100vh - 70px);
-}
-
-.left-column,
-.middle-column,
-.right-column {
+.sidebar-left {
+  width: 280px;
+  background: rgba(248, 246, 240, 0.8);
+  border-right: 1px solid var(--color-border);
+  padding: 30px 24px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  z-index: 10;
 }
 
-.left-column,
-.middle-column {
+.logo-title {
+  font-size: 28px;
+  color: var(--color-primary);
+  font-weight: bold;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.main-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.main-tab {
+  padding: 8px 16px;
+  background: #eedddc;
+  color: #8c5b5f;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.3s;
+  border-radius: 4px;
+}
+
+.main-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.section-title {
+  font-size: 15px;
+  color: var(--color-text);
+  margin-bottom: 15px;
+  position: relative;
+  padding-left: 10px;
+  font-weight: bold;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 14px;
+  background-color: var(--color-primary);
+}
+
+.book-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.kg-book-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 4px;
+  border-bottom: 1px solid #e8dfd5;
+  transition: all 0.2s;
+}
+
+.kg-book-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.kg-book-item.active {
+  background: #fff;
+  border: 1px solid #d5c8bb;
+  color: var(--color-primary);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.kg-book-count {
+  color: var(--color-secondary);
+}
+
+.kg-book-item.active .kg-book-count {
+  color: var(--color-primary);
+}
+
+.entity-types-container {
+  margin-top: auto;
+}
+
+.entity-tags {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.right-column {
-  gap: 8px;
+.kg-entity-tag {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.column-spacer {
-  height: 38px;
+.main-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+#graph-svg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  display: block;
+}
+
+#graph-svg:active {
+  cursor: grabbing;
+}
+
+.graph-legend {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  width: max-content;
+  max-width: 90%;
+  background: rgba(253, 250, 246, 0.95);
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(132, 33, 48, 0.08);
+  border: 1px solid var(--color-border);
+  z-index: 100;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+}
+
+.kg-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 500;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
-/* 左侧：图谱检索区 */
-.search-panel {
-  padding: 24px;
-  border-radius: 2px;
-  flex: 1;
+.kg-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-.panel-title {
-  font-size: 20px;
-  color: var(--color-primary);
-  font-weight: bold;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-}
-
-.search-category {
-  margin-bottom: 16px;
-}
-
-.category-label {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.category-label::before {
-  content: "◎";
-  font-size: 10px;
-  color: var(--color-primary);
-}
-
-/* 标签网格 */
-.tag-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  font-size: 12px;
-}
-
-.tag-item {
-  padding: 4px 2px;
-  text-align: center;
-  border-radius: 2px;
-  background-color: var(--bg-page);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.tag-item:hover {
-  background-color: #e8e3d8;
-}
-
-.tag-item.highlight {
-  background-color: var(--color-primary);
-  color: #fff;
-}
-
-.tag-item.highlight:hover {
-  background-color: #701f2a;
-}
-
-/* 病因病机 */
-.cause-list {
-  margin-top: 16px;
-  font-size: 13px;
-}
-
-.cause-item {
-  padding: 8px 0 8px 16px;
-  margin-bottom: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-radius: 2px;
-  position: relative;
-}
-
-.cause-item:hover {
-  background-color: #e8e3d8;
-}
-
-.cause-item::before {
-  content: "•";
-  position: absolute;
-  left: 4px;
-  color: var(--color-primary);
-}
-
-/* 关联实体总量 */
-.total-count {
-  margin-top: 20px;
-  font-size: 36px;
-  color: var(--color-primary);
-  font-weight: bold;
-}
-
-.total-desc {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
-}
-
-/* 中间：图谱可视化区 */
-.graph-panel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  min-height: 500px;
-  flex: 1;
-}
-
-/* 图谱节点基础样式 */
-.graph-node {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  text-align: center;
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  font-family: "SimSun", "宋体", serif;
-  transform: translate(-50%, -50%);
-  animation: node-in 0.5s ease-out both;
-  animation-delay: calc(var(--i) * 50ms);
-}
-
-@keyframes node-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-.graph-node:hover {
-  transform: translate(-50%, -50%) scale(1.05);
-}
-
-/* 核心学者节点（红底白字） */
-.node-scholar {
-  background-color: var(--color-primary) !important;
-  color: #fff !important;
-}
-
-.node-scholar.size-xl {
-  width: 110px;
-  height: 110px;
-  font-size: 16px;
-}
-
-.node-scholar.size-m {
-  width: 65px;
-  height: 65px;
-  font-size: 12px;
-}
-
-.node-scholar.size-s {
-  width: 55px;
-  height: 55px;
-  font-size: 11px;
-}
-
-/* 文献古籍节点（白底红字） */
-.node-book {
-  background-color: #fff !important;
-  color: var(--color-primary) !important;
-}
-
-.node-book.size-m {
-  width: 60px;
-  height: 60px;
-  font-size: 12px;
-}
-
-.node-book.size-s {
-  width: 50px;
-  height: 50px;
-  font-size: 11px;
-}
-
-.node-book.size-xs {
-  width: 40px;
-  height: 40px;
-  font-size: 10px;
-}
-
-/* 图谱图例 */
-.graph-legend {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 12px;
-  color: #666;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.dot-scholar {
-  background-color: var(--color-primary);
-}
-
-.dot-book {
-  background-color: #fff;
-  box-shadow: 0 0 0 1px #ccc inset;
-}
-
-/* 右侧：详情面板 */
-.detail-panel {
-  background-color: #F5F3EE99 !important;
-  padding: 24px;
-  border-radius: 2px;
-  position: relative;
+.sidebar-right {
+  width: 360px;
+  background: #fdfaf6;
+  border-left: 1px solid var(--color-border);
+  padding: 30px 24px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  z-index: 10;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.02);
+  overflow-y: auto;
+}
+
+.search-wrapper {
+  display: flex;
+  margin-bottom: 30px;
+  border: 1px solid #d5c8bb;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.search-input {
   flex: 1;
-}
-
-/* 关闭按钮 */
-.close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-  color: #999;
-}
-
-.detail-title {
-  font-size: 24px;
-  color: var(--color-primary);
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.detail-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-/* 信息卡片 */
-.info-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.info-card {
-  padding: 12px 16px;
-  background-color: #f9f6f0;
-  border-radius: 4px;
-  border-left: 2px solid var(--color-primary);
-}
-
-.info-card-label {
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 4px;
-}
-
-.info-card-value {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 核心论述 */
-.abstract-block {
-  margin-bottom: 16px;
-  border-left: 2px solid #d4c4b8;
-  padding-left: 12px;
-}
-
-.abstract-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-.abstract-content {
+  border: none;
+  padding: 10px 15px;
   font-size: 13px;
-  color: #666;
-  line-height: 1.8;
+  font-family: inherit;
+  outline: none;
+  background: transparent;
 }
 
-/* 相关实体 */
-.related-entities {
-  margin-bottom: 16px;
-}
-
-.entities-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 12px;
-  color: #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.entities-count {
-  font-size: 12px;
-  color: #999;
-  background-color: #f0ece4;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-
-.entity-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  margin-bottom: 4px;
-  font-size: 13px;
-}
-
-.entity-name {
-  color: #333;
-}
-
-.entity-type {
-  color: #999;
-}
-
-/* 按钮样式 */
-.btn-deep {
-  display: block;
-  width: 100%;
-  padding: 16px;
-  background-color: var(--color-primary);
+.search-btn {
+  background: var(--color-primary);
   color: #fff;
-  font-size: 16px;
+  border: none;
+  padding: 0 20px;
   cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  margin-bottom: 16px;
-  border-radius: 0;
-  transition: background-color 0.2s ease;
+  font-family: inherit;
+  font-size: 13px;
+  transition: opacity 0.2s;
 }
 
-.btn-deep:hover {
-  background-color: var(--color-primary-hover);
+.search-btn:hover {
+  opacity: 0.9;
+}
+
+.detail-card {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.detail-label {
+  display: inline-block;
+  color: var(--color-primary);
+  font-size: 15px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 4px;
+  font-weight: bold;
+}
+
+.kg-detail-title {
+  font-size: 22px;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.kg-detail-subtitle {
+  font-size: 12px;
+  color: var(--color-secondary);
+  margin-bottom: 20px;
+}
+
+.kg-detail-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.kg-d-tab {
+  padding: 6px 14px;
+  border: 1px solid #d5c8bb;
+  background: transparent;
+  color: var(--color-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.kg-d-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.kg-content-box {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  margin-bottom: 24px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.kg-content-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--color-text);
+  text-align: justify;
+  margin-bottom: 20px;
+}
+
+.kg-content-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kg-c-tag {
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.kg-summary-header {
+  font-size: 14px;
+  color: var(--color-primary);
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+}
+
+.kg-summary-header::before {
+  content: '';
+  width: 12px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+.kg-summary-row {
+  display: flex;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--color-border);
+  font-size: 13px;
+}
+
+.kg-summary-row:last-child {
+  border-bottom: none;
+}
+
+.kg-s-label {
+  width: 50px;
+  color: var(--color-secondary);
+}
+
+.kg-s-value {
+  flex: 1;
+  color: var(--color-text);
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #d5c8bb;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
 }
 </style>

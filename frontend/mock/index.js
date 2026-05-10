@@ -276,9 +276,99 @@ function getRouteId(request = {}) {
   return params.id || query.id || url.split('?')[0].split('/').filter(Boolean).pop()
 }
 
-function matchesSoftwarePatentType(item, type) {
-  if (!type) return true
-  return item.type === type || item.typeName === type
+const knowledgeGraph = {
+  books: [
+    { id: 'b1', name: '《临证指南医案》', count: 224, active: true },
+    { id: 'b2', name: '《叶天士晚年方案真本》', count: 200, active: false },
+    { id: 'b3', name: '《叶氏医案存真》', count: 200, active: false },
+    { id: 'b4', name: '《未刻本叶氏医案》', count: 200, active: false },
+    { id: 'b5', name: '《眉寿堂方案选存》', count: 200, active: false },
+    { id: 'b6', name: '《三家医案合刻》', count: 50, active: false },
+    { id: 'b7', name: '《种福堂公选医案》', count: 50, active: false }
+  ],
+  nodes: [
+    { id: 'center', label: '叶天士医案\n知识图谱', type: 'center', level: 1, rings: 3 },
+    { id: 'book_lzzn', label: '临证指南\n医案', type: 'book', level: 2, rings: 1 },
+    { id: 'book_wnaf', label: '叶天士晚年\n方案真本', type: 'book', level: 2, rings: 1 },
+    { id: 'book_yscz', label: '叶氏医案\n存真', type: 'book', level: 2, rings: 0 },
+    { id: 'case_1_4', label: '案1-4', type: 'case', level: 3, rings: 1 },
+    { id: 'visit_1', label: '诊次1', type: 'visit', level: 3, rings: 1 },
+    { id: 'visit_2', label: '诊次2', type: 'visit', level: 3, rings: 0 },
+    { id: 'path_lung_heat', label: '病因病机\n肺热', type: 'pathology', level: 2, rings: 1 },
+    { id: 'path_qi_block', label: '肺气不能\n清肃', type: 'pathology', level: 3, rings: 0 },
+    { id: 'sym_cough', label: '症状\n咳嗽', type: 'symptom', level: 3, rings: 1 },
+    { id: 'sym_epilepsy', label: '症状\n痫症', type: 'symptom', level: 3, rings: 0 },
+    { id: 'sym_chest', label: '右胸高', type: 'symptom', level: 4, rings: 0 },
+    { id: 'formula_siling', label: '方剂\n四苓', type: 'formula', level: 3, rings: 1 },
+    { id: 'formula_qingfei', label: '方剂\n清肺饮', type: 'formula', level: 3, rings: 0 },
+    { id: 'herb_fuling', label: '茯苓', type: 'herb', level: 4, rings: 0 },
+    { id: 'herb_zhuye', label: '淡竹叶', type: 'herb', level: 4, rings: 0 },
+    { id: 'herb_zexie', label: '泽泻', type: 'herb', level: 5, rings: 0 },
+    { id: 'herb_zhuling', label: '猪苓', type: 'herb', level: 5, rings: 0 },
+    { id: 'patient_child', label: '稚年', type: 'patient', level: 4, rings: 0 },
+    { id: 'p0', label: '', type: 'herb', level: 5, rings: 0 },
+    { id: 'p1', label: '', type: 'symptom', level: 5, rings: 0 },
+    { id: 'p2', label: '', type: 'case', level: 5, rings: 0 },
+    { id: 'p3', label: '', type: 'formula', level: 5, rings: 0 },
+    { id: 'p4', label: '', type: 'pathology', level: 5, rings: 0 },
+    { id: 'p5', label: '', type: 'herb', level: 5, rings: 0 },
+    { id: 'p6', label: '', type: 'symptom', level: 5, rings: 0 },
+    { id: 'p7', label: '', type: 'case', level: 5, rings: 0 },
+    { id: 'p8', label: '', type: 'formula', level: 5, rings: 0 },
+    { id: 'p9', label: '', type: 'pathology', level: 5, rings: 0 },
+    { id: 'p10', label: '', type: 'herb', level: 5, rings: 0 },
+    { id: 'p11', label: '', type: 'symptom', level: 5, rings: 0 }
+  ],
+  links: [
+    { source: 'center', target: 'book_lzzn' },
+    { source: 'center', target: 'book_wnaf' },
+    { source: 'center', target: 'book_yscz' },
+    { source: 'book_lzzn', target: 'case_1_4' },
+    { source: 'case_1_4', target: 'visit_1' },
+    { source: 'case_1_4', target: 'visit_2' },
+    { source: 'visit_1', target: 'path_lung_heat' },
+    { source: 'visit_1', target: 'path_qi_block' },
+    { source: 'visit_1', target: 'sym_cough' },
+    { source: 'visit_1', target: 'sym_epilepsy' },
+    { source: 'visit_1', target: 'sym_chest' },
+    { source: 'visit_1', target: 'formula_siling' },
+    { source: 'visit_2', target: 'formula_qingfei' },
+    { source: 'formula_siling', target: 'herb_fuling' },
+    { source: 'formula_siling', target: 'herb_zhuye' },
+    { source: 'formula_siling', target: 'herb_zexie' },
+    { source: 'formula_siling', target: 'herb_zhuling' },
+    { source: 'case_1_4', target: 'patient_child' },
+    { source: 'book_lzzn', target: 'p0' },
+    { source: 'case_1_4', target: 'p1' },
+    { source: 'case_1_4', target: 'p2' },
+    { source: 'visit_1', target: 'p3' },
+    { source: 'path_lung_heat', target: 'p4' },
+    { source: 'formula_siling', target: 'p5' },
+    { source: 'sym_cough', target: 'p6' },
+    { source: 'book_wnaf', target: 'p7' },
+    { source: 'visit_2', target: 'p8' },
+    { source: 'path_qi_block', target: 'p9' },
+    { source: 'formula_qingfei', target: 'p10' },
+    { source: 'sym_epilepsy', target: 'p11' }
+  ],
+  detail: {
+    title: '《临证指南医案》',
+    subtitle: 'Case_1-4 · 叶天士医案知识图谱',
+    text: '稚年纯阳体质，热症最多。病偏右胸高，呼气不利，肺气不能清肃。热郁内蒸，逆传膻中，致天君震动，状若痫症。夫肺主卫，心主营，二气循环于肺胃脉中。',
+    tags: [
+      { label: '肺气不能清肃', type: 'pathology' },
+      { label: '痫症', type: 'symptom' },
+      { label: '四苓', type: 'formula' },
+      { label: '茯苓', type: 'herb' },
+      { label: '淡竹叶', type: 'herb' }
+    ],
+    summary: [
+      { label: '来源', value: '《临证指南医案》' },
+      { label: '诊次', value: '5 次，默认显示诊次1' },
+      { label: '实体', value: '症状 7 · 病机 6 · 方剂 5 · 中药 28' },
+      { label: '关系', value: '组成、加味、减味、诊次用方' }
+    ]
+  }
 }
 
 const wordCloudRoutes = ['/api/v1/wordClouds', '/api/v1/word-clouds']
