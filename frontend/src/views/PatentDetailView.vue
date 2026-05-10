@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchSoftwarePatentDetail } from '@/api/index.js'
@@ -42,11 +43,11 @@ const patent = ref({
 
 onMounted(async () => {
   try {
-    const data = await fetchSoftwarePatentDetail(route.params.id)
+    const data = await fetchSoftwarePatentDetail(route.params.id || 'software_001')
     if (data) {
       patent.value = {
         title: data.title,
-        subtitle: `${data.type} · ${data.year}年`,
+        subtitle: `${data.typeName || data.type} · ${data.year}年`,
         source: data.owner || '',
         inventors: normalizeList(data.inventors),
         date: data.year ? `${data.year}年` : '',
@@ -68,15 +69,15 @@ const closePage = () => {
 </script>
 
 <template>
-  <main class="patent-page">
-    <section class="patent-workspace" aria-label="文档阅读区">
+  <DocumentReaderLayout :reader-label="'\u6587\u6863\u9605\u8bfb\u533a'" :aside-label="'\u4e13\u5229\u8be6\u60c5'">
+    <template #reader>
       <PdfReader
         :src="patent.pdfUrl"
         :fallback-image="documentPage"
       />
-    </section>
+    </template>
 
-    <aside class="patent-aside" aria-label="专利详情">
+    <template #aside>
       <div class="aside-close">
         <button type="button" aria-label="关闭专利详情" @click="closePage">×</button>
       </div>
@@ -127,46 +128,11 @@ const closePage = () => {
           <button type="button">引用导出</button>
         </div>
       </section>
-    </aside>
-  </main>
+    </template>
+  </DocumentReaderLayout>
 </template>
 
 <style scoped>
-.patent-page {
-  height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  background-color: #f0f0f0;
-  color: #2b2520;
-  overflow: hidden;
-  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
-}
-
-.patent-workspace {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: #f5f2ed;
-  overflow: hidden;
-}
-
-.patent-aside::-webkit-scrollbar {
-  display: none;
-}
-
-.patent-aside {
-  min-height: 0;
-  padding: 0 32px 32px;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  box-shadow: 0 16px 48px rgba(43, 37, 32, 0.12);
-  overflow-y: auto;
-  scrollbar-width: none;
-  z-index: 3;
-}
-
 .aside-close {
   min-height: 58px;
   padding: 16px 0 8px;
@@ -376,27 +342,6 @@ const closePage = () => {
   background-color: #fafafa;
 }
 
-@media (max-width: 1180px) {
-  .patent-page {
-    min-height: 100vh;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-  }
-
-  .patent-workspace {
-    min-height: 720px;
-    overflow: visible;
-  }
-
-  .patent-aside {
-    min-height: auto;
-    padding: 0 32px 40px;
-    overflow: visible;
-  }
-}
-
 @media (max-width: 680px) {
   .patent-hero h1 {
     font-size: 22px;
@@ -405,11 +350,6 @@ const closePage = () => {
 
   .secondary-actions {
     grid-template-columns: 1fr;
-  }
-
-  .patent-aside {
-    padding-right: 20px;
-    padding-left: 20px;
   }
 }
 </style>

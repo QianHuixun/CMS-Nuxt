@@ -70,6 +70,7 @@ onMounted(async () => {
   try {
     const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
     activities.value = (res.rows || []).map(a => ({
+      id: a.id,
       title: a.title,
       date: formatDate(a.time),
     }))
@@ -171,9 +172,11 @@ onMounted(async () => {
 
             <ol>
               <li v-for="activity in activities" :key="`${activity.title}-${activity.date}`">
-                <span></span>
-                <p>{{ activity.title }}</p>
-                <time>{{ activity.date }}</time>
+                <router-link :to="`/activity/${activity.id}`">
+                  <span></span>
+                  <p>{{ activity.title }}</p>
+                  <time>{{ activity.date }}</time>
+                </router-link>
               </li>
             </ol>
           </section>
@@ -570,14 +573,19 @@ onMounted(async () => {
 }
 
 .activity-panel li {
+  padding: 7px 0;
+}
+
+.activity-panel li > a {
   display: grid;
   grid-template-columns: 7px minmax(0, 1fr) 82px;
   gap: 10px;
   align-items: start;
-  padding: 7px 0;
+  color: inherit;
+  text-decoration: none;
 }
 
-.activity-panel li > span {
+.activity-panel li > a > span {
   width: 5px;
   height: 5px;
   margin-top: 6px;
@@ -719,7 +727,7 @@ onMounted(async () => {
   }
 
   .paper-item,
-  .activity-panel li {
+  .activity-panel li > a {
     grid-template-columns: 1fr;
     gap: 8px;
   }
