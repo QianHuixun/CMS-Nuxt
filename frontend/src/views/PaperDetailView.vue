@@ -142,7 +142,7 @@ const closePage = () => {
 
 <style scoped>
 .paper-page {
-  height: calc(100vh - 64px);
+  height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 400px;
   background-color: #f0f0f0;
