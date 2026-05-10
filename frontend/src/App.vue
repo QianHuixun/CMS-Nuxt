@@ -29,6 +29,8 @@ const shouldShowNav = computed(() => {
 <style scoped>
 .app {
   min-height: 100vh;
+  padding-top: 53px;
   background-color: #f8f6f0;
+  box-sizing: border-box;
 }
 </style>

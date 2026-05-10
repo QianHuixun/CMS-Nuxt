@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchKnowledgeGraph } from '@/api/index.js'
 
 const router = useRouter()
 
@@ -20,6 +21,7 @@ const medicines = ref([
 ])
 
 const causes = ref(['风热犯肺', '营分热炽', '营分热炽'])
+const totalCount = ref('12,842')
 
 const SIZE_RADIUS = {
   'size-xl': 10,
@@ -52,9 +54,20 @@ function interleave(scholars, books) {
   return list
 }
 
+function isGraphNodeValid(node) {
+  return node?.name && node?.type && SIZE_RADIUS[node.size]
+}
+
+function canRenderNodes(nodes) {
+  return Array.isArray(nodes) && nodes.some(n => n.size === 'size-xl') && nodes.every(isGraphNodeValid)
+}
+
 function generatePositions(rawNodes) {
-  const centerNode = rawNodes.find(n => n.size === 'size-xl')
-  const rest = rawNodes.filter(n => n.size !== 'size-xl')
+  const validNodes = Array.isArray(rawNodes) ? rawNodes.filter(isGraphNodeValid) : []
+  const centerNode = validNodes.find(n => n.size === 'size-xl')
+  if (!centerNode) return []
+
+  const rest = validNodes.filter(n => n.size !== 'size-xl')
 
   const scholars = rest.filter(n => n.type === 'scholar')
   const books = rest.filter(n => n.type === 'book')
@@ -147,6 +160,22 @@ const detail = ref({
   ]
 })
 
+onMounted(async () => {
+  try {
+    const data = await fetchKnowledgeGraph()
+    symptoms.value = data.symptoms || symptoms.value
+    medicines.value = data.medicines || medicines.value
+    causes.value = data.causes || causes.value
+    totalCount.value = data.totalCount || totalCount.value
+    if (canRenderNodes(data.nodes)) {
+      allNodes.value = generatePositions(data.nodes)
+    }
+    detail.value = data.detail || detail.value
+  } catch (e) {
+    console.error(e)
+  }
+})
+
 function goHome() {
   router.push('/home')
 }
@@ -204,7 +233,7 @@ function goHome() {
           </div>
 
           <!-- 关联实体总量 -->
-          <div class="total-count">12,842</div>
+          <div class="total-count">{{ totalCount }}</div>
           <div class="total-desc">关联实体总量</div>
         </div>
         <span class="column-spacer"></span>

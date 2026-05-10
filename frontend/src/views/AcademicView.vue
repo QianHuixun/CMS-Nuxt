@@ -5,9 +5,27 @@ import { fetchTalents, fetchWordClouds, fetchProjects } from '@/api/index.js'
 
 const router = useRouter()
 
-const teamList = ref([])
+const fallbackTeamList = [
+  { id: 1, name: '陈维', title: '教授', desc: '出土医学文献整理与经脉数字化', avatar: 'https://example.edu/mock/talents/chen-wei.jpg' },
+  { id: 2, name: '周明', title: '副教授', desc: '医学史; 数字化人文', avatar: 'https://example.edu/mock/talents/zhou-ming.jpg' },
+  { id: 3, name: '李青', title: '讲师', desc: '文献学; 数据工程', avatar: 'https://example.edu/mock/talents/li-qing.jpg' },
+]
+
+const fallbackWords = ['天回医简', '经脉', '出土文献', '数字化', '知识服务', '简牍', '中医药', '古籍']
+
+const fallbackProjectList = [
+  { tag: '国家级', title: '出土医学文献多模态整理与知识组织研究', meta: '负责人: 陈维 · 2024-2027' },
+  { tag: '省部级', title: '巴蜀医籍数字化保护与利用', meta: '负责人: 周明 · 2023-2025' },
+]
+
+const createWordCloud = (words) => words.slice(0, wordLayouts.length).map((word, i) => ({
+  text: typeof word === 'string' ? word : word.text,
+  ...wordLayouts[i],
+}))
+
+const teamList = ref([...fallbackTeamList])
 const wordCloud = ref([])
-const projectList = ref([])
+const projectList = ref([...fallbackProjectList])
 
 const wordLayouts = [
   { top: '2%', left: '36%', height: '320px', width: '52px', fontSize: '28px', opacity: 1, zIndex: 3 },
@@ -26,26 +44,26 @@ const wordLayouts = [
   { bottom: '6%', left: '18%', height: '250px', width: '40px', fontSize: '21px', opacity: 0.86, zIndex: 2 },
 ]
 
+wordCloud.value = createWordCloud(fallbackWords)
+
 onMounted(async () => {
   try {
     const talentRes = await fetchTalents()
-    teamList.value = (talentRes.list || []).map(t => ({
+    const nextTeamList = (talentRes.list || []).map(t => ({
       id: t.id,
       name: t.name,
       title: t.title,
       desc: t.researchArea,
       avatar: t.avatar,
     }))
+    if (nextTeamList.length) teamList.value = nextTeamList
   } catch (e) {
     console.error('获取人才列表失败', e)
   }
   try {
     const wordRes = await fetchWordClouds()
     const words = (wordRes.list || []).flatMap(w => w.words || [])
-    wordCloud.value = words.slice(0, wordLayouts.length).map((w, i) => ({
-      text: w.text,
-      ...wordLayouts[i],
-    }))
+    if (words.length) wordCloud.value = createWordCloud(words)
   } catch (e) {
     console.error('获取词云失败', e)
   }
@@ -149,7 +167,7 @@ function goExpert(id) {
 .academic-page {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 53px);
   overflow: hidden;
   background-color: var(--bg-page);
   background-image:
@@ -165,7 +183,7 @@ function goExpert(id) {
   grid-template-columns: 30% 40% 30%;
   gap: 20px;
   align-items: flex-start;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 53px - 104px);
 }
 
 .team-section {

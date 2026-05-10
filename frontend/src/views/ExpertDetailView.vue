@@ -1,8 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchTalentDetail } from '@/api/index.js'
-import arrowIcon from '@/assets/images/pages/expert-detail/arrow-icon.svg'
+import { fetchTalentDetail, fetchTalents } from '@/api/index.js'
 import backIcon from '@/assets/images/pages/expert-detail/back-icon.svg'
 import cardImageOne from '@/assets/images/pages/expert-detail/card-image-1-3d674a.png'
 import cardImageTwo from '@/assets/images/pages/expert-detail/card-image-2-4cbd0d.png'
@@ -24,7 +23,7 @@ const wasRealDrag = ref(false)
 let wheelLock = false
 let connectorResizeObserver
 
-const experts = ref([
+const fallbackExperts = [
   { id: 'chen-wei', name: '陈伟', degree: '博士', title: '首席研究员', subtitle: '博士生导师', photo: expertPhoto, focus: '出土医简保护', bio: '' },
   { id: 'lin-yue', name: '林悦', degree: '博士', title: '图像计算专家', subtitle: '副研究员', photo: cardImageOne, focus: '多光谱影像', bio: '' },
   { id: 'zhou-ming', name: '周明', degree: '博士', title: '医学史研究员', subtitle: '教授', photo: cardImageTwo, focus: '汉代医学史', bio: '' },
@@ -32,16 +31,49 @@ const experts = ref([
   { id: 'he-ran', name: '何然', degree: '博士', title: '文物保护专家', subtitle: '研究馆员', photo: cardImageOne, focus: '文物保护', bio: '' },
   { id: 'wan-li', name: '万理', degree: '博士', title: '数据治理专家', subtitle: '副教授', photo: cardImageTwo, focus: '数据标准', bio: '' },
   { id: 'zhao-ning', name: '赵宁', degree: '博士', title: '语义检索专家', subtitle: '研究员', photo: expertPhoto, focus: '智能检索', bio: '' },
-])
+]
+
+const expertPhotos = [expertPhoto, cardImageOne, cardImageTwo]
+const experts = ref([...fallbackExperts])
 
 const publications = ref([])
 
+const isNumericId = (id) => id !== undefined && id !== null && id !== '' && Number.isFinite(Number(id))
+
+const loadExperts = async () => {
+  try {
+    const data = await fetchTalents()
+    const list = data.list || []
+    if (list.length) {
+      experts.value = list.map((item, index) => ({
+        id: item.id,
+        name: item.name,
+        degree: item.degree || '博士',
+        title: item.title || '',
+        subtitle: item.institution || '',
+        photo: item.avatar || expertPhotos[index % expertPhotos.length],
+        focus: item.researchArea || '',
+        bio: ''
+      }))
+    }
+  } catch (e) {
+    console.error('获取人才列表失败', e)
+  } finally {
+    loadExpert(route.params.id || experts.value[0]?.id)
+  }
+}
+
 const loadExpert = async (id) => {
+  if (!isNumericId(id)) {
+    publications.value = []
+    return
+  }
+
   try {
     const numericId = Number(id)
     const data = await fetchTalentDetail(numericId)
     if (data) {
-      const idx = experts.value.findIndex(e => e.id === route.params.id)
+      const idx = experts.value.findIndex(e => String(e.id) === String(id))
       if (idx >= 0) {
         experts.value[idx].bio = data.bio || ''
       }
@@ -58,9 +90,7 @@ const loadExpert = async (id) => {
 }
 
 onMounted(() => {
-  if (route.params.id) {
-    loadExpert(route.params.id)
-  }
+  loadExperts()
 })
 
 watch(() => route.params.id, (newId) => {
@@ -68,19 +98,13 @@ watch(() => route.params.id, (newId) => {
 })
 
 const currentExpert = computed(() => {
-  return experts.value.find((expert) => expert.id === route.params.id) ?? experts.value[0]
+  return experts.value.find((expert) => String(expert.id) === String(route.params.id)) ?? experts.value[0]
 })
 
 const currentExpertIndex = computed(() => {
   const index = experts.value.findIndex((expert) => expert.id === currentExpert.value.id)
   return index === -1 ? 0 : index
 })
-
-const getPublicationRoute = (publication) => {
-  if (publication.type === 'book') return `/monograph/${publication.id}`
-  if (publication.type === 'paper') return `/paper/${publication.id}`
-  return '#'
-}
 
 const normalizeOffset = (index) => {
   const half = Math.floor(experts.value.length / 2)
@@ -261,18 +285,16 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
         </svg>
 
         <section ref="publicationList" class="publication-list" aria-label="专家成果">
-          <router-link
+          <article
             v-for="(publication, index) in publications"
             :key="`${currentExpert.id}-${index}`"
             class="publication-item"
-            :to="getPublicationRoute(publication)"
           >
             <div class="publication-copy">
               <span>{{ publication.number }}</span>
               <h2>{{ publication.title }}</h2>
             </div>
-            <img :src="arrowIcon" alt="" aria-hidden="true">
-          </router-link>
+          </article>
         </section>
       </article>
 
@@ -493,15 +515,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   background-color: rgba(255, 255, 255, 0.82);
   box-shadow: 0 1px 2px rgba(43, 37, 32, 0.05);
   color: inherit;
-  cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.publication-item:hover {
-  border-color: rgba(132, 33, 48, 0.24);
-  background-color: #fff;
-  transform: translateX(2px);
 }
 
 .publication-copy {
@@ -528,24 +542,6 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.2s ease;
-}
-
-.publication-item:hover h2 {
-  color: var(--color-primary);
-}
-
-.publication-item img {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-  opacity: 0.55;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.publication-item:hover img {
-  opacity: 1;
-  transform: translateX(2px);
 }
 
 .expert-strip {
@@ -901,11 +897,6 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   .publication-copy h2 {
     font-size: 14px;
     white-space: nowrap;
-  }
-
-  .publication-item img {
-    width: 14px;
-    height: 14px;
   }
 
   .expert-strip {

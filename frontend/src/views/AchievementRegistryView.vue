@@ -1,7 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchPapers, fetchSoftwarePatents, fetchBooks, fetchProjects } from '@/api/index.js'
+import {
+  fetchBookStats,
+  fetchBooks,
+  fetchPapers,
+  fetchPaperStats,
+  fetchProjectStats,
+  fetchProjects,
+  fetchSoftwarePatentStats,
+  fetchSoftwarePatents
+} from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
 
@@ -19,52 +29,88 @@ const currentSection = computed(() => {
 })
 
 const typeLabel = computed(() => {
-  const labels = { papers: '软件著作权', patents: '软件著作权', books: '学术著作', topics: '获批课题' }
+  const labels = { papers: '发表论文', patents: '软件著作权', books: '学术著作', topics: '获批课题' }
   return labels[currentKey.value]
 })
 
 const results = ref([])
-const chartBars = [
+const fallbackChartBars = [
   { year: '2020', value: 34 },
   { year: '2021', value: 48 },
   { year: '2022', value: 62 },
   { year: '2023', value: 78 },
   { year: '2024(Q1)', value: 100, active: true },
 ]
+const stats = ref({ total: 0, byType: {}, byYear: [] })
 
-const loadData = async () => {
+const chartBars = computed(() => {
+  const rows = stats.value.byYear || []
+  if (!rows.length) return fallbackChartBars
+  const max = Math.max(...rows.map(item => item.count || 0), 1)
+  return rows.map(item => ({
+    year: String(item.year),
+    value: Math.max(8, Math.round(((item.count || 0) / max) * 100)),
+    active: item.count === max
+  }))
+})
+
+const statsPairs = computed(() => {
+  const entries = Object.entries(stats.value.byType || {})
+  if (entries.length) return entries.slice(0, 2).map(([label, value]) => ({ label, value }))
+  return [
+    { label: typeLabel.value, value: results.value.length },
+    { label: '总数', value: stats.value.total || results.value.length }
+  ]
+})
+
+const loadStats = async (key = currentKey.value) => {
+  try {
+    let nextStats = { total: results.value.length, byType: {}, byYear: [] }
+    if (key === 'papers') nextStats = await fetchPaperStats()
+    else if (key === 'patents') nextStats = await fetchSoftwarePatentStats()
+    else if (key === 'books') nextStats = await fetchBookStats()
+    else if (key === 'topics') nextStats = await fetchProjectStats()
+    if (currentKey.value === key) stats.value = nextStats
+  } catch (e) {
+    console.error('加载成果统计失败', e)
+    if (currentKey.value === key) stats.value = { total: results.value.length, byType: {}, byYear: [] }
+  }
+}
+
+const loadData = async (key = currentKey.value) => {
   results.value = []
   try {
-    if (currentKey.value === 'papers') {
+    let nextResults = []
+    if (key === 'papers') {
       const res = await fetchPapers({ pageNum: 1, pageSize: 10 })
-      results.value = (res.rows || []).map(p => ({
+      nextResults = (res.rows || []).map(p => ({
         category: p.type || '论文',
         title: p.title,
         number: p.doi || '',
         owner: p.firstAuthor || '',
         date: p.year ? String(p.year) : '',
       }))
-    } else if (currentKey.value === 'patents') {
+    } else if (key === 'patents') {
       const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 10 })
-      results.value = (res.rows || []).map(p => ({
+      nextResults = (res.rows || []).map(p => ({
         category: p.type || '软著',
         title: p.title,
         number: p.registrationNo || '',
         owner: p.owner || '',
         date: p.year ? String(p.year) : '',
       }))
-    } else if (currentKey.value === 'books') {
+    } else if (key === 'books') {
       const res = await fetchBooks({ pageNum: 1, pageSize: 10 })
-      results.value = (res.rows || []).map(b => ({
+      nextResults = (res.rows || []).map(b => ({
         category: '专著',
         title: b.title,
         number: b.isbn || '',
         owner: b.author || '',
         date: b.year ? String(b.year) : '',
       }))
-    } else if (currentKey.value === 'topics') {
+    } else if (key === 'topics') {
       const res = await fetchProjects({ pageNum: 1, pageSize: 10 })
-      results.value = (res.rows || []).map(p => ({
+      nextResults = (res.rows || []).map(p => ({
         category: p.type || '课题',
         title: p.title,
         number: '',
@@ -72,19 +118,22 @@ const loadData = async () => {
         date: p.startYear ? String(p.startYear) : '',
       }))
     }
+    if (currentKey.value === key) results.value = nextResults
   } catch (e) {
     console.error('加载成果列表失败', e)
   }
+  await loadStats(key)
 }
 
-onMounted(loadData)
+const switchSection = (key) => {
+  currentKey.value = key
+  loadData(key)
+}
+
+onMounted(() => loadData())
 
 const goBack = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 
@@ -102,7 +151,7 @@ const goBack = () => {
           :key="section.key"
           type="button"
           :class="['side-link', section.icon, { active: currentKey === section.key }]"
-          @click="currentKey = section.key; loadData()"
+          @click="switchSection(section.key)"
         >
           <span aria-hidden="true"></span>
           {{ section.title }}
@@ -148,18 +197,14 @@ const goBack = () => {
         <section class="stats-card">
           <p>TOTAL SUBMISSIONS / 成果总数</p>
           <div class="total-count">
-            <strong>{{ results.length }}</strong>
+            <strong>{{ stats.total || results.length }}</strong>
             <span>项</span>
           </div>
 
           <dl class="stats-pair">
-            <div>
-              <dt>{{ typeLabel }}</dt>
-              <dd>3</dd>
-            </div>
-            <div>
-              <dt>发明专利</dt>
-              <dd>2</dd>
+            <div v-for="pair in statsPairs" :key="pair.label">
+              <dt>{{ pair.label }}</dt>
+              <dd>{{ pair.value }}</dd>
             </div>
           </dl>
 

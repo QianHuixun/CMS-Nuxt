@@ -2,11 +2,31 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
+import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchBookDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
-const monograph = ref(null)
+const normalizeList = (value, separator = ';') => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
+  return []
+}
+
+const monograph = ref({
+  title: '',
+  subtitle: '',
+  source: '',
+  authors: [],
+  date: '',
+  edition: '',
+  isbn: '',
+  pdfUrl: '',
+  abstract: '',
+  keywords: [],
+  downloads: '',
+})
 
 onMounted(async () => {
   try {
@@ -22,7 +42,7 @@ onMounted(async () => {
         isbn: data.isbn || '',
         pdfUrl: '',
         abstract: data.description || '',
-        keywords: [],
+        keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '68 MB',
       }
     }
@@ -32,11 +52,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 
@@ -45,6 +61,7 @@ const closePage = () => {
     <section class="monograph-workspace" aria-label="专著阅读区">
       <PdfReader
         :src="monograph.pdfUrl"
+        :fallback-image="documentPage"
       />
     </section>
 

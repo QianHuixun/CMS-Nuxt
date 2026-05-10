@@ -2,11 +2,30 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PdfReader from '@/components/PdfReader.vue'
+import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchSoftwarePatentDetail } from '@/api/index.js'
+import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
-const patent = ref(null)
+const normalizeList = (value, separator = ';') => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
+  return []
+}
+
+const patent = ref({
+  title: '',
+  subtitle: '',
+  source: '',
+  inventors: [],
+  date: '',
+  patentNo: '',
+  pdfUrl: '',
+  abstract: '',
+  keywords: [],
+  downloads: '',
+})
 
 onMounted(async () => {
   try {
@@ -16,12 +35,12 @@ onMounted(async () => {
         title: data.title,
         subtitle: `${data.type} · ${data.year}年`,
         source: data.owner || '',
-        inventors: data.inventors ? data.inventors.split(';') : [],
+        inventors: normalizeList(data.inventors),
         date: data.year ? `${data.year}年` : '',
         patentNo: data.registrationNo || '',
         pdfUrl: '',
         abstract: data.description || '',
-        keywords: [],
+        keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '12 MB',
       }
     }
@@ -31,11 +50,7 @@ onMounted(async () => {
 })
 
 const closePage = () => {
-  if (window.history.length > 1) {
-    router.back()
-    return
-  }
-  router.push('/academic')
+  safeBack(router, '/academic')
 }
 </script>
 
@@ -44,6 +59,7 @@ const closePage = () => {
     <section class="patent-workspace" aria-label="文档阅读区">
       <PdfReader
         :src="patent.pdfUrl"
+        :fallback-image="documentPage"
       />
     </section>
 

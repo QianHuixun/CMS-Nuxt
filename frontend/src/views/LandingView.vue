@@ -1,24 +1,40 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchLandingConfig } from '@/api/index.js'
 
 const router = useRouter()
+const pageConfig = ref({
+  title: '出土医学文献文物保护研究数字重点实验室',
+  subtitle: '数据集成平台',
+  actionText: '进入系统 →'
+})
 
 function enterSystem() {
   router.push('/home')
 }
+
+onMounted(async () => {
+  try {
+    const data = await fetchLandingConfig()
+    pageConfig.value = { ...pageConfig.value, ...data }
+  } catch (e) {
+    console.error(e)
+  }
+})
 </script>
 
 <template>
   <div class="home">
     <div class="title-wrapper">
-      <div class="title-main">出土医学文献文物保护研究数字重点实验室</div>
+      <div class="title-main">{{ pageConfig.title }}</div>
       <div class="line line-left"></div>
       <div class="line line-right"></div>
     </div>
 
-    <div class="title-sub">數據集成平臺</div>
+    <div class="title-sub">{{ pageConfig.subtitle }}</div>
 
-    <button class="btn-primary" @click="enterSystem">进入系统 →</button>
+    <button class="btn-primary" @click="enterSystem">{{ pageConfig.actionText }}</button>
   </div>
 </template>
 
