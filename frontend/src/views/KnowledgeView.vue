@@ -1,7 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchKnowledgeGraph } from '@/api/index.js'
 
 const router = useRouter()
 
@@ -158,22 +157,6 @@ const detail = ref({
     { name: '银翘散', type: '治疗方剂' },
     { name: '邪留三焦', type: '病机描述' },
   ]
-})
-
-onMounted(async () => {
-  try {
-    const data = await fetchKnowledgeGraph()
-    symptoms.value = data.symptoms || symptoms.value
-    medicines.value = data.medicines || medicines.value
-    causes.value = data.causes || causes.value
-    totalCount.value = data.totalCount || totalCount.value
-    if (canRenderNodes(data.nodes)) {
-      allNodes.value = generatePositions(data.nodes)
-    }
-    detail.value = data.detail || detail.value
-  } catch (e) {
-    console.error(e)
-  }
 })
 
 function goHome() {

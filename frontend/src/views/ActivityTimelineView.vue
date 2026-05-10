@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchActivityTimeline } from '@/api/index.js'
+import { fetchActivities, fetchActivityPhotos } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
@@ -42,18 +42,39 @@ const timelineDots = ref([
 
 const descriptionLines = computed(() => String(pageInfo.value.description || '').split('\n'))
 
+const formatDate = (value) => {
+  if (!value) return '待定'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
+}
+
 onMounted(async () => {
   try {
-    const data = await fetchActivityTimeline()
-    pageInfo.value = {
-      eyebrow: data.eyebrow || pageInfo.value.eyebrow,
-      title: data.title || pageInfo.value.title,
-      description: data.description || pageInfo.value.description
+    const [activityRes, photoRes] = await Promise.all([
+      fetchActivities({ pageNum: 1, pageSize: 2 }),
+      fetchActivityPhotos({ pageNum: 1, pageSize: 12 })
+    ])
+    const activities = activityRes.rows || []
+    const photos = photoRes.rows || []
+    if (activities.length) {
+      pageInfo.value = {
+        eyebrow: 'Activity Archive',
+        title: '活动足迹·时光影卷',
+        description: `已收录 ${activityRes.total || activities.length} 场学术活动，沉淀 ${photoRes.total || photos.length} 组活动剪影。\n每一次交流都围绕出土医学文献保护、整理与数字化服务展开。`
+      }
+      eventCards.value = activities.slice(0, 2).map((activity, index) => ({
+        className: index === 0 ? 'event-card-primary' : 'event-card-secondary',
+        title: activity.title || activity.name,
+        description: activity.summary || '活动详情整理中。',
+        highlights: [
+          { value: formatDate(activity.time), label: '活动时间' },
+          { value: activity.location || '待定', label: '活动地点' }
+        ]
+      }))
     }
-    eventCards.value = data.eventCards || eventCards.value
-    timelineDots.value = data.timelineDots || timelineDots.value
   } catch (e) {
-    console.error(e)
+    console.error('加载活动概览失败', e)
   }
 })
 

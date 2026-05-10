@@ -1,27 +1,16 @@
 <script setup>
-import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchLandingConfig } from '@/api/index.js'
 
 const router = useRouter()
-const pageConfig = ref({
+const pageConfig = {
   title: '出土医学文献文物保护研究数字重点实验室',
   subtitle: '数据集成平台',
   actionText: '进入系统 →'
-})
+}
 
 function enterSystem() {
   router.push('/home')
 }
-
-onMounted(async () => {
-  try {
-    const data = await fetchLandingConfig()
-    pageConfig.value = { ...pageConfig.value, ...data }
-  } catch (e) {
-    console.error(e)
-  }
-})
 </script>
 
 <template>
