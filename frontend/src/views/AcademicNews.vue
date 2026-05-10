@@ -13,10 +13,12 @@ const activityPhotos = ref([])
 const fallbackPaperId = 'meridian-bioelectric'
 const fallbackBookId = 'book_001'
 const fallbackPatentId = 'software_001'
+const fallbackActivityId = 'activity_001'
 
 const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
 const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
 const patentRoute = (id) => `/patent/${id || fallbackPatentId}`
+const activityRoute = (id) => `/activity/${id || fallbackActivityId}`
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -63,7 +65,10 @@ onMounted(async () => {
   }
   try {
     const res = await fetchActivityPhotos({ pageNum: 1, pageSize: 2 })
-    activityPhotos.value = res.rows || []
+    activityPhotos.value = (res.rows || []).map(photo => ({
+      ...photo,
+      activityId: photo.activityId || photo.activityID || fallbackActivityId
+    }))
   } catch (e) {
     console.error('获取活动剪影失败', e)
   }
@@ -86,7 +91,7 @@ onMounted(async () => {
       <h1>学术动态</h1>
       <p>汇集本实验室最新的科研成果、出版论著及重要学术进展。</p>
     </section>
-
+x
     <section class="academic-grid">
       <section class="panel paper-panel">
         <header class="panel-header">
@@ -155,19 +160,20 @@ onMounted(async () => {
 
         <div class="gallery-layout">
           <div class="gallery-list">
-            <figure
+            <router-link
               v-for="(photo, index) in activityPhotos"
               :key="photo.id"
               :class="['gallery-card', index === 0 ? 'meeting-card' : 'lab-card']"
+              :to="activityRoute(photo.activityId)"
             >
               <figcaption>{{ photo.title }}</figcaption>
-            </figure>
+            </router-link>
           </div>
 
           <section class="activity-panel">
             <header class="activity-header">
               <span>学术活动存档</span>
-              <button type="button">查看全部</button>
+              <router-link class="header-action" to="/activity-timeline">查看全部</router-link>
             </header>
 
             <ol>
@@ -297,7 +303,8 @@ onMounted(async () => {
 }
 
 .panel-header button,
-.activity-header button {
+.activity-header button,
+.header-action {
   padding: 0;
   border: 0;
   background: transparent;
@@ -305,12 +312,15 @@ onMounted(async () => {
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .panel-header button:hover,
-.activity-header button:hover {
+.activity-header button:hover,
+.header-action:hover {
   color: var(--color-primary-hover);
 }
 
@@ -490,8 +500,11 @@ onMounted(async () => {
 .gallery-card {
   position: relative;
   height: 198px;
+  display: block;
   overflow: hidden;
   background-color: #333;
+  color: inherit;
+  text-decoration: none;
 }
 
 .meeting-card {
