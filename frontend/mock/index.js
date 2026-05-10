@@ -216,6 +216,7 @@ const softwarePatents = [
 const activityPhotos = [
   {
     id: 'photo_001',
+    activityId: 'activity_001',
     title: '出土医学文献数字化研讨会现场',
     activityName: '出土医学文献数字化研讨会',
     organizer: '出土医学文献文物保护研究数字实验室',
@@ -227,6 +228,7 @@ const activityPhotos = [
   },
   {
     id: 'photo_002',
+    activityId: 'activity_002',
     title: '天回医简学术沙龙',
     activityName: '天回医简学术沙龙',
     organizer: '中医大出土文献研究中心',
