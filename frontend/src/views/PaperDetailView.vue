@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchPaperDetail } from '@/api/index.js'
@@ -15,6 +16,19 @@ const normalizeList = (value, separator = ',') => {
   return []
 }
 
+const getAttachmentPdfUrl = (attachments) => {
+  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
+    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
+    const name = item?.name || ''
+    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
+  })
+  return file?.url || file?.fileUrl || file?.downloadUrl || ''
+}
+
+const getPdfUrl = (data) => {
+  return data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || getAttachmentPdfUrl(data?.attachments)
+}
+
 const paper = ref({
   title: '',
   category: '学术论文',
@@ -22,8 +36,6 @@ const paper = ref({
   source: '',
   date: '',
   downloads: '',
-  citations: 0,
-  reads: '',
   pdfUrl: '',
   previewImage: documentPage,
   abstract: '',
@@ -32,7 +44,7 @@ const paper = ref({
 
 onMounted(async () => {
   try {
-    const data = await fetchPaperDetail(route.params.id)
+    const data = await fetchPaperDetail(route.params.id || 'paper_001')
     if (data) {
       paper.value = {
         title: data.title,
@@ -41,9 +53,7 @@ onMounted(async () => {
         source: data.journal || '',
         date: data.year ? `${data.year}年` : '',
         downloads: '14.2 MB',
-        citations: 128,
-        reads: '2.4k',
-        pdfUrl: data.url || '',
+        pdfUrl: getPdfUrl(data),
         previewImage: documentPage,
         abstract: data.abstract || '',
         keywords: normalizeList(data.keywords || data.keywordsText || ''),
@@ -60,16 +70,16 @@ const closePage = () => {
 </script>
 
 <template>
-  <main class="paper-page">
-    <section class="paper-workspace" aria-label="论文阅读区">
+  <DocumentReaderLayout :reader-label="'\u8bba\u6587\u9605\u8bfb\u533a'" :aside-label="'\u8bba\u6587\u8be6\u60c5'">
+    <template #reader>
       <PdfReader
         v-model:page="currentPage"
         :src="paper.pdfUrl"
         :fallback-image="paper.previewImage"
       />
-    </section>
+    </template>
 
-    <aside class="paper-aside" aria-label="论文详情">
+    <template #aside>
       <div class="aside-close">
         <button type="button" aria-label="关闭论文详情" @click="closePage">×</button>
       </div>
@@ -84,17 +94,6 @@ const closePage = () => {
           <i aria-hidden="true"></i>
           <time>{{ paper.date }}</time>
         </div>
-      </section>
-
-      <section class="metric-grid" aria-label="论文指标">
-        <article>
-          <span>{{ paper.citations }}</span>
-          <p>引用次数</p>
-        </article>
-        <article>
-          <span>{{ paper.reads }}</span>
-          <p>阅读量</p>
-        </article>
       </section>
 
       <section class="detail-section">
@@ -123,46 +122,11 @@ const closePage = () => {
           <button type="button">分享成果</button>
         </div>
       </section>
-    </aside>
-  </main>
+    </template>
+  </DocumentReaderLayout>
 </template>
 
 <style scoped>
-.paper-page {
-  height: calc(100vh - 64px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  background-color: #f0f0f0;
-  color: #2b2520;
-  overflow: hidden;
-  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
-}
-
-.paper-workspace {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: #f5f2ed;
-  overflow: hidden;
-}
-
-.paper-aside::-webkit-scrollbar {
-  display: none;
-}
-
-.paper-aside {
-  min-height: 0;
-  padding: 0 32px 32px;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  box-shadow: 0 16px 48px rgba(43, 37, 32, 0.12);
-  overflow-y: auto;
-  scrollbar-width: none;
-  z-index: 3;
-}
-
 .aside-close {
   min-height: 58px;
   padding: 16px 0 8px;
@@ -227,37 +191,6 @@ const closePage = () => {
   height: 12px;
   margin-top: 2px;
   background-color: #eee;
-}
-
-.metric-grid {
-  margin-bottom: 28px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.metric-grid article {
-  min-height: 105px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-radius: 4px;
-  background-color: #faf8f5;
-}
-
-.metric-grid span {
-  color: var(--color-primary);
-  font-family: "Noto Serif SC", serif;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.metric-grid p {
-  margin-top: 8px;
-  color: #9a9692;
-  font-size: 10px;
 }
 
 .detail-section {
@@ -367,27 +300,6 @@ const closePage = () => {
   background-color: #fafafa;
 }
 
-@media (max-width: 1180px) {
-  .paper-page {
-    min-height: 100vh;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-  }
-
-  .paper-workspace {
-    min-height: 720px;
-    overflow: visible;
-  }
-
-  .paper-aside {
-    min-height: auto;
-    padding: 0 32px 40px;
-    overflow: visible;
-  }
-}
-
 @media (max-width: 680px) {
   .paper-hero h1 {
     font-size: 22px;
@@ -397,11 +309,6 @@ const closePage = () => {
   .metric-grid,
   .secondary-actions {
     grid-template-columns: 1fr;
-  }
-
-  .paper-aside {
-    padding-right: 20px;
-    padding-left: 20px;
   }
 }
 </style>

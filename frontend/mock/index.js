@@ -102,9 +102,11 @@ const projects = [
     id: 'project_001',
     title: '出土医学文献多模态整理与知识组织研究',
     type: '国家级',
+    year: 2024,
     startYear: 2024,
     endYear: 2027,
     leader: '陈维',
+    leaderId: 1,
     participant: '周明;李青',
     institution: '成都中医药大学',
     summary: '围绕出土医学文献图像、释文、注释和成果数据开展多模态整理。',
@@ -115,9 +117,11 @@ const projects = [
     id: 'project_002',
     title: '巴蜀医籍数字化保护与利用',
     type: '省部级',
+    year: 2023,
     startYear: 2023,
     endYear: 2025,
     leader: '周明',
+    leaderId: 2,
     participant: '陈维',
     institution: '成都中医药大学',
     summary: '对巴蜀地区珍稀中医古籍进行数字化采集、修复与知识标引。',
@@ -130,23 +134,33 @@ const papers = [
   {
     id: 'paper_001',
     title: '天回医简经脉文献源流研究',
+    authors: '陈维, 周明',
+    authorIds: [1, 2],
     firstAuthor: '陈维',
     corresponding: '陈维',
     otherAuthors: '周明',
     journal: '中华医史杂志',
     year: 2026,
     type: '核心',
+    doi: '10.12345/j.cmhistory.2026.002',
+    abstract: '论文讨论天回医简经脉文献与早期经脉理论之间的关系。',
+    keywords: ['天回医简', '经脉', '出土医学文献'],
     coverImage: 'https://example.edu/mock/papers/paper-001.jpg'
   },
   {
     id: 'paper_002',
     title: '出土医学文献图像标注方法探讨',
+    authors: '周明, 李青',
+    authorIds: [2, 3],
     firstAuthor: '周明',
     corresponding: '陈维',
     otherAuthors: '李青',
     journal: '中医文献杂志',
     year: 2025,
     type: '普通',
+    doi: '10.12345/j.tcmdoc.2025.001',
+    abstract: '论文探讨出土医学文献图像标注流程、数据结构与协作审核方法。',
+    keywords: ['出土医学文献', '图像标注', '数字人文'],
     coverImage: 'https://example.edu/mock/papers/paper-002.jpg'
   }
 ]
@@ -156,6 +170,7 @@ const books = [
     id: 'book_001',
     title: '天回医简与早期经脉医学',
     author: '陈维 主编',
+    authorId: 1,
     publisher: '人民卫生出版社',
     year: 2026,
     coverImage: 'https://example.edu/mock/books/book-001.jpg',
@@ -165,6 +180,7 @@ const books = [
     id: 'book_002',
     title: '巴蜀古籍医籍概论',
     author: '周明 著',
+    authorId: 2,
     publisher: '四川科学技术出版社',
     year: 2024,
     coverImage: 'https://example.edu/mock/books/book-002.jpg',
@@ -176,7 +192,8 @@ const softwarePatents = [
   {
     id: 'software_001',
     title: '出土医学文献标注系统',
-    type: '软件著作权',
+    type: 'software',
+    typeName: '软件著作权',
     registrationNo: '2024SR001234',
     owner: '成都中医药大学',
     inventors: '周明;陈维',
@@ -186,7 +203,8 @@ const softwarePatents = [
   {
     id: 'patent_001',
     title: '一种简牍图像增强方法',
-    type: '发明专利',
+    type: 'patent',
+    typeName: '发明专利',
     registrationNo: 'ZL202410000001.0',
     owner: '成都中医药大学',
     inventors: '陈维;周明',
@@ -199,8 +217,10 @@ const activityPhotos = [
   {
     id: 'photo_001',
     title: '出土医学文献数字化研讨会现场',
+    activityName: '出土医学文献数字化研讨会',
     organizer: '出土医学文献文物保护研究数字实验室',
     location: '成都中医药大学博物馆会议厅',
+    imageUrl: 'https://example.edu/mock/activities/photo-001.jpg',
     thumbUrl: 'https://example.edu/mock/activities/photo-001-thumb.jpg',
     activityTime: '2026-04-18T09:00:00Z',
     summary: '围绕出土医学文献数字化采集、标注和知识服务开展专题研讨。'
@@ -208,8 +228,10 @@ const activityPhotos = [
   {
     id: 'photo_002',
     title: '天回医简学术沙龙',
+    activityName: '天回医简学术沙龙',
     organizer: '中医大出土文献研究中心',
     location: '图书馆报告厅',
+    imageUrl: 'https://example.edu/mock/activities/photo-002.jpg',
     thumbUrl: 'https://example.edu/mock/activities/photo-002-thumb.jpg',
     activityTime: '2025-11-10T14:00:00Z',
     summary: '分享天回医简最新研究成果与数字化进展。'
@@ -243,39 +265,15 @@ const activities = [
   }
 ]
 
-const landingConfig = {
-  title: '出土医学文献文物保护研究数字重点实验室',
-  subtitle: '数据集成平台',
-  actionText: '进入系统 →'
+function paginate(list, pageNum = 1, pageSize = 10) {
+  const start = (pageNum - 1) * pageSize
+  const rows = list.slice(start, start + pageSize)
+  return { total: list.length, pageNum: Number(pageNum), pageSize: Number(pageSize), rows }
 }
 
-const homeConfig = {
-  eyebrow: 'DIGITAL HUMANITIES ARCHIVE',
-  title: '传承出土文献，赓续中医文脉',
-  description: '本中心致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。',
-  cards: [
-    {
-      key: 'resources',
-      title: '资源导航',
-      description: '整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。',
-      route: '/resources',
-      actionText: '进入导航'
-    },
-    {
-      key: 'knowledge',
-      title: '知识图谱',
-      description: '基于本体建模技术，可视化展示古医籍、中药、方剂与经络的内在关联。',
-      route: '/knowledge',
-      actionText: '开启探索'
-    },
-    {
-      key: 'academic',
-      title: '学术动态',
-      description: '发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。',
-      route: '/academic',
-      actionText: '查看详情'
-    }
-  ]
+function getRouteId(request = {}) {
+  const { params = {}, query = {}, url = '' } = request
+  return params.id || query.id || url.split('?')[0].split('/').filter(Boolean).pop()
 }
 
 const knowledgeGraph = {
@@ -373,60 +371,16 @@ const knowledgeGraph = {
   }
 }
 
-const activityTimeline = {
-  eyebrow: 'Chronicles of Excellence',
-  title: '活动足迹·时光影卷',
-  description: '穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。\n每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。',
-  eventCards: [
-    {
-      className: 'event-card-primary',
-      title: '科普影响力',
-      description: '为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。',
-      highlights: [
-        { value: '5,000+', label: '观展人次' },
-        { value: '2周', label: '展览周期' }
-      ]
-    },
-    {
-      className: 'event-card-secondary',
-      title: '跨学科研讨',
-      description: '邀请医学史、文物保护、人工智能团队共同参与，围绕出土医学文献数字化方法展开交流。',
-      highlights: [
-        { value: '12场', label: '专题报告' },
-        { value: '8组', label: '协作团队' }
-      ]
-    }
-  ],
-  timelineDots: [
-    { className: 'dot-large dot-one' },
-    { className: 'dot-medium dot-two' },
-    { className: 'dot-large dot-three' },
-    { className: 'dot-small dot-four' }
-  ]
-}
+const wordCloudRoutes = ['/api/v1/wordClouds', '/api/v1/word-clouds']
+const softwarePatentPaginateRoutes = ['/api/v1/softwarePatents/paginate', '/api/v1/software-patents/paginate']
+const softwarePatentStatsRoutes = ['/api/v1/softwarePatents/stats', '/api/v1/software-patents/stats']
+const activityPhotoPaginateRoutes = ['/api/v1/activityPhotos/paginate', '/api/v1/activity-photos/paginate']
 
-function paginate(list, pageNum = 1, pageSize = 10) {
-  const start = (pageNum - 1) * pageSize
-  const rows = list.slice(start, start + pageSize)
-  return { total: list.length, pageNum: Number(pageNum), pageSize: Number(pageSize), rows }
+function createGetRoutes(urls, response) {
+  return urls.map(url => ({ url, method: 'get', response }))
 }
 
 export default [
-  {
-    url: '/api/v1/site/landing',
-    method: 'get',
-    response: () => wrap(landingConfig)
-  },
-  {
-    url: '/api/v1/site/home',
-    method: 'get',
-    response: () => wrap(homeConfig)
-  },
-  {
-    url: '/api/v1/knowledge/graph',
-    method: 'get',
-    response: () => wrap(knowledgeGraph)
-  },
   // ------ 静态列表/无参路由（必须排在 :id 路由前面，避免匹配冲突） ------
 
   // 1. 获取数据库列表
@@ -448,11 +402,7 @@ export default [
     response: () => wrap({ total: talents.length, list: talents })
   },
   // 4. 获取词云列表
-  {
-    url: '/api/v1/wordClouds',
-    method: 'get',
-    response: () => wrap({ list: wordClouds })
-  },
+  ...createGetRoutes(wordCloudRoutes, () => wrap({ list: wordClouds })),
   // 5. 查询课题概要列表
   {
     url: '/api/v1/projects/paginate',
@@ -486,41 +436,29 @@ export default [
     }
   },
   // 8. 查询软著专利概要列表
-  {
-    url: '/api/v1/softwarePatents/paginate',
-    method: 'get',
-    response: ({ query = {} }) => {
-      let list = [...softwarePatents]
-      if (query.year) list = list.filter(s => s.year === Number(query.year))
-      if (query.type) list = list.filter(s => s.type === query.type)
-      return wrap(paginate(list, query.pageNum, query.pageSize))
-    }
-  },
+  ...createGetRoutes(softwarePatentPaginateRoutes, ({ query = {} }) => {
+    let list = [...softwarePatents]
+    if (query.year) list = list.filter(s => s.year === Number(query.year))
+    if (query.type) list = list.filter(s => matchesSoftwarePatentType(s, query.type))
+    return wrap(paginate(list, query.pageNum, query.pageSize))
+  }),
   // 9. 查询活动剪影列表
-  {
-    url: '/api/v1/activityPhotos/paginate',
-    method: 'get',
-    response: ({ query = {} }) => {
-      const pageSize = query.pageSize || 12
-      return wrap(paginate(activityPhotos, query.pageNum, pageSize))
-    }
-  },
+  ...createGetRoutes(activityPhotoPaginateRoutes, ({ query = {} }) => {
+    const pageSize = query.pageSize || 12
+    return wrap(paginate(activityPhotos, query.pageNum, pageSize))
+  }),
   // 11. 获取软著专利统计
-  {
-    url: '/api/v1/softwarePatents/stats',
-    method: 'get',
-    response: () => wrap({
-      total: softwarePatents.length,
-      byYear: [
-        { year: 2026, count: 1 },
-        { year: 2024, count: 1 }
-      ],
-      byType: {
-        '软件著作权': 1,
-        '发明专利': 1
-      }
-    })
-  },
+  ...createGetRoutes(softwarePatentStatsRoutes, () => wrap({
+    total: softwarePatents.length,
+    byYear: [
+      { year: 2026, count: 1 },
+      { year: 2024, count: 1 }
+    ],
+    byType: {
+      software: 1,
+      patent: 1
+    }
+  })),
   // 13. 获取论文统计
   {
     url: '/api/v1/papers/stats',
@@ -584,11 +522,6 @@ export default [
       return wrap(paginate(list, query.pageNum, query.pageSize))
     }
   },
-  {
-    url: '/api/v1/activities/timeline',
-    method: 'get',
-    response: () => wrap(activityTimeline)
-  },
 
   // ------ 以下为带 :id 参数的路由（放在后面，避免误匹配） ------
 
@@ -596,8 +529,8 @@ export default [
   {
     url: '/api/v1/talents/:id',
     method: 'get',
-    response: ({ query = {} } = {}) => {
-      const id = Number(query.id)
+    response: (request = {}) => {
+      const id = Number(getRouteId(request))
       const t = talents.find(x => x.id === id)
       if (!t) return wrap(null)
       const achievements = [
@@ -609,41 +542,34 @@ export default [
     }
   },
   // 12. 查询软著专利详情
-  {
-    url: '/api/v1/softwarePatents/:id',
-    method: 'get',
-    response: ({ query = {} } = {}) => {
-      const sp = softwarePatents.find(s => s.id === query.id)
-      if (!sp) return wrap(null)
-      return wrap({
-        ...sp,
-        applicationDate: '2024-01-15T00:00:00Z',
-        issueDate: '2024-06-20T00:00:00Z',
-        description: '用于医学文献图像、释文、注释和实体的在线标注。',
-        attachments: [
-          { name: '登记证书.pdf', url: 'https://example.edu/mock/files/software-001.pdf' }
-        ]
-      })
-    }
-  },
+  ...createGetRoutes(['/api/v1/softwarePatents/:id', '/api/v1/software-patents/:id'], (request = {}) => {
+    const id = getRouteId(request)
+    const sp = softwarePatents.find(s => s.id === id)
+    if (!sp) return wrap(null)
+    return wrap({
+      ...sp,
+      applicationDate: '2024-01-15T00:00:00Z',
+      issueDate: '2024-06-20T00:00:00Z',
+      description: '用于医学文献图像、释文、注释和实体的在线标注。',
+      attachments: [
+        { name: '登记证书.pdf', url: 'https://example.edu/mock/files/software-001.pdf' }
+      ]
+    })
+  }),
   // 14. 查询论文详情
   {
     url: '/api/v1/papers/:id',
     method: 'get',
-    response: ({ query = {} } = {}) => {
-      const p = papers.find(x => x.id === query.id)
+    response: (request = {}) => {
+      const id = getRouteId(request)
+      const p = papers.find(x => x.id === id)
       if (!p) return wrap(null)
       return wrap({
         ...p,
-        authors: '陈维, 周明',
-        authorIds: [1, 2],
         volume: '56',
         issue: '2',
         pages: '101-112',
-        doi: '10.12345/j.cmhistory.2026.002',
         url: 'https://example.edu/mock/files/paper-001.pdf',
-        abstract: '论文讨论天回医简经脉文献与早期经脉理论之间的关系。',
-        keywords: ['天回医简', '经脉', '出土医学文献'],
         attachments: [
           { name: '论文全文.pdf', url: 'https://example.edu/mock/files/paper-001.pdf' }
         ]
@@ -654,16 +580,17 @@ export default [
   {
     url: '/api/v1/books/:id',
     method: 'get',
-    response: ({ query = {} } = {}) => {
-      const b = books.find(x => x.id === query.id)
+    response: (request = {}) => {
+      const id = getRouteId(request)
+      const b = books.find(x => x.id === id)
       if (!b) return wrap(null)
       return wrap({
         ...b,
-        authorId: 1,
         publishDate: '2026-03-15T00:00:00Z',
         price: 98.0,
         pages: 456,
         words: 580000,
+        pdfUrl: 'https://example.edu/mock/files/book-001-sample.pdf',
         description: '围绕天回医简材料、经脉理论源流和医学史价值展开系统研究。',
         toc: '第一章 出土背景; 第二章 文献整理; 第三章 经脉理论; 第四章 数字化应用',
         attachments: [
@@ -677,8 +604,9 @@ export default [
   {
     url: '/api/v1/projects/:id',
     method: 'get',
-    response: ({ query = {} } = {}) => {
-      const p = projects.find(x => x.id === query.id)
+    response: (request = {}) => {
+      const id = getRouteId(request)
+      const p = projects.find(x => x.id === id)
       if (!p) return wrap(null)
       return wrap({
         ...p,
@@ -699,11 +627,14 @@ export default [
   {
     url: '/api/v1/activities/:id',
     method: 'get',
-    response: ({ query = {} } = {}) => {
-      const a = activities.find(x => x.id === query.id)
+    response: (request = {}) => {
+      const id = getRouteId(request)
+      const a = activities.find(x => x.id === id)
       if (!a) return wrap(null)
       return wrap({
         ...a,
+        title: a.name,
+        type: '会议',
         gallery: [
           'https://example.edu/mock/activities/photo-001.jpg',
           'https://example.edu/mock/activities/photo-003.jpg'

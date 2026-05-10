@@ -5,7 +5,7 @@ import NavBar from '@/components/NavBar.vue'
 
 const route = useRoute()
 
-// 隐藏导航栏的详情页路径前缀（专家详情页需要显示导航栏）
+// 隐藏导航栏的详情页路径前
 const hideNavPrefixes = ['/', '/paper', '/activity', '/monograph', '/patent']
 
 const shouldShowNav = computed(() => {
@@ -20,7 +20,7 @@ const shouldShowNav = computed(() => {
 </script>
 
 <template>
-  <div class="app">
+  <div :class="['app', { 'app--with-nav': shouldShowNav }]">
     <NavBar v-if="shouldShowNav" />
     <router-view />
   </div>
@@ -29,8 +29,11 @@ const shouldShowNav = computed(() => {
 <style scoped>
 .app {
   min-height: 100vh;
-  padding-top: 53px;
   background-color: #f8f6f0;
   box-sizing: border-box;
+}
+
+.app--with-nav {
+  padding-top: 53px;
 }
 </style>
