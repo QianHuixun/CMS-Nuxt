@@ -14,6 +14,19 @@ const normalizeList = (value, separator = ';') => {
   return []
 }
 
+const getAttachmentPdfUrl = (attachments) => {
+  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
+    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
+    const name = item?.name || ''
+    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
+  })
+  return file?.url || file?.fileUrl || file?.downloadUrl || ''
+}
+
+const getPdfUrl = (data) => {
+  return data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || getAttachmentPdfUrl(data?.attachments)
+}
+
 const patent = ref({
   title: '',
   subtitle: '',
@@ -38,7 +51,7 @@ onMounted(async () => {
         inventors: normalizeList(data.inventors),
         date: data.year ? `${data.year}年` : '',
         patentNo: data.registrationNo || '',
-        pdfUrl: '',
+        pdfUrl: getPdfUrl(data),
         abstract: data.description || '',
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '12 MB',
@@ -120,7 +133,7 @@ const closePage = () => {
 
 <style scoped>
 .patent-page {
-  height: calc(100vh - 64px);
+  height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 400px;
   background-color: #f0f0f0;

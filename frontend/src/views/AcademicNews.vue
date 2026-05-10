@@ -12,9 +12,11 @@ const books = ref([])
 const activityPhotos = ref([])
 const fallbackPaperId = 'meridian-bioelectric'
 const fallbackBookId = 'book_001'
+const fallbackPatentId = 'software_001'
 
 const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
 const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
+const patentRoute = (id) => `/patent/${id || fallbackPatentId}`
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -52,6 +54,7 @@ onMounted(async () => {
   try {
     const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 6 })
     patents.value = (res.rows || []).map(p => ({
+      id: p.id,
       code: p.registrationNo || '',
       title: p.title,
     }))
@@ -134,13 +137,13 @@ onMounted(async () => {
         </header>
 
         <div class="patent-list">
-          <article v-for="patent in patents" :key="`${patent.code}-${patent.title}`" class="patent-item">
+          <router-link v-for="patent in patents" :key="`${patent.code}-${patent.title}`" class="patent-item" :to="patentRoute(patent.id)">
             <div>
               <span>{{ patent.code }}</span>
               <h3>{{ patent.title }}</h3>
             </div>
             <span class="gear">◎</span>
-          </article>
+          </router-link>
         </div>
       </section>
 
@@ -443,6 +446,8 @@ onMounted(async () => {
   padding: 10px 14px;
   border-left: 3px solid #d8a4aa;
   background-color: rgba(255, 255, 255, 0.92);
+  color: inherit;
+  text-decoration: none;
 }
 
 .patent-item span:not(.gear) {
