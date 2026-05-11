@@ -1,16 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { useRoute } from 'vue-router'
+
+interface NavItem {
+  name: string
+  path: string
+  activePaths?: string[]
+}
 
 const route = useRoute()
 
-const navItems = [
+const navItems: NavItem[] = [
   { name: '首页', path: '/home' },
   { name: '资源导航', path: '/resources' },
   { name: '知识图谱', path: '/knowledge' },
   { name: '学术动态', path: '/academic', activePaths: ['/academic-news', '/achievements', '/activity-timeline'] },
 ]
 
-const isActive = (item) => {
+const isActive = (item: NavItem): boolean => {
   if (route.path === item.path || route.path.startsWith(`${item.path}/`)) return true
   return item.activePaths?.some((path) => route.path === path || route.path.startsWith(`${path}/`)) ?? false
 }
