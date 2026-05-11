@@ -141,6 +141,7 @@ function showToast(message) {
 
 let simulation = null
 let resizeHandler = null
+let activeAnimations = new Set()
 
 function getInitialPosition(node, index, width, height) {
   const centerX = width / 2
@@ -255,30 +256,36 @@ function initD3Graph() {
       }
     }
 
-    el.append('circle')
+    const bodyGroup = el.append('g').attr('class', 'kg-node-body')
+
+    bodyGroup.append('circle')
       .attr('r', r)
       .attr('fill', color)
       .attr('stroke', '#fff')
       .attr('stroke-width', d.level === 1 ? 3 : 2)
       .style('cursor', 'pointer')
       .on('mouseover', function () {
+        bodyGroup
+          .transition().duration(200)
+          .attr('transform', 'scale(1.05)')
         d3.select(this)
           .transition().duration(200)
           .attr('stroke', 'rgba(110,28,36,0.4)')
           .attr('stroke-width', 4)
-          .attr('transform', 'scale(1.05)')
       })
       .on('mouseout', function () {
+        bodyGroup
+          .transition().duration(200)
+          .attr('transform', 'scale(1)')
         d3.select(this)
           .transition().duration(200)
           .attr('stroke', '#fff')
           .attr('stroke-width', d.level === 1 ? 3 : 2)
-          .attr('transform', 'scale(1)')
       })
 
     if (d.label) {
       const lines = d.label.split('\n')
-      const textEl = el.append('text')
+      const textEl = bodyGroup.append('text')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
         .attr('pointer-events', 'none')
@@ -339,6 +346,8 @@ function initD3Graph() {
   })
 
   function animateNodeToCenter(d) {
+    activeAnimations.delete(d.id)
+
     const centerX = width / 2
     const centerY = height / 2
     const startX = d.x
@@ -346,7 +355,11 @@ function initD3Graph() {
     const duration = 650
     const startTime = performance.now()
 
+    activeAnimations.add(d.id)
+
     function step(now) {
+      if (!activeAnimations.has(d.id)) return
+
       const progress = Math.min((now - startTime) / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
       d.fx = startX + (centerX - startX) * eased
@@ -360,6 +373,7 @@ function initD3Graph() {
 
       d.fx = centerX
       d.fy = centerY
+      activeAnimations.delete(d.id)
     }
 
     requestAnimationFrame(step)
@@ -449,6 +463,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  activeAnimations.clear()
   if (simulation) {
     simulation.stop()
   }
