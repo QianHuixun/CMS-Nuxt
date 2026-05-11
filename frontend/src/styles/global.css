@@ -139,6 +139,16 @@ body {
   min-height: 100vh;
 }
 
+.route-fade-enter-active,
+.route-fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+
+.route-fade-enter-from,
+.route-fade-leave-to {
+  opacity: 0;
+}
+
 .page-container {
   max-width: 1200px;
   margin: 60px auto;

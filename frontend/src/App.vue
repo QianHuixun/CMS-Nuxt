@@ -22,7 +22,11 @@ const shouldShowNav = computed(() => {
 <template>
   <div :class="['app', { 'app--with-nav': shouldShowNav }]">
     <NavBar v-if="shouldShowNav" />
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <transition name="route-fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
