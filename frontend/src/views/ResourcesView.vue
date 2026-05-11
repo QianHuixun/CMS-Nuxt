@@ -130,7 +130,7 @@ function goBack() {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 40px;
-  flex: 1;
+  align-items: stretch;
 }
 
 .group-title {
@@ -317,6 +317,8 @@ function goBack() {
   color: #fff;
   padding: 24px;
   border-radius: 2px;
+  flex: 1;
+  min-height: 0;
 }
 
 .tech-block h3 {
