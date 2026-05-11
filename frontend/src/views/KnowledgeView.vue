@@ -141,6 +141,7 @@ function showToast(message) {
 
 let simulation = null
 let resizeHandler = null
+let activeAnimations = new Set()
 
 function getInitialPosition(node, index, width, height) {
   const centerX = width / 2
@@ -209,6 +210,8 @@ function initD3Graph() {
   }
 
   simulation = d3.forceSimulation(nodes)
+    .alphaTarget(0.025)
+    .velocityDecay(0.38)
     .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
       const sourceLevel = d.source.level || 3
       const targetLevel = d.target.level || 3
@@ -241,8 +244,9 @@ function initD3Graph() {
     const color = colorMap[d.type] || '#ccc'
 
     if (d.rings > 0) {
+      const ringGroup = el.append('g').attr('class', 'kg-node-rings')
       for (let i = 1; i <= d.rings; i++) {
-        el.append('circle')
+        ringGroup.append('circle')
           .attr('fill', 'none')
           .attr('stroke-dasharray', '4, 4')
           .attr('pointer-events', 'none')
@@ -252,30 +256,36 @@ function initD3Graph() {
       }
     }
 
-    el.append('circle')
+    const bodyGroup = el.append('g').attr('class', 'kg-node-body')
+
+    bodyGroup.append('circle')
       .attr('r', r)
       .attr('fill', color)
       .attr('stroke', '#fff')
       .attr('stroke-width', d.level === 1 ? 3 : 2)
       .style('cursor', 'pointer')
       .on('mouseover', function () {
+        bodyGroup
+          .transition().duration(200)
+          .attr('transform', 'scale(1.05)')
         d3.select(this)
           .transition().duration(200)
           .attr('stroke', 'rgba(110,28,36,0.4)')
           .attr('stroke-width', 4)
-          .attr('transform', 'scale(1.05)')
       })
       .on('mouseout', function () {
+        bodyGroup
+          .transition().duration(200)
+          .attr('transform', 'scale(1)')
         d3.select(this)
           .transition().duration(200)
           .attr('stroke', '#fff')
           .attr('stroke-width', d.level === 1 ? 3 : 2)
-          .attr('transform', 'scale(1)')
       })
 
     if (d.label) {
       const lines = d.label.split('\n')
-      const textEl = el.append('text')
+      const textEl = bodyGroup.append('text')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
         .attr('pointer-events', 'none')
@@ -305,6 +315,8 @@ function initD3Graph() {
     mousePos = null
   })
 
+  let ringRotation = 0
+
   simulation.on('tick', () => {
     if (mousePos) {
       nodes.forEach(d => {
@@ -326,9 +338,46 @@ function initD3Graph() {
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
 
+    ringRotation = (ringRotation + 0.12) % 360
     node
       .attr('transform', d => `translate(${d.x},${d.y})`)
+      .select('.kg-node-rings')
+      .attr('transform', d => `rotate(${d.level % 2 === 0 ? -ringRotation : ringRotation})`)
   })
+
+  function animateNodeToCenter(d) {
+    activeAnimations.delete(d.id)
+
+    const centerX = width / 2
+    const centerY = height / 2
+    const startX = d.x
+    const startY = d.y
+    const duration = 650
+    const startTime = performance.now()
+
+    activeAnimations.add(d.id)
+
+    function step(now) {
+      if (!activeAnimations.has(d.id)) return
+
+      const progress = Math.min((now - startTime) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      d.fx = startX + (centerX - startX) * eased
+      d.fy = startY + (centerY - startY) * eased
+      simulation.alpha(0.12).restart()
+
+      if (progress < 1) {
+        requestAnimationFrame(step)
+        return
+      }
+
+      d.fx = centerX
+      d.fy = centerY
+      activeAnimations.delete(d.id)
+    }
+
+    requestAnimationFrame(step)
+  }
 
   function drag(simulation) {
     function dragstarted(event, d) {
@@ -343,10 +392,9 @@ function initD3Graph() {
       d.__dragged = true
     }
     function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0)
+      if (!event.active) simulation.alphaTarget(0.025)
       if (d.level === 1) {
-        d.fx = width / 2
-        d.fy = height / 2
+        animateNodeToCenter(d)
         return
       }
       d.fx = null
@@ -415,6 +463,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  activeAnimations.clear()
   if (simulation) {
     simulation.stop()
   }

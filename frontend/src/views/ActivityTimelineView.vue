@@ -1,11 +1,18 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchActivities } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
 const activityArchivePageSize = 6
+
+// 新增核心状态：
+// scrollProgress 用于控制线段的真实弧长渲染比例 (0 到 1)
+// currentY 用于保存屏幕中心所对应的 SVG 内部绝对 Y 坐标 (像素)
+const scrollProgress = ref(0)
+const currentY = ref(-9999) 
+const pathLookupTable = ref([]) // 用于存储 Y轴坐标 到 弧长比例 的映射表
 
 const pageInfo = ref({
   eyebrow: 'Chronicles of Excellence',
@@ -91,15 +98,18 @@ const timelineNodePositions = computed(() => activityCards.value.map((_, index) 
   cy: timelineLayout.nodeStartY + index * timelineLayout.nodeSpacing,
 })))
 const activeTimelineNodePositions = computed(() => timelineNodePositions.value)
+
 const timelineViewBoxHeight = computed(() => {
   const nodes = activeTimelineNodePositions.value
   const lastNode = nodes[nodes.length - 1]
   return Math.max(1600, (lastNode?.cy || timelineLayout.nodeStartY) + timelineLayout.pathTail + 120)
 })
+
 const timelineCanvasHeight = computed(() => Math.max(1600, 640 + activityCards.value.length * 260))
 const timelinePathD = computed(() => {
   return createTimelinePath(activeTimelineNodePositions.value)
 })
+
 const eventCards = computed(() => activityCards.value.map((card, index) => {
   const slot = createEventSlot({
     cardClassName: index === 0 ? 'event-card-primary' : 'event-card-secondary',
@@ -121,7 +131,82 @@ const formatDate = (value) => {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
 }
 
+// === 超高精度映射逻辑：解决曲线路径弧度造成的偏移 ===
+
+// 1. 预构建路径映射表 (Y 坐标 -> 弧长进度)
+const updateLookupTable = () => {
+  const pathEl = document.querySelector('.timeline-line')
+  if (!pathEl) return
+  const totalLength = pathEl.getTotalLength()
+  if (totalLength === 0) return
+  
+  const table = []
+  const steps = 800 // 采样 800 个点，足够顺滑
+  for (let i = 0; i <= steps; i++) {
+    const l = (i / steps) * totalLength
+    const pt = pathEl.getPointAtLength(l)
+    table.push({ y: pt.y, progress: i / steps })
+  }
+  pathLookupTable.value = table
+  handleScroll() // 构建完毕后立即校准当前进度
+}
+
+// 监听路径数据，渲染完成后重构表
+watch(timelinePathD, async () => {
+  await nextTick()
+  updateLookupTable()
+})
+
+// 2. 滚动计算
+const handleScroll = () => {
+  const container = document.querySelector('.timeline-canvas')
+  if (!container) return
+  
+  const rect = container.getBoundingClientRect()
+  const viewportCenter = window.innerHeight / 2
+  
+  // 屏幕中心线距离容器顶部的真实像素高度
+  const offsetInContainer = viewportCenter - rect.top
+  
+  // 映射到 SVG 绘制区域
+  const svgTopPixels = rect.height * (timelineLayout.topPercent / 100)
+  const svgHeightPixels = rect.height * (timelineLayout.heightPercent / 100)
+  
+  // 计算在 SVG ViewBox 内的理想进度 (Y轴方向的线性进度)
+  let svgProgress = (offsetInContainer - svgTopPixels) / svgHeightPixels
+  svgProgress = Math.min(Math.max(svgProgress, 0), 1)
+  
+  // 这就是当前屏幕中心精确对应的 SVG 内部绝对 Y 坐标点
+  const targetY = svgProgress * timelineViewBoxHeight.value
+  currentY.value = targetY 
+  
+  // 3. 查表修正：使用二分查找，将线性 Y 轴进度，转换为非线性的真实路径弧长进度
+  const table = pathLookupTable.value
+  if (table.length > 0) {
+    let low = 0, high = table.length - 1, bestProgress = 0
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2)
+      if (table[mid].y <= targetY) {
+        bestProgress = table[mid].progress
+        low = mid + 1
+      } else {
+        high = mid - 1
+      }
+    }
+    // 最终应用修正后的真实渲染比例
+    scrollProgress.value = bestProgress
+  }
+}
+
+// 节点的点亮逻辑极大简化：屏幕中心线 (currentY) 碰到节点的绝对 cy 坐标，直接点亮！
+const isNodeActive = (nodeY) => {
+  return currentY.value >= nodeY
+}
+
 onMounted(async () => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  handleScroll()
+
   try {
     const res = await fetchActivities({ pageNum: 1, pageSize: activityArchivePageSize })
     const activities = res.rows || []
@@ -146,6 +231,10 @@ onMounted(async () => {
   }
 })
 
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
 const back = () => {
   safeBack(router, '/academic')
 }
@@ -168,27 +257,51 @@ const back = () => {
         </div>
       </section>
 
-      <svg class="timeline-path" :viewBox="`0 0 ${timelineLayout.viewBoxWidth} ${timelineViewBoxHeight}`" fill="none" aria-hidden="true">
+      <!-- 注意：新增 preserveAspectRatio="none"，强制保证内部节点绝对匹配外层卡片的 CSS 百分比布局 -->
+      <svg class="timeline-path" :viewBox="`0 0 ${timelineLayout.viewBoxWidth} ${timelineViewBoxHeight}`" fill="none" aria-hidden="true" preserveAspectRatio="none">
         <defs>
           <circle id="timeline-node" :r="timelineLayout.nodeRadius" />
         </defs>
+        
+        <!-- 1. 基础底层线条 -->
         <path
           class="timeline-line"
           :d="timelinePathD"
           stroke="currentColor"
           stroke-width="5"
           stroke-linecap="round"
-          pathLength="1000"
         />
+        
+        <!-- 2. 跟随滚动的深红色成长实线 -->
+        <path
+          class="timeline-progress-line"
+          :d="timelinePathD"
+          stroke="#842130"
+          stroke-width="5"
+          stroke-linecap="round"
+          pathLength="1000"
+          :style="{
+            strokeDasharray: '1000',
+            strokeDashoffset: 1000 - scrollProgress * 1000
+          }"
+        />
+
+        <!-- 3. 亮色短游标线 -->
         <path
           class="timeline-accent"
           :d="timelinePathD"
           pathLength="1000"
+          :style="{
+            strokeDasharray: '60 1000',
+            strokeDashoffset: -(scrollProgress * 1000 - 60)
+          }"
         />
+
+        <!-- 节点：严格触碰点亮 -->
         <use
           v-for="dot in activeTimelineNodePositions"
           :key="dot.id"
-          :class="['timeline-dot', dot.className]"
+          :class="['timeline-dot', dot.className, { 'is-active': isNodeActive(dot.cy) }]"
           href="#timeline-node"
           :x="dot.cx"
           :y="dot.cy"
@@ -196,9 +309,9 @@ const back = () => {
       </svg>
 
       <article
-        v-for="card in eventCards"
+        v-for="(card, index) in eventCards"
         :key="card.id"
-        :class="['event-card', card.className]"
+        :class="['event-card', card.className, { 'is-active': isNodeActive(activeTimelineNodePositions[index].cy) }]"
         :style="{
           '--card-top': card.cardPosition.top,
           '--card-left': card.cardPosition.left || 'auto',
@@ -217,13 +330,12 @@ const back = () => {
         </div>
       </article>
 
-      <div class="page-actions">
-        <button type="button" class="ghost-button" @click="back">
-          <span aria-hidden="true">‹</span>
+      <div class="page-actions return-actions">
+        <button type="button" class="return-action return-action--back" @click="back">
+          <span aria-hidden="true">←</span>
           返回上一页
         </button>
-        <router-link class="home-button" to="/home">
-          <span aria-hidden="true">⌂</span>
+        <router-link class="return-action return-action--home" to="/home">
           返回首页
         </router-link>
       </div>
@@ -340,22 +452,31 @@ const back = () => {
   color: inherit;
 }
 
+.timeline-progress-line {
+  transition: stroke-dashoffset 0.1s linear;
+}
+
 .timeline-accent {
   stroke: #c8828c;
   stroke-width: 14;
   stroke-linecap: round;
-  stroke-dasharray: 42 958;
-  stroke-dashoffset: -88;
+  transition: stroke-dashoffset 0.1s linear;
 }
 
 .timeline-dot {
   fill: #d1acac;
-  opacity: 0.96;
+  opacity: 0.8;
   position: relative;
+  transition: all 0.2s ease;
 }
 
 .timeline-dot-primary {
   fill: #d2aeae;
+}
+
+.timeline-dot.is-active {
+  opacity: 1;
+  fill: #842130;
 }
 
 .event-card {
@@ -372,6 +493,18 @@ const back = () => {
   border: 1px solid #f0eee9;
   box-shadow: 0 14px 34px rgba(132, 33, 48, 0.12);
   z-index: 2;
+  
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.5s;
+}
+
+.event-card.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.5s ease 0.3s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s, visibility 0s 0.3s;
 }
 
 .card-content {
@@ -437,37 +570,8 @@ const back = () => {
   position: absolute;
   right: 32px;
   bottom: 24px;
-  display: flex;
-  gap: 16px;
+  margin-top: 0;
   z-index: 3;
-}
-
-.ghost-button,
-.home-button {
-  min-height: 45px;
-  padding: 12px 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(221, 192, 192, 0.15);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-control);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.ghost-button {
-  background-color: #fff;
-  color: #842130;
-}
-
-.home-button {
-  border-color: #842130;
-  background-color: #842130;
-  color: #fff;
 }
 
 @media (max-width: 1200px) {

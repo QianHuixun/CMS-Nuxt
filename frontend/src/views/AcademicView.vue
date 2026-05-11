@@ -236,7 +236,7 @@ function goExpert(id) {
       </div>
     </div>
 
-    <button class="btn-back" @click="goHome">返回首页</button>
+    <button class="btn-back return-action return-action--home" @click="goHome">返回首页</button>
   </div>
 </template>
 
@@ -477,6 +477,11 @@ function goExpert(id) {
   padding-right: 20px;
 }
 
+.project-section > .section-title,
+.project-section > .section-subtitle {
+  text-align: right;
+}
+
 /* 让列表承接滚动能力，撑开中间区域 */
 .project-list { 
   flex: 0 1 auto;
@@ -541,14 +546,5 @@ function goExpert(id) {
   bottom: 24px;
   right: 40px;
   z-index: 100;
-  padding: 8px 16px;
-  background: var(--color-primary, #842130);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(132,33,48,0.3);
-  transition: background-color 0.2s ease;
 }
-.btn-back:hover { background: #a32a3d; }
 </style>

@@ -560,6 +560,10 @@ const goBack = () => {
 
 .result-copy h2 {
   margin-top: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #1f1714;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
@@ -568,11 +572,11 @@ const goBack = () => {
 
 .result-copy p {
   margin-top: 7px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
+  display: block;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #6f6660;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
