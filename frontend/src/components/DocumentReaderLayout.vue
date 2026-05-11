@@ -31,7 +31,7 @@ defineProps({
   background-color: #f0f0f0;
   color: #2b2520;
   overflow: hidden;
-  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .document-reader-workspace {

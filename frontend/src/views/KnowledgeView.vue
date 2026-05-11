@@ -7,10 +7,6 @@ import { fetchKnowledgeGraph } from '@/api/index.js'
 const router = useRouter()
 
 const graphSvg = ref(null)
-const bookListContainer = ref(null)
-const entityTypesContainer = ref(null)
-const graphLegendContainer = ref(null)
-const detailDynamicContent = ref(null)
 
 const colorMap = {
   center: '#6e1c24',
@@ -110,72 +106,12 @@ const graphData = ref({
   ]
 })
 
-function renderSidebar() {
-  if (bookListContainer.value) {
-    bookListContainer.value.innerHTML = books.value.map(book => `
-      <div class="kg-book-item ${book.active ? 'active' : ''}">
-        <span>${book.name}</span>
-        <span class="kg-book-count">${book.count}</span>
-      </div>
-    `).join('')
-  }
-  if (entityTypesContainer.value) {
-    entityTypesContainer.value.innerHTML = entityTypes.map(tag => `
-      <span class="kg-entity-tag" style="background-color: ${colorMap[tag.type]}">${tag.label}</span>
-    `).join('')
-  }
-  if (graphLegendContainer.value) {
-    graphLegendContainer.value.innerHTML = legends.map(leg => `
-      <div class="kg-legend-item">
-        <div class="kg-legend-dot" style="background-color: ${colorMap[leg.type]}"></div>
-        <span>${leg.label}</span>
-      </div>
-    `).join('')
-  }
-}
-
-function renderCaseDetail() {
-  const data = caseDetail.value
-  if (!detailDynamicContent.value) return
-
-  const tagsHtml = data.tags.map(tag => `
-    <span class="kg-c-tag" style="background-color: ${colorMap[tag.type]}">${tag.label}</span>
-  `).join('')
-
-  const summaryHtml = data.summary.map(item => `
-    <div class="kg-summary-row">
-      <span class="kg-s-label">${item.label}</span>
-      <span class="kg-s-value">${item.value}</span>
-    </div>
-  `).join('')
-
-  detailDynamicContent.value.innerHTML = `
-    <div class="kg-detail-title">${data.title}</div>
-    <div class="kg-detail-subtitle">${data.subtitle}</div>
-    <div class="kg-detail-tabs">
-      <button class="kg-d-tab active">原文</button>
-      <button class="kg-d-tab">诊次</button>
-      <button class="kg-d-tab">实体</button>
-      <button class="kg-d-tab">关系</button>
-    </div>
-    <div class="kg-content-box">
-      <div class="kg-content-text">${data.text}</div>
-      <div class="kg-content-tags">${tagsHtml}</div>
-    </div>
-    <div class="kg-summary-section">
-      <div class="kg-summary-header">结构化摘要</div>
-      <div class="kg-summary-list">${summaryHtml}</div>
-    </div>
-  `
-}
-
 function updateSidePanel(node) {
   if (!node.label) return
   const title = node.label.replace(/\n/g, '')
   caseDetail.value.title = title
   caseDetail.value.subtitle = '当前选中节点 · 知识图谱'
   caseDetail.value.text = `这是关于【${title}】的详细描述。当前为动态生成的交互数据。在真实系统中，此处将请求并展示该实体相关的医案内容、病症分析或古籍段落。`
-  renderCaseDetail()
 }
 
 function copyToClipboard() {
@@ -193,7 +129,7 @@ function showToast(message) {
   toast.style.cssText = `
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.7); color: white; padding: 10px 20px;
-    border-radius: 4px; z-index: 1000; font-size: 14px;
+    border-radius: 4px; z-index: 1000; font-size: var(--font-size-md);
     transition: opacity 0.5s;
   `
   document.body.appendChild(toast)
@@ -345,7 +281,6 @@ function initD3Graph() {
         .attr('pointer-events', 'none')
         .attr('fill', '#fff')
         .attr('font-size', d.level === 1 ? '18px' : '12px')
-        .attr('font-family', '"SimSun", "宋体", serif')
         .style('text-shadow', '0 1px 2px rgba(0,0,0,0.3)')
 
       lines.forEach((line, i) => {
@@ -476,8 +411,6 @@ onMounted(async () => {
   }
 
   await nextTick()
-  renderSidebar()
-  renderCaseDetail()
   setTimeout(initD3Graph, 150)
 })
 
@@ -504,16 +437,39 @@ function goHome() {
         <button class="main-tab">医案浏览</button>
       </div>
       <div class="section-title">来源古籍</div>
-      <div class="book-list" ref="bookListContainer"></div>
+      <div class="book-list">
+        <div
+          v-for="book in books"
+          :key="book.id"
+          :class="['kg-book-item', { active: book.active }]"
+        >
+          <span>{{ book.name }}</span>
+          <span class="kg-book-count">{{ book.count }}</span>
+        </div>
+      </div>
       <div class="entity-types-container">
         <div class="section-title">实体类型</div>
-        <div class="entity-tags" ref="entityTypesContainer"></div>
+        <div class="entity-tags">
+          <span
+            v-for="tag in entityTypes"
+            :key="tag.type"
+            class="kg-entity-tag"
+            :style="{ backgroundColor: colorMap[tag.type] }"
+          >
+            {{ tag.label }}
+          </span>
+        </div>
       </div>
     </aside>
 
     <main class="main-content">
       <svg ref="graphSvg" id="graph-svg"></svg>
-      <div class="graph-legend" ref="graphLegendContainer"></div>
+      <div class="graph-legend">
+        <div v-for="leg in legends" :key="leg.type" class="kg-legend-item">
+          <div class="kg-legend-dot" :style="{ backgroundColor: colorMap[leg.type] }"></div>
+          <span>{{ leg.label }}</span>
+        </div>
+      </div>
     </main>
 
     <aside class="sidebar-right">
@@ -523,18 +479,49 @@ function goHome() {
       </div>
       <div class="detail-card">
         <div class="detail-label">医案详情</div>
-        <div ref="detailDynamicContent"></div>
+        <div class="kg-detail-title">{{ caseDetail.title }}</div>
+        <div class="kg-detail-subtitle">{{ caseDetail.subtitle }}</div>
+        <div class="kg-detail-tabs">
+          <button class="kg-d-tab active">原文</button>
+          <button class="kg-d-tab">诊次</button>
+          <button class="kg-d-tab">实体</button>
+          <button class="kg-d-tab">关系</button>
+        </div>
+        <div class="kg-content-box">
+          <div class="kg-content-text">{{ caseDetail.text }}</div>
+          <div class="kg-content-tags">
+            <span
+              v-for="tag in caseDetail.tags"
+              :key="`${tag.type}-${tag.label}`"
+              class="kg-c-tag"
+              :style="{ backgroundColor: colorMap[tag.type] }"
+            >
+              {{ tag.label }}
+            </span>
+          </div>
+        </div>
+        <div class="kg-summary-section">
+          <div class="kg-summary-header">结构化摘要</div>
+          <div class="kg-summary-list">
+            <div v-for="item in caseDetail.summary" :key="item.label" class="kg-summary-row">
+              <span class="kg-s-label">{{ item.label }}</span>
+              <span class="kg-s-value">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
         <div class="action-row">
           <button class="action-btn" @click="copyToClipboard">复制医案ID</button>
           <button class="action-btn">分享当前视图</button>
         </div>
       </div>
-      <button class="btn-back" @click="goHome">返回首页</button>
+      <button class="btn-back return-action return-action--home" @click="goHome">
+        返回首页
+      </button>
     </aside>
   </div>
 </template>
 
-<style>
+<style scoped>
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d5c8bb; border-radius: 3px; }
@@ -551,7 +538,6 @@ function goHome() {
   background-color: var(--bg-page);
   color: var(--color-text);
   overflow: hidden;
-  font-family: "SimSun", "宋体", serif;
   margin: 0;
   padding: 0;
 }
@@ -568,9 +554,9 @@ function goHome() {
 }
 
 .logo-title {
-  font-size: 28px;
+  font-size: var(--font-size-8xl);
   color: var(--color-primary);
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 30px;
   letter-spacing: 2px;
 }
@@ -587,8 +573,8 @@ function goHome() {
   color: #8c5b5f;
   border: none;
   cursor: pointer;
-  font-size: 15px;
-  font-family: inherit;
+  font-size: var(--font-size-lg);
+  font-family: var(--font-sans);
   transition: all 0.3s;
   border-radius: 4px;
 }
@@ -599,12 +585,12 @@ function goHome() {
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   color: var(--color-text);
   margin-bottom: 15px;
   position: relative;
   padding-left: 10px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .section-title::before {
@@ -631,7 +617,7 @@ function goHome() {
   margin-bottom: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   border-radius: 4px;
   border-bottom: 1px solid #e8dfd5;
   transition: all 0.2s;
@@ -668,7 +654,7 @@ function goHome() {
 
 .kg-entity-tag {
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: #fff;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -716,9 +702,9 @@ function goHome() {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -757,8 +743,8 @@ function goHome() {
   flex: 1;
   border: none;
   padding: 10px 15px;
-  font-size: 13px;
-  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
   outline: none;
   background: transparent;
 }
@@ -769,8 +755,8 @@ function goHome() {
   border: none;
   padding: 0 20px;
   cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
   transition: opacity 0.2s;
 }
 
@@ -786,22 +772,22 @@ function goHome() {
 .detail-label {
   display: inline-block;
   color: var(--color-primary);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   margin-bottom: 15px;
   border-bottom: 2px solid var(--color-primary);
   padding-bottom: 4px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .kg-detail-title {
-  font-size: 22px;
+  font-size: var(--font-size-5xl);
   color: var(--color-text);
   margin-bottom: 6px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .kg-detail-subtitle {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--color-secondary);
   margin-bottom: 20px;
 }
@@ -817,7 +803,7 @@ function goHome() {
   border: 1px solid #d5c8bb;
   background: transparent;
   color: var(--color-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s;
@@ -839,8 +825,8 @@ function goHome() {
 }
 
 .kg-content-text {
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-reading);
   color: var(--color-text);
   text-align: justify;
   margin-bottom: 20px;
@@ -854,19 +840,19 @@ function goHome() {
 
 .kg-c-tag {
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: #fff;
   border-radius: 4px;
 }
 
 .kg-summary-header {
-  font-size: 14px;
+  font-size: var(--font-size-md);
   color: var(--color-primary);
   margin-bottom: 15px;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .kg-summary-header::before {
@@ -881,7 +867,7 @@ function goHome() {
   display: flex;
   padding: 10px 0;
   border-bottom: 1px dashed var(--color-border);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .kg-summary-row:last-child {
@@ -912,8 +898,8 @@ function goHome() {
   border: 1px solid #d5c8bb;
   color: var(--color-text);
   cursor: pointer;
-  font-size: 13px;
-  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
   border-radius: 4px;
   transition: background 0.2s;
 }

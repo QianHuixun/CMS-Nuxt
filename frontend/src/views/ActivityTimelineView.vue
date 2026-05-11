@@ -1,10 +1,11 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchActivities, fetchActivityPhotos } from '@/api/index.js'
+import { fetchActivities } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
 const router = useRouter()
+const activityArchivePageSize = 6
 
 const pageInfo = ref({
   eyebrow: 'Chronicles of Excellence',
@@ -12,35 +13,106 @@ const pageInfo = ref({
   description: '穿梭于传统与创新的交汇点，记录实验室每一个具有里程碑意义的瞬间。\n每一张照片都是智慧的沉淀，每一段历程都是对未来的承诺。'
 })
 
-const eventCards = ref([
-  {
-    className: 'event-card-primary',
-    title: '科普影响力',
-    description: '为期两周的展览吸引了超过5000名观众，现场展示的分子生药学交互装置广受好评。',
-    highlights: [
-      { value: '5,000+', label: '观展人次' },
-      { value: '2周', label: '展览周期' },
-    ],
-  },
-  {
-    className: 'event-card-secondary',
-    title: '跨学科研讨',
-    description: '邀请医学史、文物保护、人工智能团队共同参与，围绕出土医学文献数字化方法展开交流。',
-    highlights: [
-      { value: '12场', label: '专题报告' },
-      { value: '8组', label: '协作团队' },
-    ],
-  },
-])
+const timelineLayout = {
+  viewBoxWidth: 978,
+  topPercent: 15.35,
+  leftPercent: 24.5,
+  widthPercent: 51,
+  heightPercent: 74,
+  cardGap: 44,
+  cardHalfHeight: 68,
+  nodeRadius: 28,
+  nodeStartY: 300,
+  nodeSpacing: 330,
+  nodeCenterX: 489,
+  nodeOffsetX: 220,
+  pathLead: 240,
+  pathTail: 240,
+}
 
-const timelineDots = ref([
-  { className: 'dot-large dot-one' },
-  { className: 'dot-medium dot-two' },
-  { className: 'dot-large dot-three' },
-  { className: 'dot-small dot-four' },
+const createTimelinePath = (nodes) => {
+  if (!nodes.length) return ''
+
+  const points = [
+    { cx: timelineLayout.nodeCenterX, cy: Math.max(0, nodes[0].cy - timelineLayout.pathLead) },
+    ...nodes,
+    { cx: nodes[nodes.length - 1].cx, cy: nodes[nodes.length - 1].cy + timelineLayout.pathTail },
+  ]
+
+  return points.slice(1).reduce((path, point, index) => {
+    const previous = points[index]
+    const midY = (previous.cy + point.cy) / 2
+    return `${path} C ${previous.cx} ${midY} ${point.cx} ${midY} ${point.cx} ${point.cy}`
+  }, `M ${points[0].cx} ${points[0].cy}`)
+}
+
+const createEventSlot = ({ cardClassName, dot, side }) => {
+  const dotLeftPercent = timelineLayout.leftPercent + timelineLayout.widthPercent * (dot.cx / timelineLayout.viewBoxWidth)
+  const dotTopPercent = timelineLayout.topPercent + timelineLayout.heightPercent * (dot.cy / timelineViewBoxHeight.value)
+  const cardPosition = {
+    top: `calc(${dotTopPercent.toFixed(3)}% - ${timelineLayout.cardHalfHeight}px)`,
+  }
+
+  if (side === 'left') {
+    cardPosition.right = `calc(${(100 - dotLeftPercent).toFixed(3)}% + ${timelineLayout.cardGap}px)`
+  } else {
+    cardPosition.left = `calc(${dotLeftPercent.toFixed(3)}% + ${timelineLayout.cardGap}px)`
+  }
+
+  return { cardClassName, dot, cardPosition }
+}
+
+const activityCards = ref([
+  {
+    id: 'fallback-activity-1',
+    title: '活动剪影',
+    description: '活动剪影图片区域展示的现场照片，记录了最具代表性的学术活动瞬间。',
+    highlights: [
+      { value: '图片卡', label: '入口类型' },
+      { value: '活动剪影', label: '对应区域' },
+    ],
+  },
+  {
+    id: 'fallback-activity-2',
+    title: '活动剪影',
+    description: '点击后对应 academic-news 页面中的活动剪影图片卡入口。',
+    highlights: [
+      { value: '图像入口', label: '对应动作' },
+      { value: 'activityId', label: '跳转键' },
+    ],
+  },
 ])
 
 const descriptionLines = computed(() => String(pageInfo.value.description || '').split('\n'))
+const timelineNodePositions = computed(() => activityCards.value.map((_, index) => ({
+  id: `timeline-node-${index + 1}`,
+  className: index === 0 ? 'timeline-dot-primary' : 'timeline-dot-secondary',
+  cx: timelineLayout.nodeCenterX + (index % 2 === 0 ? -timelineLayout.nodeOffsetX : timelineLayout.nodeOffsetX),
+  cy: timelineLayout.nodeStartY + index * timelineLayout.nodeSpacing,
+})))
+const activeTimelineNodePositions = computed(() => timelineNodePositions.value)
+const timelineViewBoxHeight = computed(() => {
+  const nodes = activeTimelineNodePositions.value
+  const lastNode = nodes[nodes.length - 1]
+  return Math.max(1600, (lastNode?.cy || timelineLayout.nodeStartY) + timelineLayout.pathTail + 120)
+})
+const timelineCanvasHeight = computed(() => Math.max(1600, 640 + activityCards.value.length * 260))
+const timelinePathD = computed(() => {
+  return createTimelinePath(activeTimelineNodePositions.value)
+})
+const eventCards = computed(() => activityCards.value.map((card, index) => {
+  const slot = createEventSlot({
+    cardClassName: index === 0 ? 'event-card-primary' : 'event-card-secondary',
+    dot: activeTimelineNodePositions.value[index],
+    side: index % 2 === 0 ? 'left' : 'right',
+  })
+
+  return {
+    ...card,
+    className: slot.cardClassName,
+    cardPosition: slot.cardPosition,
+  }
+}))
 
 const formatDate = (value) => {
   if (!value) return '待定'
@@ -51,22 +123,18 @@ const formatDate = (value) => {
 
 onMounted(async () => {
   try {
-    const [activityRes, photoRes] = await Promise.all([
-      fetchActivities({ pageNum: 1, pageSize: 2 }),
-      fetchActivityPhotos({ pageNum: 1, pageSize: 12 })
-    ])
-    const activities = activityRes.rows || []
-    const photos = photoRes.rows || []
+    const res = await fetchActivities({ pageNum: 1, pageSize: activityArchivePageSize })
+    const activities = res.rows || []
     if (activities.length) {
       pageInfo.value = {
         eyebrow: 'Activity Archive',
         title: '活动足迹·时光影卷',
-        description: `已收录 ${activityRes.total || activities.length} 场学术活动，沉淀 ${photoRes.total || photos.length} 组活动剪影。\n每一次交流都围绕出土医学文献保护、整理与数字化服务展开。`
+        description: `已收录 ${res.total || activities.length} 场学术活动，记录每一次交流的现场瞬间。\n时间轴与学术动态页的活动存档保持同源。`
       }
-      eventCards.value = activities.slice(0, 2).map((activity, index) => ({
-        className: index === 0 ? 'event-card-primary' : 'event-card-secondary',
-        title: activity.title || activity.name,
-        description: activity.summary || '活动详情整理中。',
+      activityCards.value = activities.slice(0, activityArchivePageSize).map((activity, index) => ({
+        id: activity.id || `activity-${index}`,
+        title: activity.title || activity.name || '学术活动',
+        description: activity.summary || activity.organizer || '活动详情整理中。',
         highlights: [
           { value: formatDate(activity.time), label: '活动时间' },
           { value: activity.location || '待定', label: '活动地点' }
@@ -85,7 +153,7 @@ const back = () => {
 
 <template>
   <main class="chronicle-page">
-    <section class="timeline-canvas" aria-labelledby="timeline-title">
+    <section class="timeline-canvas" aria-labelledby="timeline-title" :style="{ '--timeline-canvas-height': `${timelineCanvasHeight}px` }">
       <section class="hero-copy">
         <p>{{ pageInfo.eyebrow }}</p>
         <h1 id="timeline-title">{{ pageInfo.title }}</h1>
@@ -100,27 +168,42 @@ const back = () => {
         </div>
       </section>
 
-      <svg class="timeline-path" viewBox="0 0 978 2188" fill="none" aria-hidden="true">
+      <svg class="timeline-path" :viewBox="`0 0 ${timelineLayout.viewBoxWidth} ${timelineViewBoxHeight}`" fill="none" aria-hidden="true">
+        <defs>
+          <circle id="timeline-node" :r="timelineLayout.nodeRadius" />
+        </defs>
         <path
-          d="M487 0C503 146 471 196 311 252C108 322 20 454 136 604C268 772 633 688 794 829C992 1002 847 1248 562 1325C299 1396 83 1468 158 1633C239 1812 632 1741 642 1895C651 2041 447 1974 417 2065C391 2142 530 2135 622 2124C714 2113 771 2132 778 2188"
+          class="timeline-line"
+          :d="timelinePathD"
           stroke="currentColor"
           stroke-width="5"
           stroke-linecap="round"
+          pathLength="1000"
+        />
+        <path
+          class="timeline-accent"
+          :d="timelinePathD"
+          pathLength="1000"
+        />
+        <use
+          v-for="dot in activeTimelineNodePositions"
+          :key="dot.id"
+          :class="['timeline-dot', dot.className]"
+          href="#timeline-node"
+          :x="dot.cx"
+          :y="dot.cy"
         />
       </svg>
-      <span class="path-accent" aria-hidden="true"></span>
-
-      <span
-        v-for="dot in timelineDots"
-        :key="dot.className"
-        :class="['timeline-dot', dot.className]"
-        aria-hidden="true"
-      ></span>
 
       <article
         v-for="card in eventCards"
-        :key="card.title"
+        :key="card.id"
         :class="['event-card', card.className]"
+        :style="{
+          '--card-top': card.cardPosition.top,
+          '--card-left': card.cardPosition.left || 'auto',
+          '--card-right': card.cardPosition.right || 'auto'
+        }"
       >
         <div class="card-content">
           <h2>{{ card.title }}</h2>
@@ -153,10 +236,10 @@ const back = () => {
   min-height: 100vh;
   background:
     linear-gradient(rgba(251, 249, 244, 0.9), rgba(251, 249, 244, 0.92)),
-    url('@/assets/images/backgrounds/home/home-bg2.png') center top / cover fixed,
+    url('@/assets/images/backgrounds/mult-page/bg.jpg') center top / cover fixed,
     #fbf9f4;
   color: #842130;
-  font-family: "Noto Serif SC", "SimSun", "宋体", serif;
+  font-family: var(--font-serif);
 }
 
 .timeline-canvas {
@@ -164,7 +247,7 @@ const back = () => {
   position: relative;
   width: 100%;
   max-width: 1920px;
-  min-height: max(1600px, calc(var(--canvas-width) * 1.12));
+  min-height: max(var(--timeline-canvas-height, 1600px), calc(var(--canvas-width) * 1.12));
   margin: 0 auto;
   overflow: hidden;
 }
@@ -186,39 +269,39 @@ const back = () => {
   border-radius: 12px;
   background-color: rgba(132, 33, 48, 0.1);
   color: #842130;
-  font-family: Inter, "Microsoft YaHei", sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.2em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-control);
+  letter-spacing: var(--letter-spacing-title);
   text-transform: uppercase;
 }
 
 .hero-copy h1 {
   color: #842130;
-  font-size: clamp(42px, 3.75vw, 72px);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: 0.15em;
+  font-size: var(--font-size-timeline-title);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
+  letter-spacing: var(--letter-spacing-section);
 }
 
 .hero-description {
   margin-top: 24px;
   color: rgba(116, 88, 83, 0.8);
-  font-size: 18px;
-  line-height: 1.62;
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-body);
 }
 
 .scroll-hint {
-  margin-top: 40px;
+  margin-top: 52px;
   display: grid;
   justify-items: center;
   gap: 16px;
   color: rgba(168, 162, 158, 0.82);
-  font-family: Inter, "Microsoft YaHei", sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-label);
 }
 
 .scroll-hint i {
@@ -250,137 +333,104 @@ const back = () => {
   height: 74%;
   color: rgba(132, 33, 48, 0.11);
   z-index: 0;
+  pointer-events: none;
 }
 
-.path-accent {
-  position: absolute;
-  top: 18.7%;
-  left: 40.4%;
-  width: 5.3%;
-  height: 0.55%;
-  border-radius: 999px;
-  background-color: #c8828c;
-  transform: rotate(-13deg);
-  z-index: 1;
+.timeline-line {
+  color: inherit;
+}
+
+.timeline-accent {
+  stroke: #c8828c;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-dasharray: 42 958;
+  stroke-dashoffset: -88;
 }
 
 .timeline-dot {
-  position: absolute;
-  border-radius: 50%;
-  background-color: #d1acac;
-  transform: translate(-50%, -50%);
-  z-index: 2;
+  fill: #d1acac;
+  opacity: 0.96;
+  position: relative;
 }
 
-.dot-large {
-  width: clamp(86px, 8.9vw, 171px);
-  aspect-ratio: 1;
-}
-
-.dot-medium {
-  width: clamp(70px, 7.3vw, 140px);
-  aspect-ratio: 1;
-}
-
-.dot-small {
-  width: clamp(60px, 6.15vw, 118px);
-  aspect-ratio: 1;
-}
-
-.dot-one {
-  top: calc(15.35% + 74% * (252 / 2188));
-  left: calc(24.5% + 51% * (311 / 978));
-  background-color: #d2aeae;
-}
-
-.dot-two {
-  top: calc(15.35% + 74% * (829 / 2188));
-  left: calc(24.5% + 51% * (794 / 978));
-}
-
-.dot-three {
-  top: calc(15.35% + 74% * (1325 / 2188));
-  left: calc(24.5% + 51% * (562 / 978));
-}
-
-.dot-four {
-  top: calc(15.35% + 74% * (1895 / 2188));
-  left: calc(24.5% + 51% * (642 / 978));
+.timeline-dot-primary {
+  fill: #d2aeae;
 }
 
 .event-card {
   position: absolute;
-  width: 23.5%;
-  min-width: 360px;
-  min-height: 420px;
+  top: var(--card-top);
+  left: var(--card-left);
+  right: var(--card-right);
+  width: clamp(180px, 11.5vw, 220px);
+  min-height: 132px;
   display: flex;
   align-items: center;
   background-color: #fff;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #f0eee9;
-  box-shadow: 0 20px 50px -12px rgba(132, 33, 48, 0.15);
+  box-shadow: 0 14px 34px rgba(132, 33, 48, 0.12);
   z-index: 2;
-}
-
-.event-card-primary {
-  top: 25.5%;
-  left: 15%;
-}
-
-.event-card-secondary {
-  top: 57.5%;
-  left: 58%;
 }
 
 .card-content {
   width: 100%;
-  padding: 32px;
+  padding: 16px;
 }
 
 .card-content h2 {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   color: #842130;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 13px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.35;
+  letter-spacing: 0;
 }
 
 .card-content p {
-  max-width: 340px;
+  max-width: none;
+  margin-bottom: 12px;
   color: #745853;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
+  font-family: var(--font-sans);
+  font-size: 11px;
   line-height: 1.45;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 .impact-grid {
-  margin-top: 22px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .impact-grid div {
-  min-height: 80px;
-  padding: 14px;
+  min-height: 42px;
+  padding: 7px 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #f5f5f4;
+  background-color: #f5f3ef;
 }
 
 .impact-grid strong {
+  overflow: hidden;
   color: #842130;
-  font-family: Inter, "Microsoft YaHei", sans-serif;
-  font-size: 24px;
-  line-height: 1.1;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .impact-grid span {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #745853;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 12px;
+  font-family: var(--font-sans);
+  font-size: 10px;
 }
 
 .page-actions {
@@ -401,10 +451,10 @@ const back = () => {
   justify-content: center;
   gap: 8px;
   border: 1px solid rgba(221, 192, 192, 0.15);
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-control);
   text-decoration: none;
   cursor: pointer;
 }
@@ -422,7 +472,7 @@ const back = () => {
 
 @media (max-width: 1200px) {
   .event-card {
-    min-width: 320px;
+    width: clamp(170px, 18vw, 210px);
   }
 }
 
@@ -438,33 +488,26 @@ const back = () => {
 
   .hero-copy p {
     margin-bottom: 24px;
-    font-size: 10px;
+    font-size: var(--font-size-2xs);
   }
 
   .hero-copy h1 {
-    font-size: 42px;
-    letter-spacing: 0.05em;
+    font-size: var(--font-size-14xl);
+    letter-spacing: var(--letter-spacing-subtle);
   }
 
   .hero-description {
-    font-size: 15px;
+    font-size: var(--font-size-lg);
   }
 
   .timeline-path {
-    top: 270px;
+    top: 360px;
     left: 4%;
     width: 92%;
     height: 1180px;
   }
 
-  .path-accent {
-    top: 334px;
-    left: 43%;
-    width: 80px;
-    height: 10px;
-  }
-
-  .timeline-dot {
+  .timeline-path .timeline-dot {
     display: none;
   }
 
@@ -475,7 +518,7 @@ const back = () => {
     min-width: 0;
     max-width: 490px;
     margin: 0 auto;
-    min-height: 420px;
+    min-height: 0;
   }
 
   .event-card-primary {
@@ -484,7 +527,11 @@ const back = () => {
   }
 
   .event-card-secondary {
-    margin-top: 220px;
+    margin-top: 72px;
+  }
+
+  .event-card + .event-card {
+    margin-top: 72px;
   }
 
   .page-actions {
@@ -499,8 +546,8 @@ const back = () => {
 
 @media (max-width: 520px) {
   .hero-copy h1 {
-    font-size: 34px;
-    line-height: 1.2;
+    font-size: var(--font-size-10xl);
+    line-height: var(--line-height-snug);
   }
 
   .hero-description br {

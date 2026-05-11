@@ -47,7 +47,7 @@ const pageConfig = {
       <div class="cards">
         <router-link v-for="card in pageConfig.cards" :key="card.key" :to="card.route" class="card">
           <img :src="iconMap[card.key] || iconResources" :alt="card.title" class="card-icon" />
-          <h3 class="card-title">{{ card.title }}</h3>
+          <h3 class="card-title" :class="{ 'card-title-black': card.key === 'knowledge' }">{{ card.title }}</h3>
           <p class="card-desc">{{ card.description }}</p>
           <span class="card-btn">{{ card.actionText }}</span>
           <img :src="decorMap[card.key]" alt="" class="card-decor" :class="{ 'card-decor-shift': decorShiftMap[card.key] }" />
@@ -60,6 +60,9 @@ const pageConfig = {
 <style scoped>
 .home-page {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: calc(100vh - 53px);
   text-align: center;
@@ -83,23 +86,25 @@ const pageConfig = {
   z-index: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 40px 0;
+  padding: 0 40px;
+  transform: translateY(6px);
 }
 
 .sub-english {
-  font-size: 12px;
-  letter-spacing: 2px;
+  font-size: var(--font-size-md);
+  letter-spacing: var(--letter-spacing-sm);
   color: var(--color-primary);
   margin-bottom: 8px;
   position: relative;
   display: inline-block;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-sans);
+  transform: translateY(-24px);
 }
 
 .sub-english::after {
   content: "";
   position: absolute;
-  top: -8px;
+  top: -16px;
   left: 50%;
   transform: translateX(-50%);
   width: 40px;
@@ -108,19 +113,21 @@ const pageConfig = {
 }
 
 .main-title {
-  font-size: 42px;
-  font-weight: bold;
+  font-size: var(--font-size-15xl);
+  font-weight: var(--font-weight-bold);
   margin: 24px 0;
   color: #000;
-  letter-spacing: 2px;
+  letter-spacing: var(--letter-spacing-sm);
+  transform: translateY(-24px);
 }
 
 .desc {
-  max-width: 800px;
-  margin: 0 auto 60px;
-  font-size: 14px;
-  color: var(--color-secondary);
-  line-height: 1.8;
+  max-width: 640px;
+  margin: 0 auto 48px;
+  font-size: var(--font-size-xl);
+  color: #000;
+  line-height: var(--line-height-reading);
+  transform: translateY(-24px);
 }
 
 .cards {
@@ -133,9 +140,9 @@ const pageConfig = {
 .card {
   position: relative;
   display: block;
-  background-color: #fff;
+  background-color: #fafaf8;
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.16), var(--shadow-card);
   border-radius: 2px;
   width: 300px;
   padding: 40px 24px;
@@ -146,7 +153,7 @@ const pageConfig = {
 }
 
 .card:hover {
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.18), var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 
@@ -155,26 +162,31 @@ const pageConfig = {
   height: 32px;
   margin-bottom: 16px;
   color: var(--color-primary);
-  font-size: 20px;
-  line-height: 32px;
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-card-title);
 }
 
 .card-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-black);
   margin-bottom: 16px;
   color: var(--color-text);
 }
 
+.card-title-black {
+  color: #000;
+}
+
 .card-desc {
-  font-size: 12px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   color: var(--color-secondary);
   margin-bottom: 24px;
-  line-height: 1.7;
+  line-height: var(--line-height-card);
 }
 
 .card-btn {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--color-primary);
   text-decoration: none;
   display: inline-flex;
@@ -189,7 +201,7 @@ const pageConfig = {
 
 .card-btn::after {
   content: "→";
-  font-size: 10px;
+  font-size: var(--font-size-xs);
 }
 
 .card-decor {
@@ -249,6 +261,16 @@ const pageConfig = {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-height: 760px) {
+  .content {
+    transform: translateY(0);
+  }
+
+  .desc {
+    margin-bottom: 40px;
   }
 }
 </style>

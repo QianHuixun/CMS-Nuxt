@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   fetchBookStats,
   fetchBooks,
@@ -13,6 +13,7 @@ import {
 } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
+const route = useRoute()
 const router = useRouter()
 
 const sections = [
@@ -22,7 +23,11 @@ const sections = [
   { key: 'topics', title: '获批课题', icon: 'chart' },
 ]
 
-const currentKey = ref('papers')
+const sectionKeys = sections.map((section) => section.key)
+const initialKey = typeof route.query.tab === 'string' && sectionKeys.includes(route.query.tab)
+  ? route.query.tab
+  : 'papers'
+const currentKey = ref(initialKey)
 
 const currentSection = computed(() => {
   return sections.find((section) => section.key === currentKey.value) ?? sections[0]
@@ -39,13 +44,18 @@ const detailRoute = (type, id) => {
   return routes[type] ? `${routes[type]}/${id}` : ''
 }
 
+const patentTypeLabels = {
+  software: '软著',
+  patent: '发明专利'
+}
+
 const results = ref([])
 const fallbackChartBars = [
-  { year: '2020', value: 34 },
-  { year: '2021', value: 48 },
-  { year: '2022', value: 62 },
-  { year: '2023', value: 78 },
-  { year: '2024(Q1)', value: 100, active: true },
+  { year: '2021', value: 42 },
+  { year: '2022', value: 56 },
+  { year: '2023', value: 70 },
+  { year: '2024', value: 86 },
+  { year: '2025', value: 100, active: true },
 ]
 const stats = ref({ total: 0, byType: {}, byYear: [] })
 
@@ -103,7 +113,7 @@ const loadData = async (key = currentKey.value) => {
       nextResults = (res.rows || []).map(p => ({
         id: p.id,
         route: detailRoute(key, p.id),
-        category: p.type || '软著',
+        category: patentTypeLabels[p.type] || p.typeName || '软著',
         title: p.title,
         number: p.registrationNo || '',
         owner: p.owner || '',
@@ -202,9 +212,8 @@ const goBack = () => {
               <span>{{ item.category }}</span>
               <h2>{{ item.title }}</h2>
               <p>
-                登记号: {{ item.number }}
-                <b></b>
-                负责人: {{ item.owner }}
+                <span class="meta-number">登记号: {{ item.number }}</span>
+                <span class="meta-owner">负责人: {{ item.owner }}</span>
               </p>
             </div>
             <time>{{ item.date }}<small>PUBLICATION DATE</small></time>
@@ -247,13 +256,12 @@ const goBack = () => {
       </aside>
     </div>
 
-    <footer class="registry-actions">
-      <button type="button" class="ghost-button" @click="goBack">
-        <span aria-hidden="true">‹</span>
+    <footer class="registry-actions return-actions">
+      <button type="button" class="return-action return-action--back" @click="goBack">
+        <span aria-hidden="true">←</span>
         返回上一页
       </button>
-      <router-link class="home-button" to="/home">
-        <span aria-hidden="true">⌂</span>
+      <router-link class="return-action return-action--home" to="/home">
         返回首页
       </router-link>
     </footer>
@@ -262,26 +270,30 @@ const goBack = () => {
 
 <style scoped>
 .registry-page {
-  min-height: 100vh;
+  height: calc(100vh - 53px);
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background:
     linear-gradient(rgba(250, 247, 242, 0.88), rgba(250, 247, 242, 0.9)),
-    url('@/assets/images/backgrounds/home/home-bg2.png') center top / cover fixed,
+    url('@/assets/images/backgrounds/mult-page/bg.jpg') center top / cover fixed,
     #faf7f2;
   color: #2f2522;
-  font-family: "Noto Serif SC", "SimSun", "宋体", serif;
+  font-family: var(--font-serif);
 }
 
 .registry-shell {
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 26px 37px 0;
+  min-height: 0;
+  padding: 22px 37px 0;
   display: grid;
-  grid-template-columns: 250px minmax(520px, 1fr) 436px;
-  gap: 38px;
+  grid-template-columns: 220px minmax(420px, 1fr) 360px;
+  gap: 28px;
   flex: 1;
+  overflow: hidden;
 }
 
 .side-panel {
@@ -289,7 +301,7 @@ const goBack = () => {
 }
 
 .side-title {
-  margin-bottom: 34px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -297,8 +309,8 @@ const goBack = () => {
 }
 
 .side-title strong {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--font-size-8xl);
+  font-weight: var(--font-weight-bold);
 }
 
 .flask-icon {
@@ -311,8 +323,8 @@ const goBack = () => {
 }
 
 .side-link {
-  width: 250px;
-  height: 50px;
+  width: 220px;
+  height: 44px;
   margin-bottom: 9px;
   padding: 0 16px;
   display: flex;
@@ -322,7 +334,7 @@ const goBack = () => {
   background: transparent;
   color: #6f6a66;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   text-align: left;
   cursor: pointer;
 }
@@ -401,33 +413,38 @@ const goBack = () => {
 }
 
 .content-panel {
+  width: 100%;
   min-width: 0;
   padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .content-heading {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(320px, 402px);
-  gap: 32px;
+  grid-template-columns: minmax(240px, 1fr) minmax(280px, 360px);
+  gap: 24px;
   align-items: start;
+  flex-shrink: 0;
 }
 
 .content-heading h1 {
   color: #842130;
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: var(--font-size-10xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
 }
 
 .content-heading p {
-  margin-top: 20px;
+  margin-top: 10px;
   color: #6d625d;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
 }
 
 .search-box {
-  height: 61px;
-  padding: 0 18px;
+  height: 50px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -464,7 +481,7 @@ const goBack = () => {
   background: transparent;
   color: #7b6a66;
   font: inherit;
-  font-size: 14px;
+  font-size: var(--font-size-xl);
 }
 
 .search-box input::placeholder {
@@ -472,10 +489,11 @@ const goBack = () => {
 }
 
 .filters {
-  margin: 20px 10px 9px 0;
+  margin: 14px 10px 9px 0;
   display: flex;
   justify-content: flex-end;
   gap: 48px;
+  flex-shrink: 0;
 }
 
 .filters button {
@@ -487,7 +505,7 @@ const goBack = () => {
   background: transparent;
   color: #5f5753;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
 }
 
 .filters i {
@@ -499,98 +517,130 @@ const goBack = () => {
 }
 
 .result-list {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
   display: grid;
-  gap: 20px;
+  gap: 14px;
+  align-content: start;
+  overflow-y: scroll;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
 }
 
 .result-item {
-  min-height: 130px;
-  padding: 24px;
+  justify-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 92px;
+  padding: 14px 20px 13px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px;
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) 118px;
+  gap: 18px;
+  align-items: start;
   border-left: 4px solid rgba(132, 33, 48, 0.18);
   background-color: rgba(255, 253, 250, 0.82);
   color: inherit;
   text-decoration: none;
 }
 
+.result-copy {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+}
+
 .result-copy span {
   color: #842130;
-  font-size: 13px;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-tight);
 }
 
 .result-copy h2 {
-  margin-top: 12px;
+  margin-top: 6px;
   color: #1f1714;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
 }
 
 .result-copy p {
-  margin-top: 12px;
+  margin-top: 7px;
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: #6f6660;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
-.result-copy b {
-  display: none;
+.result-copy .meta-number,
+.result-copy .meta-owner {
+  min-width: 0;
+}
+
+.result-copy .meta-owner {
+  margin-left: 12px;
 }
 
 .result-item time {
+  align-self: start;
+  margin-top: calc(var(--font-size-lg) * var(--line-height-tight) + 6px);
   display: grid;
   justify-items: end;
   color: #aa263b;
-  font-family: "Noto Serif SC", serif;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.1;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-6xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .result-item small {
   margin-top: 7px;
   color: #a59b96;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 10px;
-  font-weight: 400;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  white-space: nowrap;
 }
 
 .stats-panel {
-  padding-top: 24px;
+  min-height: 0;
+  padding-top: 4px;
+  overflow-y: auto;
 }
 
 .stats-panel h2 {
-  margin-bottom: 60px;
-  padding-left: 26px;
+  margin-bottom: 22px;
+  padding-left: 18px;
   border-left: 3px solid #842130;
   color: #842130;
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1;
+  font-size: var(--font-size-10xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
 }
 
 .stats-card {
-  min-height: 569px;
-  padding: 40px;
+  min-height: auto;
+  padding: 28px;
   background-color: rgba(255, 253, 250, 0.82);
   box-shadow: 0 1px 3.8px rgba(0, 0, 0, 0.25);
 }
 
 .stats-card > p {
   color: #88807b;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 13px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .total-count {
-  margin-top: 22px;
+  margin-top: 16px;
   display: flex;
   align-items: end;
   gap: 18px;
@@ -598,21 +648,21 @@ const goBack = () => {
 
 .total-count strong {
   color: #842130;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 82px;
-  font-weight: 400;
-  line-height: 0.9;
+  font-family: var(--font-number);
+  font-size: 64px;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-compact);
   text-shadow: 0 4px 5px rgba(94, 42, 49, 0.26);
 }
 
 .total-count span {
   margin-bottom: 8px;
   color: #aaa29d;
-  font-size: 26px;
+  font-size: var(--font-size-8xl);
 }
 
 .stats-pair {
-  margin: 78px 0 48px;
+  margin: 34px 0 28px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 42px;
@@ -626,25 +676,25 @@ const goBack = () => {
 
 .stats-pair dt {
   color: #8b837e;
-  font-size: 12px;
+  font-size: var(--font-size-md);
 }
 
 .stats-pair dd {
   color: #842130;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 38px;
-  font-weight: 700;
-  line-height: 1;
+  font-family: var(--font-number);
+  font-size: var(--font-size-10xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
 }
 
 .chart-title {
   margin-bottom: 20px;
   color: #827872;
-  font-size: 13px;
+  font-size: var(--font-size-lg);
 }
 
 .bar-chart {
-  height: 142px;
+  height: 112px;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 18px;
@@ -674,66 +724,46 @@ const goBack = () => {
 .bar-wrap em {
   margin-top: 12px;
   color: #9b928d;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 10px;
-  font-style: normal;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-style: var(--font-style-normal);
 }
 
 .note-card {
-  margin-top: 20px;
-  min-height: 139px;
-  padding: 32px 40px;
+  margin-top: 14px;
+  min-height: 0;
+  padding: 20px 24px;
   background-color: rgba(234, 232, 227, 0.5);
   color: #6f6660;
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-summary);
 }
 
 .registry-actions {
   width: 100%;
   max-width: 1920px;
-  margin: 20px auto 40px;
-  padding: 0 62px;
+  margin: 12px auto 18px;
+  padding: 0 37px;
   display: flex;
   justify-content: flex-end;
   gap: 16px;
+  flex-shrink: 0;
 }
 
-.ghost-button,
-.home-button {
-  min-height: 45px;
-  padding: 12px 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(221, 192, 192, 0.15);
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-decoration: none;
-  cursor: pointer;
-}
 
-.ghost-button {
-  background-color: #fff;
-  color: #842130;
-}
 
-.home-button {
-  border-color: #842130;
-  background-color: #842130;
-  color: #fff;
-}
 
 @media (max-width: 1360px) {
   .registry-shell {
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: 180px minmax(360px, 1fr) 300px;
+    gap: 22px;
+  }
+
+  .side-link {
+    width: 180px;
   }
 
   .stats-panel {
-    grid-column: 2;
     padding-top: 10px;
   }
 
@@ -777,7 +807,7 @@ const goBack = () => {
 
   .content-heading h1,
   .stats-panel h2 {
-    font-size: 32px;
+    font-size: var(--font-size-10xl);
   }
 
   .filters {
