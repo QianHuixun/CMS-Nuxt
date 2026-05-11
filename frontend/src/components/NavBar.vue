@@ -7,8 +7,13 @@ const navItems = [
   { name: '首页', path: '/home' },
   { name: '资源导航', path: '/resources' },
   { name: '知识图谱', path: '/knowledge' },
-  { name: '学术动态', path: '/academic' },
+  { name: '学术动态', path: '/academic', activePaths: ['/academic-news', '/achievements', '/activity-timeline'] },
 ]
+
+const isActive = (item) => {
+  if (route.path === item.path || route.path.startsWith(`${item.path}/`)) return true
+  return item.activePaths?.some((path) => route.path === path || route.path.startsWith(`${path}/`)) ?? false
+}
 </script>
 
 <template>
@@ -22,7 +27,7 @@ const navItems = [
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        :class="['nav-item', { active: route.path === item.path }]"
+        :class="['nav-item', { active: isActive(item) }]"
       >
         {{ item.name }}
       </router-link>
@@ -69,6 +74,7 @@ const navItems = [
 .nav {
   display: flex;
   gap: 32px;
+  align-items: center;
 }
 
 .nav-item {
@@ -78,11 +84,12 @@ const navItems = [
   color: var(--color-text);
   text-decoration: none;
   position: relative;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .nav-item:hover {
   color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .nav-item.active {
@@ -90,7 +97,13 @@ const navItems = [
   font-weight: var(--font-weight-semibold);
 }
 
-.nav-item.active::after {
+.nav-item.active::after,
+.nav-item:hover::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.nav-item::after {
   content: "";
   position: absolute;
   bottom: -8px;
@@ -98,5 +111,9 @@ const navItems = [
   width: 100%;
   height: 1px;
   background-color: var(--color-primary);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.24s ease, opacity 0.24s ease;
 }
 </style>
