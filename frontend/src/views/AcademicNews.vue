@@ -13,12 +13,21 @@ const activityPhotos = ref([])
 const fallbackPaperId = 'meridian-bioelectric'
 const fallbackBookId = 'book_001'
 const fallbackPatentId = 'software_001'
-const fallbackActivityId = 'activity_001'
 
 const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
 const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
 const patentRoute = (id) => `/patent/${id || fallbackPatentId}`
-const activityRoute = (id) => `/activity/${id || fallbackActivityId}`
+const activityTimelineRoute = '/activity-timeline'
+const fallbackActivityImages = [
+  '/mock-assets/activities/activity-group-photo.jpg',
+  '/mock-assets/activities/activity-training.jpg',
+]
+const fallbackActivityPhotos = [
+  { id: 'fallback-photo-1', title: '出土医学文献数字化研讨会现场', thumbUrl: fallbackActivityImages[0] },
+  { id: 'fallback-photo-2', title: '中医药冷门绝学继承型人才学术能力提升培训班', thumbUrl: fallbackActivityImages[1] },
+]
+
+const activityPhotoSrc = (photo, index) => photo?.thumbUrl || photo?.imageUrl || fallbackActivityImages[index % fallbackActivityImages.length]
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -36,13 +45,13 @@ const goBack = () => {
 
 onMounted(async () => {
   try {
-    const res = await fetchPapers({ pageNum: 1, pageSize: 8 })
+    const res = await fetchPapers({ pageNum: 1, pageSize: 18 })
     papers.value = (res.rows || []).map(p => ({
       id: p.id,
       journal: p.journal || '',
       title: p.title,
       date: p.year ? `${p.year}年` : '',
-      author: `作者：${p.firstAuthor || ''}等`,
+      author: `作者：${p.firstAuthor || ''} 等`,
     }))
   } catch (e) {
     console.error('获取论文列表失败', e)
@@ -54,7 +63,7 @@ onMounted(async () => {
     console.error('获取著作列表失败', e)
   }
   try {
-    const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 6 })
+    const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 5 })
     patents.value = (res.rows || []).map(p => ({
       id: p.id,
       code: p.registrationNo || '',
@@ -65,12 +74,11 @@ onMounted(async () => {
   }
   try {
     const res = await fetchActivityPhotos({ pageNum: 1, pageSize: 2 })
-    activityPhotos.value = (res.rows || []).map(photo => ({
-      ...photo,
-      activityId: photo.activityId || photo.activityID || fallbackActivityId
-    }))
+    const rows = res.rows || []
+    activityPhotos.value = [...rows.slice(0, 2), ...fallbackActivityPhotos.slice(rows.length)].slice(0, 2)
   } catch (e) {
     console.error('获取活动剪影失败', e)
+    activityPhotos.value = fallbackActivityPhotos
   }
   try {
     const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
@@ -89,14 +97,14 @@ onMounted(async () => {
   <main class="academic-page">
     <section class="academic-hero">
       <h1>学术动态</h1>
-      <p>汇集本实验室最新的科研成果、出版论著及重要学术进展。</p>
+      <p>汇集本实验室最新的科研成果、出版论著以及重要学术进展。</p>
     </section>
-x
+
     <section class="academic-grid">
       <section class="panel paper-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>发表论文</h2>
-          <button type="button">查看全部</button>
+          <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'papers' } }">查看全部</router-link>
         </header>
 
         <div class="paper-list">
@@ -121,13 +129,13 @@ x
       <section class="panel book-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>学术著作</h2>
-          <button type="button">查看全部</button>
+          <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'books' } }">查看全部</router-link>
         </header>
 
         <div class="book-content">
           <div class="book-copy">
             <h3>《{{ books[0]?.title || '出土医学文献叙录' }}》</h3>
-            <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年 {{ books[0]?.publisher || '大学出版社' }}。</p>
+            <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年，{{ books[0]?.publisher || '大学出版社' }}。</p>
             <router-link class="book-action" :to="bookRoute(books[0]?.id)">阅读提要</router-link>
           </div>
           <div class="book-cover" :aria-label="`${books[0]?.title || '出土医学文献叙录'}封面`">
@@ -139,7 +147,7 @@ x
       <section class="panel patent-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>软著专利</h2>
-          <button type="button">查看全部</button>
+          <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'patents' } }">查看全部</router-link>
         </header>
 
         <div class="patent-list">
@@ -148,7 +156,7 @@ x
               <span>{{ patent.code }}</span>
               <h3>{{ patent.title }}</h3>
             </div>
-            <span class="gear">◎</span>
+            <span class="gear">◆</span>
           </router-link>
         </div>
       </section>
@@ -164,8 +172,9 @@ x
               v-for="(photo, index) in activityPhotos"
               :key="photo.id"
               :class="['gallery-card', index === 0 ? 'meeting-card' : 'lab-card']"
-              :to="activityRoute(photo.activityId)"
+              :to="activityTimelineRoute"
             >
+              <img :src="activityPhotoSrc(photo, index)" :alt="photo.title || '活动剪影'">
               <figcaption>{{ photo.title }}</figcaption>
             </router-link>
           </div>
@@ -190,88 +199,113 @@ x
       </section>
     </section>
 
-    <div class="page-actions">
-      <button type="button" class="plain-button" @click="goBack">返回上一页</button>
-      <router-link class="home-button" to="/home">返回首页</router-link>
+    <div class="page-actions return-actions">
+      <button type="button" class="return-action return-action--back" @click="goBack">
+        <span aria-hidden="true">←</span>
+        返回上一页
+      </button>
+      <router-link class="return-action return-action--home" to="/home">
+        返回首页
+      </router-link>
     </div>
   </main>
 </template>
 
 <style scoped>
 .academic-page {
-  min-height: calc(100vh - 64px);
-  padding: 32px 0 24px;
-  overflow-x: hidden;
+  height: calc(100vh - 53px);
+  padding: 18px 0 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background:
     linear-gradient(rgba(250, 246, 237, 0.88), rgba(250, 246, 237, 0.9)),
-    url('@/assets/images/backgrounds/home/home-bg2.png') center center / cover fixed;
+    url('@/assets/images/backgrounds/mult-page/bg.jpg') center center / cover fixed;
   color: #2e2721;
-  font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
+  font-family: var(--font-serif);
 }
 
 .academic-hero,
+.academic-grid,
 .page-actions {
-  padding: 0 70px;
+  padding: 0 56px;
   max-width: 100%;
   box-sizing: border-box;
 }
 
 .academic-hero {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .academic-hero h1 {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--color-primary);
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1.15;
+  font-size: var(--font-size-8xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-hero);
 }
 
 .academic-hero p {
   color: #8a8078;
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
 }
 
 .academic-grid {
-  padding: 0 70px;
-  max-width: 100%;
-  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr) minmax(280px, 0.78fr);
-  grid-template-rows: auto auto;
-  gap: 24px 36px;
+  grid-template-columns: minmax(320px, 1fr) minmax(340px, 1.12fr) minmax(300px, 0.95fr);
+  grid-template-rows: minmax(0, 0.98fr) minmax(0, 0.62fr);
+  gap: 14px 16px;
   align-items: stretch;
 }
 
 .panel {
   min-width: 0;
-  padding: 24px 26px;
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
   background-color: rgba(255, 255, 255, 0.86);
   box-shadow: 0 12px 28px rgba(90, 72, 54, 0.04);
-  min-height: 280px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .paper-panel {
+  grid-column: 1;
   grid-row: 1 / span 2;
   border-left: 2px solid rgba(132, 33, 48, 0.25);
-  min-height: 650px;
+  height: 100%;
+  min-height: 0;
   background-color: rgba(248, 247, 242, 0.86);
 }
 
+.book-panel {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+}
+
 .patent-panel {
+  grid-column: 3;
+  grid-row: 1;
   background-color: rgba(248, 246, 240, 0.84);
 }
 
 .gallery-panel {
   grid-column: 2 / 4;
-  min-height: 250px;
+  grid-row: 2;
+  height: 100%;
+  min-height: 0;
 }
 
 .activity-panel {
   min-width: 0;
   padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .panel-header,
@@ -279,23 +313,23 @@ x
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .panel-header h2 {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   color: #3f332c;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-title);
 }
 
 .header-icon {
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
   display: inline-block;
   border: 2px solid var(--color-primary);
   background-color: var(--color-primary);
@@ -309,10 +343,10 @@ x
   border: 0;
   background: transparent;
   color: var(--color-primary);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-control);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -325,12 +359,13 @@ x
 }
 
 .paper-list {
-  height: auto;
-  max-height: 560px;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
+  gap: 9px;
+  overflow: hidden;
   scrollbar-width: none;
 }
 
@@ -340,30 +375,30 @@ x
 
 .paper-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px;
-  gap: 22px;
-  min-height: 58px;
-  padding-bottom: 4px;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 14px;
+  min-height: 46px;
+  padding-bottom: 2px;
   color: inherit;
   text-decoration: none;
 }
 
 .journal {
   display: block;
-  margin-bottom: 7px;
+  margin-bottom: 4px;
   color: var(--color-primary);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-family: var(--font-number);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
 }
 
 .paper-item h3 {
   overflow: hidden;
   color: #312821;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.45;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -376,58 +411,61 @@ x
 .activity-panel time {
   display: block;
   color: #9a9188;
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-heading);
 }
 
 .paper-item strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 5px;
   color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
 }
 
 .book-content {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px;
-  gap: 30px;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 16px;
   align-items: center;
 }
 
 .book-copy h3 {
-  margin-bottom: 22px;
+  margin-bottom: 10px;
   color: #352a24;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
 }
 
 .book-copy p {
   color: #8a8078;
-  font-size: 14px;
-  line-height: 1.8;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 
 .book-copy button,
 .book-action {
-  margin-top: 58px;
-  padding: 10px 18px;
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  padding: 8px 14px;
   display: inline-flex;
   border: 0;
   background-color: var(--color-primary);
   color: #fff;
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-control);
   text-decoration: none;
   cursor: pointer;
 }
 
 .book-cover {
   aspect-ratio: 3 / 4;
-  padding: 8px;
-  border: 7px solid #4b3128;
+  padding: 6px;
+  border: 5px solid #4b3128;
   background: #efe2c7;
   box-shadow: 0 10px 18px rgba(42, 30, 22, 0.2);
 }
@@ -439,24 +477,24 @@ x
   justify-content: center;
   border: 1px solid rgba(132, 33, 48, 0.16);
   color: #2e1e17;
-  font-family: "KaiTi", "STKaiti", serif;
-  font-size: 34px;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-size: var(--font-size-8xl);
+  line-height: var(--line-height-title);
   transform: rotate(-8deg);
 }
 
 .patent-list {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .patent-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  min-height: 52px;
-  padding: 10px 14px;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 12px;
   border-left: 3px solid #d8a4aa;
   background-color: rgba(255, 255, 255, 0.92);
   color: inherit;
@@ -466,45 +504,57 @@ x
 .patent-item span:not(.gear) {
   display: block;
   color: #9d938c;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 10px;
-  line-height: 1.2;
+  font-family: var(--font-number);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
 }
 
 .patent-item h3 {
   color: #3b302a;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.45;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
 }
 
 .gear {
   flex: 0 0 auto;
   color: var(--color-primary);
-  font-size: 18px;
+  font-size: var(--font-size-2xl);
 }
 
 .gallery-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  height: 100%;
+  min-height: 0;
+  gap: 10px;
 }
 
 .gallery-layout {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+  gap: 14px;
   align-items: start;
 }
 
 .gallery-card {
   position: relative;
-  height: 198px;
+  height: 168px;
   display: block;
   overflow: hidden;
   background-color: #333;
   color: inherit;
   text-decoration: none;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .meeting-card {
@@ -520,69 +570,33 @@ x
     linear-gradient(145deg, #0f0f0f, #535353 45%, #101010);
 }
 
-.gallery-card::before,
-.gallery-card::after {
-  content: "";
-  position: absolute;
-  background-color: rgba(255, 255, 255, 0.18);
-}
-
-.meeting-card::before {
-  left: 22px;
-  bottom: 30px;
-  width: 116px;
-  height: 45px;
-  border-radius: 50% 50% 0 0;
-}
-
-.meeting-card::after {
-  left: 36px;
-  top: 34px;
-  width: 94px;
-  height: 74px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  background: transparent;
-}
-
-.lab-card::before {
-  left: 42px;
-  bottom: 36px;
-  width: 112px;
-  height: 38px;
-  transform: skewX(-12deg);
-}
-
-.lab-card::after {
-  top: 22px;
-  right: 34px;
-  width: 38px;
-  height: 88px;
-  border-radius: 24px 24px 4px 4px;
-  opacity: 0.24;
-}
-
 .gallery-card figcaption {
   position: absolute;
-  left: 8px;
-  bottom: 8px;
-  padding: 4px 7px;
+  left: 6px;
+  bottom: 6px;
+  padding: 3px 6px;
   background-color: rgba(132, 33, 48, 0.92);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
 }
 
 .activity-header {
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .activity-header span {
-  color: #5d524a;
-  font-size: 14px;
-  font-weight: 600;
+  color: #3f332c;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-title);
 }
 
 .activity-panel ol {
+  flex: 1;
+  min-height: 0;
   list-style: none;
+  max-height: none;
+  overflow: hidden;
 }
 
 .activity-panel li {
@@ -591,7 +605,7 @@ x
 
 .activity-panel li > a {
   display: grid;
-  grid-template-columns: 7px minmax(0, 1fr) 82px;
+  grid-template-columns: 6px minmax(0, 1fr) 88px;
   gap: 10px;
   align-items: start;
   color: inherit;
@@ -608,50 +622,28 @@ x
 .activity-panel p {
   overflow: hidden;
   color: var(--color-primary);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .activity-panel time {
   text-align: right;
+  line-height: var(--line-height-snug);
+  white-space: nowrap;
 }
 
 .page-actions {
-  margin-top: 16px;
+  margin-top: 8px;
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-}
-
-.plain-button,
-.home-button {
-  min-width: 84px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  text-decoration: none;
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.plain-button {
-  background-color: rgba(255, 255, 255, 0.88);
-  color: var(--color-primary);
-}
-
-.home-button {
-  background-color: var(--color-primary);
-  color: #fff;
+  gap: 12px;
 }
 
 @media (max-width: 1280px) {
   .academic-page {
-    padding: 28px 0 44px;
+    padding: 16px 0 16px;
   }
 
   .academic-hero,
@@ -663,7 +655,7 @@ x
   .academic-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto;
-    gap: 20px;
+    gap: 12px;
   }
 
   .paper-panel,
@@ -684,22 +676,25 @@ x
   }
 
   .paper-list {
-    height: auto;
-    max-height: 420px;
+    max-height: 260px;
   }
 
   .book-content {
-    grid-template-columns: minmax(0, 1.5fr) 100px;
+    grid-template-columns: minmax(0, 1.4fr) 92px;
   }
 
   .gallery-layout {
-    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  }
+
+  .gallery-card {
+    height: 104px;
   }
 }
 
 @media (max-width: 768px) {
   .academic-page {
-    padding: 24px 0 36px;
+    padding: 14px 0 14px;
   }
 
   .academic-hero,
@@ -709,25 +704,30 @@ x
   }
 
   .academic-hero h1 {
-    font-size: 24px;
+    font-size: var(--font-size-5xl);
   }
 
   .academic-grid {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 12px;
   }
 
   .panel {
     min-height: auto;
   }
 
+  .paper-list,
+  .activity-panel ol {
+    max-height: none;
+  }
+
   .book-content {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 12px;
   }
 
   .book-cover {
-    max-width: 150px;
+    max-width: 128px;
     margin: 0 auto;
   }
 
@@ -742,13 +742,13 @@ x
   .paper-item,
   .activity-panel li > a {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
   .paper-item aside {
     text-align: left;
     display: flex;
-    gap: 12px;
+    gap: 8px;
   }
 
   .paper-item h3,
@@ -761,8 +761,7 @@ x
     flex-direction: column;
   }
 
-  .plain-button,
-  .home-button {
+  .return-action {
     flex: 1;
     width: 100%;
   }

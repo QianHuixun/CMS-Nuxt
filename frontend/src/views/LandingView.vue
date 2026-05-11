@@ -46,12 +46,12 @@ function enterSystem() {
 }
 
 .title-main {
-  font-family: "FZYanZhenQingKaiShuJF", "KaiTi", "STKaiti", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: clamp(24px, 4.5vw, 56px);
-  line-height: 1.4;
-  letter-spacing: -0.05em;
+  font-family: var(--font-landing-title);
+  font-weight: var(--font-weight-regular);
+  font-style: var(--font-style-normal);
+  font-size: var(--font-size-landing-title);
+  line-height: var(--line-height-control);
+  letter-spacing: var(--letter-spacing-tight);
   text-align: center;
   white-space: nowrap;
   color: #fff;
@@ -77,13 +77,27 @@ function enterSystem() {
 }
 
 .title-sub {
-  font-family: "TengXiangFanXiaoGeJianDu", "KaiTi", "STKaiti", sans-serif;
-  font-weight: 400;
-  font-size: clamp(20px, 2.5vw, 32px);
-  letter-spacing: 2px;
+  font-family: var(--font-landing-subtitle);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-landing-subtitle);
+  letter-spacing: var(--letter-spacing-sm);
   text-align: center;
   opacity: 0.9;
   margin-bottom: 100px;
   color: #fff;
+}
+
+.btn-primary {
+  padding: 16px 48px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  font-size: var(--font-size-4xl);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
 }
 </style>

@@ -23,6 +23,25 @@ const fallbackProjectList = [
   { tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
 ]
 
+// 15个固定竹简位置，按视觉主次排列，横向留出间隔避免相接。
+const bambooSlots = [
+  { left: 47.7, bottom: 7 },
+  { left: 41, bottom: 30 },
+  { left: 54.4, bottom: 23 },
+  { left: 27.6, bottom: 38 },
+  { left: 67.8, bottom: 36 },
+  { left: 14.2, bottom: 17 },
+  { left: 81.2, bottom: 14 },
+  { left: 34.3, bottom: 4 },
+  { left: 61.1, bottom: 5 },
+  { left: 20.9, bottom: 45 },
+  { left: 74.5, bottom: 46 },
+  { left: 7.5, bottom: 36 },
+  { left: 87.9, bottom: 34 },
+  { left: 0.8, bottom: 6 },
+  { left: 94.6, bottom: 8 },
+]
+
 /**
  * 水平分轨错落算法 (复刻设计图的竹简散落美学)
  */
@@ -42,7 +61,6 @@ const createWordCloud = (words) => {
 
   // 模拟指数级权重，拉开大小差距
   if (wordsWithWeight[0].weight === null) {
-    wordsWithWeight.sort(() => Math.random() - 0.5)
     wordsWithWeight = wordsWithWeight.map((w, i) => {
       const normalized = 1 - (i / (totalWords - 1))
       w.weight = Math.pow(normalized, 2) * 0.85 + 0.15 
@@ -53,52 +71,28 @@ const createWordCloud = (words) => {
   // 按权重严格降序
   wordsWithWeight.sort((a, b) => b.weight - a.weight)
 
-  // 2. 准备水平轨道 (Lanes) 保证左右不重叠
-  const lanes = Array.from({ length: totalWords }, (_, i) => i)
-  
-  // 提取中间的几条轨道，专门留给权重最高的前几个词
-  const centerLaneCount = Math.min(4, totalWords)
-  const startIndex = Math.floor((totalWords - centerLaneCount) / 2)
-  const centerLanes = lanes.splice(startIndex, centerLaneCount)
-
   return wordsWithWeight.map((wordObj, i) => {
     const { text, weight } = wordObj
+    const slot = bambooSlots[i]
     
     // --- 视觉特征映射 ---
-    const height = Math.floor(160 + weight * 280) // 160px ~ 440px
+    const height = Math.floor(190 + weight * 280) // 190px ~ 470px
     const width = Math.floor(22 + weight * 30)    // 22px ~ 52px
     const fontSize = Math.floor(13 + weight * 16) // 13px ~ 29px
     const opacity = (0.2 + weight * 0.8).toFixed(2)
     const zIndex = Math.floor(weight * 10) + 1
 
-    // --- 分配轨道 ---
-    let assignedLane
-    if (i < centerLaneCount && centerLanes.length > 0) {
-      // 核心词汇：随机分配到中间轨道
-      const randIdx = Math.floor(Math.random() * centerLanes.length)
-      assignedLane = centerLanes.splice(randIdx, 1)[0]
-    } else {
-      // 其他词汇：随机分配到剩余轨道
-      const randIdx = Math.floor(Math.random() * lanes.length)
-      assignedLane = lanes.splice(randIdx, 1)[0]
-    }
+    const leftPct = slot.left
 
-    // --- 坐标计算 ---
-    const laneWidthPct = 100 / totalWords
-    // 在自己的轨道内产生一定左右偏移，打破死板的对齐感
-    const jitterX = (0.1 + Math.random() * 0.8) * laneWidthPct
-    const leftPct = assignedLane * laneWidthPct + jitterX
+    const bottomPct = slot.bottom
 
-    // Y轴：完全随机的高低错落 (允许 0% ~ 45% 的顶部空间)
-    const topPct = Math.random() * 45
-
-    const floatDelay = `${(Math.random() * 4).toFixed(2)}s`
-    const entranceDelay = `${(Math.random() * 1.5).toFixed(2)}s`
+    const floatDelay = `${((i % 5) * 0.35).toFixed(2)}s`
+    const entranceDelay = `${(i * 0.08).toFixed(2)}s`
 
     return {
       text, 
       left: `${leftPct}%`, 
-      top: `${topPct}%`, 
+      bottom: `${bottomPct}%`, 
       height: `${height}px`, 
       width: `${width}px`, 
       fontSize: `${fontSize}px`, 
@@ -195,7 +189,7 @@ function goExpert(id) {
             :key="index"
             class="word-rect"
             :style="{
-              top: word.top,
+              bottom: word.bottom,
               left: word.left,
               height: word.height,
               width: word.width,
@@ -235,10 +229,10 @@ function goExpert(id) {
             <div class="project-meta">{{ project.meta }}</div>
           </div>
         </div>
-        <div class="view-all-btn">
+        <router-link class="view-all-btn" :to="{ path: '/achievements', query: { tab: 'topics' } }">
           <span>查看</span>
           <span>全部</span>
-        </div>
+        </router-link>
       </div>
     </div>
 
@@ -302,11 +296,15 @@ function goExpert(id) {
   padding-right: 20px;
 }
 .team-section > * { direction: ltr; }
-.team-section::-webkit-scrollbar { width: 4px; }
-.team-section::-webkit-scrollbar-track { background: transparent; }
+.team-section::-webkit-scrollbar { width: 2px; }
+.team-section::-webkit-scrollbar-button { display: none; }
+.team-section::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 150px 0;
+}
 .team-section::-webkit-scrollbar-thumb {
   background-color: var(--color-primary, #842130);
-  border-radius: 2px;
+  border-radius: 1px;
 }
 
 .team-cards { 
@@ -351,7 +349,7 @@ function goExpert(id) {
 @keyframes slip-entrance {
   0% { 
     opacity: 0; 
-    transform: translateY(-40px); 
+    transform: translateY(80px); 
     filter: blur(8px); 
   }
   100% { 
@@ -362,7 +360,7 @@ function goExpert(id) {
 }
 @keyframes slip-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+  50% { transform: translateY(-8px); }
 }
 
 .word-rect {
@@ -474,14 +472,15 @@ function goExpert(id) {
   height: 100%;
   display: flex;
   flex-direction: column;
-  text-align: right;
+  text-align: left;
   padding-left: 8px;
   padding-right: 20px;
 }
 
 /* 让列表承接滚动能力，撑开中间区域 */
 .project-list { 
-  flex: 1;
+  flex: 0 1 auto;
+  max-height: calc(100% - 128px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary, #842130) transparent;
@@ -527,9 +526,12 @@ function goExpert(id) {
   cursor: pointer;
   margin-left: auto;
   margin-top: 16px;
-  margin-bottom: 0; /* 修改为0，使其完全贴底 */
+  margin-right: 0;
+  margin-bottom: 0;
   font-size: 12px;
   font-weight: bold;
+  line-height: 1.35;
+  text-decoration: none;
   transition: all 0.2s ease;
 }
 .view-all-btn:hover { background-color: rgba(132, 33, 48, 0.15); }

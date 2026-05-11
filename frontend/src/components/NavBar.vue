@@ -59,9 +59,11 @@ const navItems = [
 }
 
 .header-title {
-  font-size: 14px;
+  font-family: var(--font-nav);
+  font-size: var(--font-size-md);
   color: var(--color-primary);
-  font-weight: normal;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-xs);
 }
 
 .nav {
@@ -70,7 +72,9 @@ const navItems = [
 }
 
 .nav-item {
-  font-size: 14px;
+  font-family: var(--font-nav);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text);
   text-decoration: none;
   position: relative;
@@ -83,6 +87,7 @@ const navItems = [
 
 .nav-item.active {
   color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .nav-item.active::after {

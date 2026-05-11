@@ -5,6 +5,27 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "FZYanZhenQingKaiShuJF";
+  src: url("@/assets/fonts/TengXiangFanXiaoGeJianDu.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SourceHanSerifSCHeavy";
+  src: url("@/assets/fonts/NotoSerifSC-VF.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SourceHanSansSC";
+  src: url("@/assets/fonts/NotoSansSC-VF.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
 :root {
   --color-primary: #842130;
   --color-primary-hover: #9e2a3c;
@@ -15,6 +36,87 @@
   --shadow-card: 0 2px 3px rgba(255, 255, 255, 0.8) inset, 0 8px 15px rgba(0, 0, 0, 0.1), 0 3px 5px rgba(0, 0, 0, 0.08);
   --shadow-card-hover: 0 2px 3px rgba(255, 255, 255, 0.8) inset, 0 12px 20px rgba(0, 0, 0, 0.12), 0 5px 8px rgba(0, 0, 0, 0.1);
   --transition-fast: all 0.2s ease;
+  --font-serif: "SourceHanSansSC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-sans: "SourceHanSansSC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  --font-heading: "SourceHanSansSC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-nav: "FZDaBiaoSong-B06S", "FZDaBiaoSongS-B-GB", "方正大标宋简体", "方正大标宋_GBK", "SourceHanSansSC", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+  --font-display: "SourceHanSerifSCHeavy", "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
+  --font-landing-title: "SourceHanSerifSCHeavy", "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
+  --font-landing-subtitle: "SourceHanSerifSCHeavy", "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
+  --font-landing-title: "SourceHanSansSC", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-landing-subtitle: "TengXiangFanXiaoGeJianDu", "SourceHanSerifSCHeavy", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-number: Georgia, "Times New Roman", serif;
+  --font-mono: "Liberation Mono", Consolas, monospace;
+  --font-style-normal: normal;
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 15px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 17px;
+  --font-size-3xl: 18px;
+  --font-size-4xl: 20px;
+  --font-size-5xl: 22px;
+  --font-size-5-5xl: 23px;
+  --font-size-6xl: 24px;
+  --font-size-6-5xl: 25px;
+  --font-size-7xl: 26px;
+  --font-size-mobile-title: 27px;
+  --font-size-8xl: 28px;
+  --font-size-9xl: 30px;
+  --font-size-10xl: 34px;
+  --font-size-11xl: 36px;
+  --font-size-12xl: 38px;
+  --font-size-13xl: 40px;
+  --font-size-14xl: 42px;
+  --font-size-15xl: 44px;
+  --font-size-display: 82px;
+  --font-size-landing-title: clamp(24px, 4.5vw, 56px);
+  --font-size-landing-subtitle: clamp(20px, 2.5vw, 32px);
+  --font-size-timeline-title: clamp(42px, 3.75vw, 72px);
+  --font-size-expert-name: clamp(26px, 2.4vw, 32px);
+  --font-size-expert-copy: clamp(13px, 1.1vw, 14px);
+  --font-size-expert-item: clamp(15px, 1.25vw, 17px);
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+  --line-height-none: 1;
+  --line-height-compact: 0.9;
+  --line-height-tight: 1.1;
+  --line-height-hero: 1.15;
+  --line-height-snug: 1.2;
+  --line-height-title: 1.25;
+  --line-height-name: 1.3;
+  --line-height-heading: 1.35;
+  --line-height-control: 1.4;
+  --line-height-normal: 1.45;
+  --line-height-copy: 1.5;
+  --line-height-relaxed: 1.55;
+  --line-height-section: 1.6;
+  --line-height-body: 1.62;
+  --line-height-loose: 1.65;
+  --line-height-card: 1.7;
+  --line-height-summary: 1.75;
+  --line-height-reading: 1.8;
+  --line-height-article: 1.85;
+  --line-height-feature: 1.9;
+  --line-height-action: 20px;
+  --line-height-icon: 24px;
+  --line-height-card-title: 32px;
+  --letter-spacing-none: 0;
+  --letter-spacing-tight: -0.05em;
+  --letter-spacing-subtle: 0.05em;
+  --letter-spacing-xs: 1px;
+  --letter-spacing-sm: 2px;
+  --letter-spacing-md: 4px;
+  --letter-spacing-wide: 0.08em;
+  --letter-spacing-wider: 0.12em;
+  --letter-spacing-section: 0.15em;
+  --letter-spacing-title: 0.2em;
+  --letter-spacing-label: 0.3em;
 }
 
 * {
@@ -27,27 +129,14 @@ body {
   width: 100%;
   min-height: 100vh;
   color: #333;
-  font-family: "SimSun", "宋体", serif;
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-regular);
   background-color: #f8f6f0;
 }
 
 #app {
   width: 100%;
   min-height: 100vh;
-}
-
-.btn-primary {
-  padding: 16px 48px;
-  background-color: var(--color-primary);
-  color: #fff;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-hover);
 }
 
 .page-container {
@@ -64,12 +153,49 @@ body {
   transition: var(--transition-fast);
 }
 
+.section-title,
+.page-title,
+.main-title,
+.group-title,
+.card-title {
+  font-family: var(--font-heading);
+}
+
+.section-subtitle,
+.desc,
+.card-desc,
+.db-card-desc,
+.detail-subtitle,
+.abstract-content,
+.total-desc,
+.bio,
+.content-heading p,
+.result-copy p,
+.book-copy p,
+.activity-copy p,
+.hero-description,
+.card-content p,
+.monograph-subtitle,
+.monograph-meta,
+.monograph-abstract p,
+.paper-meta,
+.paper-abstract p,
+.patent-subtitle,
+.patent-meta,
+.patent-abstract p,
+.software-info p,
+.tech-block p {
+  font-family: var(--font-sans) !important;
+  font-weight: var(--font-weight-regular) !important;
+}
+
 .card:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 
-/* 知识图谱页面全局样式 */
+
+/* Knowledge graph page shared styles */
 .graph-node {
   position: absolute;
   display: flex;
@@ -81,7 +207,7 @@ body {
   text-align: center;
   border-radius: 6px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  font-family: "SimSun", "宋体", serif;
+  font-family: var(--font-serif);
 }
 
 .graph-node:hover {
@@ -109,22 +235,121 @@ body {
 .tag-item.highlight:hover {
   background-color: #701f2a;
 }
-
-/* 返回首页按钮 */
-.btn-back {
-  display: block;
-  margin-left: auto;
-  margin-top: auto;
-  padding: 10px 20px;
-  background-color: var(--color-primary);
-  color: #fff;
-  border: none;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
+.return-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
 }
 
+.return-action {
+  min-width: 104px;
+  height: 38px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-control);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(132, 33, 48, 0.08);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.return-action:hover,
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(132, 33, 48, 0.18);
+}
+
+.return-action:active,
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(132, 33, 48, 0.14);
+}
+
+.return-action:focus-visible,
+.btn-back:focus-visible {
+  outline: 2px solid rgba(132, 33, 48, 0.45);
+  outline-offset: 3px;
+}
+
+.return-action img {
+  width: 10px;
+  height: 10px;
+}
+
+.return-action span[aria-hidden="true"] {
+  font-size: var(--font-size-4xl);
+  line-height: 1;
+}
+
+.return-action--back,
+.return-action--ghost {
+  background-color: #fff;
+  color: var(--color-primary);
+}
+
+.return-action--back:hover,
+.return-action--ghost:hover {
+  background-color: #f8f6f0;
+}
+
+.return-action--home,
+.return-action--primary,
+.btn-back {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.return-action--home::before,
+.return-action--primary::before,
+.btn-back::before {
+  content: "";
+  width: 10px;
+  height: 11px;
+  flex: 0 0 auto;
+  background-color: currentColor;
+  mask: url("@/assets/icons/return-home.svg") center / contain no-repeat;
+  -webkit-mask: url("@/assets/icons/return-home.svg") center / contain no-repeat;
+}
+
+.return-action--home:hover,
+.return-action--primary:hover,
 .btn-back:hover {
   background-color: var(--color-primary-hover);
+}
+
+.btn-back {
+  margin-left: auto;
+  margin-top: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .return-action,
+  .btn-back {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .return-action:hover,
+  .btn-back:hover,
+  .return-action:active,
+  .btn-back:active {
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .return-action {
+    min-width: 0;
+    width: 100%;
+  }
 }

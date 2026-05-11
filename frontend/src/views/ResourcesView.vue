@@ -88,16 +88,19 @@ function goBack() {
           </div>
         </div>
       </div>
-      <button class="btn-back" @click="goBack">返回首页</button>
+      <button class="btn-back return-action return-action--home" @click="goBack">
+        返回首页
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .resource-page {
-  min-height: calc(100vh - 70px);
+  height: calc(100vh - 53px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .resource-section {
@@ -111,14 +114,14 @@ function goBack() {
 }
 
 .section-title {
-  font-size: 32px;
+  font-size: var(--font-size-10xl);
   color: var(--color-primary);
-  font-weight: bold;
+  font-weight: var(--font-weight-regular);
   margin-bottom: 12px;
 }
 
 .section-subtitle {
-  font-size: 14px;
+  font-size: var(--font-size-xl);
   color: var(--color-secondary);
   margin-bottom: 40px;
 }
@@ -131,7 +134,7 @@ function goBack() {
 }
 
 .group-title {
-  font-size: 18px;
+  font-size: var(--font-size-4xl);
   color: var(--color-text);
   margin-bottom: 24px;
   display: flex;
@@ -230,16 +233,16 @@ function goBack() {
 }
 
 .db-card-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
   margin-bottom: 12px;
   color: var(--color-text);
 }
 
 .db-card-desc {
-  font-size: 13px;
+  font-size: var(--font-size-lg);
   color: var(--color-secondary);
-  line-height: 1.7;
+  line-height: var(--line-height-card);
   margin-bottom: 20px;
 }
 
@@ -269,7 +272,6 @@ function goBack() {
 .software-item {
   background-color: #fff;
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
   border-radius: 2px;
   padding: 24px;
   display: flex;
@@ -279,7 +281,6 @@ function goBack() {
 }
 
 .software-item:hover {
-  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 
@@ -292,52 +293,52 @@ function goBack() {
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
-  font-size: 20px;
+  font-size: var(--font-size-5xl);
   flex-shrink: 0;
 }
 
 .software-info h4 {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin-bottom: 4px;
 }
 
 .software-info p {
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: #999;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: system-ui, sans-serif;
+  letter-spacing: var(--letter-spacing-xs);
+  font-family: var(--font-sans);
 }
 
 .tech-block {
   background-color: var(--color-primary);
   color: #fff;
-  padding: 32px 24px;
+  padding: 24px;
   border-radius: 2px;
 }
 
 .tech-block h3 {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 16px;
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 12px;
 }
 
 .tech-block p {
-  font-size: 14px;
-  line-height: 1.8;
-  margin-bottom: 32px;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-loose);
+  margin-bottom: 20px;
 }
 
 .tech-btn {
   display: block;
   width: 100%;
-  padding: 12px;
+  padding: 10px 12px;
   background-color: #fff;
   color: var(--color-primary);
   border: none;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   cursor: pointer;
   text-align: center;
   text-decoration: none;
@@ -349,6 +350,12 @@ function goBack() {
 }
 
 @media (max-width: 900px) {
+  .resource-page {
+    height: auto;
+    min-height: calc(100vh - 53px);
+    overflow: visible;
+  }
+
   .resource-container {
     grid-template-columns: 1fr;
   }

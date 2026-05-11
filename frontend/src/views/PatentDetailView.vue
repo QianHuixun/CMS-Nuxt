@@ -24,8 +24,32 @@ const getAttachmentPdfUrl = (attachments) => {
   return file?.url || file?.fileUrl || file?.downloadUrl || ''
 }
 
+const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
+const isPreviewUrl = (url = '') => /\.(pdf|png|jpe?g|gif|webp|bmp|svg)($|[?#])/i.test(url)
+
+const getAttachmentPreviewUrl = (attachments) => {
+  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
+    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
+    const name = item?.name || ''
+    return isPreviewUrl(url) || isPreviewUrl(name)
+  })
+  return file?.url || file?.fileUrl || file?.downloadUrl || ''
+}
+
+const getPreviewUrl = (data) => {
+  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || data?.coverImage || ''
+  if (isPreviewUrl(directUrl)) return directUrl
+
+  const attachmentUrl = getAttachmentPreviewUrl(data?.attachments)
+  return isPreviewUrl(attachmentUrl) ? attachmentUrl : ''
+}
+
 const getPdfUrl = (data) => {
-  return data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || getAttachmentPdfUrl(data?.attachments)
+  const directUrl = data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
+  if (isPdfUrl(directUrl)) return directUrl
+
+  const attachmentUrl = getAttachmentPdfUrl(data?.attachments)
+  return isPdfUrl(attachmentUrl) ? attachmentUrl : ''
 }
 
 const patent = ref({
@@ -35,6 +59,7 @@ const patent = ref({
   inventors: [],
   date: '',
   patentNo: '',
+  previewUrl: '',
   pdfUrl: '',
   abstract: '',
   keywords: [],
@@ -52,6 +77,7 @@ onMounted(async () => {
         inventors: normalizeList(data.inventors),
         date: data.year ? `${data.year}年` : '',
         patentNo: data.registrationNo || '',
+        previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
         abstract: data.description || '',
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
@@ -72,7 +98,7 @@ const closePage = () => {
   <DocumentReaderLayout :reader-label="'\u6587\u6863\u9605\u8bfb\u533a'" :aside-label="'\u4e13\u5229\u8be6\u60c5'">
     <template #reader>
       <PdfReader
-        :src="patent.pdfUrl"
+        :src="patent.previewUrl"
         :fallback-image="documentPage"
       />
     </template>
@@ -147,8 +173,8 @@ const closePage = () => {
   border: 0;
   background: transparent;
   color: #9a9692;
-  font-size: 28px;
-  line-height: 24px;
+  font-size: var(--font-size-9xl);
+  line-height: var(--line-height-icon);
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -168,25 +194,25 @@ const closePage = () => {
   border-radius: 4px;
   background-color: #fdf2f2;
   color: var(--color-primary);
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-control);
 }
 
 .patent-hero h1 {
   color: #333;
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-7xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
 }
 
 .patent-subtitle {
   margin-top: 8px;
   color: #9a9692;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-regular);
 }
 
 .patent-meta {
@@ -195,8 +221,8 @@ const closePage = () => {
   flex-wrap: wrap;
   gap: 8px;
   color: #9a9692;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-control);
 }
 
 .patent-meta i {
@@ -209,7 +235,7 @@ const closePage = () => {
 .patent-id {
   margin-top: 12px;
   color: #b0aba7;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
 }
 
 .inventor-section {
@@ -223,10 +249,10 @@ const closePage = () => {
   align-items: center;
   gap: 8px;
   color: #4f4945;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-control);
 }
 
 .inventor-section h2::before,
@@ -251,7 +277,7 @@ const closePage = () => {
   border-radius: 4px;
   background-color: #faf8f5;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-size-md);
 }
 
 .detail-section {
@@ -260,8 +286,8 @@ const closePage = () => {
 
 .detail-section p {
   color: #77716d;
-  font-size: 12px;
-  line-height: 1.85;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-article);
   text-align: justify;
 }
 
@@ -280,7 +306,7 @@ const closePage = () => {
   border-radius: 4px;
   background-color: #f8f8f8;
   color: #9a9692;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   transition: background-color 0.2s ease;
 }
 
@@ -297,7 +323,7 @@ const closePage = () => {
 .download-button,
 .secondary-actions button {
   border-radius: 6px;
-  font-family: "Microsoft YaHei", sans-serif;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -310,7 +336,7 @@ const closePage = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: var(--font-size-xl);
   text-decoration: none;
   box-shadow: 0 12px 22px rgba(132, 33, 48, 0.1);
 }
@@ -335,7 +361,7 @@ const closePage = () => {
   border: 1px solid #f0eeee;
   background-color: #fff;
   color: #77716d;
-  font-size: 12px;
+  font-size: var(--font-size-md);
 }
 
 .secondary-actions button:hover {
@@ -344,8 +370,8 @@ const closePage = () => {
 
 @media (max-width: 680px) {
   .patent-hero h1 {
-    font-size: 22px;
-    line-height: 1.35;
+    font-size: var(--font-size-6xl);
+    line-height: var(--line-height-heading);
   }
 
   .secondary-actions {

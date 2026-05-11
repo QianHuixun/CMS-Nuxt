@@ -6,7 +6,6 @@ import backIcon from '@/assets/images/pages/expert-detail/back-icon.svg'
 import cardImageOne from '@/assets/images/pages/expert-detail/card-image-1-3d674a.png'
 import cardImageTwo from '@/assets/images/pages/expert-detail/card-image-2-4cbd0d.png'
 import expertPhoto from '@/assets/images/pages/expert-detail/expert-photo-24de6d.png'
-import homeIcon from '@/assets/images/pages/expert-detail/home-icon.svg'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,19 +23,30 @@ let wheelLock = false
 let connectorResizeObserver
 
 const fallbackExperts = [
-  { id: 'chen-wei', name: '陈伟', degree: '博士', title: '首席研究员', subtitle: '博士生导师', photo: expertPhoto, focus: '出土医简保护', bio: '' },
-  { id: 'lin-yue', name: '林悦', degree: '博士', title: '图像计算专家', subtitle: '副研究员', photo: cardImageOne, focus: '多光谱影像', bio: '' },
-  { id: 'zhou-ming', name: '周明', degree: '博士', title: '医学史研究员', subtitle: '教授', photo: cardImageTwo, focus: '汉代医学史', bio: '' },
-  { id: 'xu-qing', name: '徐青', degree: '博士', title: '知识工程专家', subtitle: '研究员', photo: expertPhoto, focus: '知识图谱', bio: '' },
-  { id: 'he-ran', name: '何然', degree: '博士', title: '文物保护专家', subtitle: '研究馆员', photo: cardImageOne, focus: '文物保护', bio: '' },
-  { id: 'wan-li', name: '万理', degree: '博士', title: '数据治理专家', subtitle: '副教授', photo: cardImageTwo, focus: '数据标准', bio: '' },
-  { id: 'zhao-ning', name: '赵宁', degree: '博士', title: '语义检索专家', subtitle: '研究员', photo: expertPhoto, focus: '智能检索', bio: '' },
+  { id: 'ren-yu-lan', name: '任玉兰', degree: '博士', title: '教授', subtitle: '成都中医药大学', photo: expertPhoto, focusAreas: ['古籍整理', '医案校勘', '文献考证', '版本比对', '研究生指导'], bio: '' },
+  { id: 'luo-chen', name: '罗晨', degree: '硕士', title: '副教授', subtitle: '成都中医药大学', photo: cardImageOne, focusAreas: ['中药炮制', '质量评价'], bio: '' },
+  { id: 'zheng-yi', name: '郑逸', degree: '博士', title: '研究员', subtitle: '四川省中医药科学院', photo: cardImageTwo, focusAreas: ['经方数据库', '数据标注', '知识抽取'], bio: '' },
+  { id: 'he-jing', name: '何静', degree: '硕士', title: '副研究员', subtitle: '成都中医药大学', photo: expertPhoto, focusAreas: ['针灸知识图谱', '穴位语义建模', '临床路径整理', '术语标准化'], bio: '' },
+  { id: 'wei-shu', name: '魏书', degree: '博士', title: '主任医师', subtitle: '附属医院', photo: cardImageOne, focusAreas: ['临床病例整理', '中医循证', '病案结构化'], bio: '' },
+  { id: 'sun-qiao', name: '孙桥', degree: '博士后', title: '讲师', subtitle: '成都中医药大学', photo: cardImageTwo, focusAreas: ['方剂文献比对'], bio: '' },
+  { id: 'cai-ning', name: '蔡宁', degree: '硕士', title: '助理研究员', subtitle: '西南中医药研究所', photo: expertPhoto, focusAreas: ['药材溯源', '产地分析', '供应链追踪', '检测方法', '样本归档'], bio: '' },
 ]
 
 const expertPhotos = [expertPhoto, cardImageOne, cardImageTwo]
 const experts = ref([...fallbackExperts])
 
 const publications = ref([])
+
+const normalizeFocusAreas = (item) => {
+  if (Array.isArray(item.researchAreas)) return item.researchAreas.filter(Boolean)
+  if (typeof item.researchArea === 'string' && item.researchArea.trim()) {
+    return item.researchArea
+      .split(/[;；]/)
+      .map(area => area.trim())
+      .filter(Boolean)
+  }
+  return []
+}
 
 const isNumericId = (id) => id !== undefined && id !== null && id !== '' && Number.isFinite(Number(id))
 
@@ -52,7 +62,7 @@ const loadExperts = async () => {
         title: item.title || '',
         subtitle: item.institution || '',
         photo: item.avatar || expertPhotos[index % expertPhotos.length],
-        focus: item.researchArea || '',
+        focusAreas: normalizeFocusAreas(item),
         bio: ''
       }))
     }
@@ -272,6 +282,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
               <p>{{ currentExpert.title }}<br>{{ currentExpert.subtitle }}</p>
             </div>
 
+            <div v-if="currentExpert.focusAreas?.length" class="expert-focus-tags">
+              <span v-for="focus in currentExpert.focusAreas" :key="focus" class="expert-focus-tag">{{ focus }}</span>
+            </div>
+
             <p class="bio">{{ currentExpert.bio || '暂无简介' }}</p>
           </div>
         </section>
@@ -322,20 +336,19 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
             <div class="expert-card-copy">
               <h2>{{ item.expert.name }} {{ item.expert.degree }}</h2>
               <p>{{ item.expert.title }}</p>
-              <span>{{ item.expert.focus }} / {{ item.expert.subtitle }}</span>
+              <span>{{ item.expert.focusAreas?.slice(0, 2).join(' / ') }} / {{ item.expert.subtitle }}</span>
             </div>
           </router-link>
         </div>
       </section>
     </section>
 
-    <footer class="page-actions">
-      <router-link class="secondary-action" to="/academic">
+    <footer class="page-actions return-actions">
+      <router-link class="return-action return-action--back" to="/academic">
         <img :src="backIcon" alt="" aria-hidden="true">
         返回上一页
       </router-link>
-      <router-link class="primary-action" to="/home">
-        <img :src="homeIcon" alt="" aria-hidden="true">
+      <router-link class="return-action return-action--home" to="/home">
         返回首页
       </router-link>
     </footer>
@@ -344,15 +357,14 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 <style scoped>
 .expert-detail-page {
-  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   background:
     linear-gradient(rgba(248, 245, 240, 0.88), rgba(248, 245, 240, 0.9)),
     url('@/assets/images/backgrounds/home/home-bg2.png') center / cover fixed;
   color: #2b2520;
-  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .expert-detail-page::before {
@@ -378,8 +390,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 .expert-stage {
   flex: 1;
-  min-height: 0;
-  padding: 24px clamp(16px, 2.4vw, 32px) 184px;
+  padding: 24px clamp(16px, 2.4vw, 32px) 80px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -388,8 +399,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 .profile-panel {
   width: 1320px;
   max-width: 100%;
-  height: 570px;
-  max-height: calc(100vh - 300px);
+  min-height: 570px;
   margin: 0 auto;
   padding: 36px 56px;
   display: grid;
@@ -443,35 +453,57 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 .name-row {
   display: flex;
-  align-items: flex-end;
+  color: #2b2520;
   justify-content: space-between;
   gap: 18px;
 }
 
 .name-row h1 {
+
+.expert-focus-tags {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.expert-focus-tag {
+  padding: 4px 10px;
+  border: 1px solid rgba(132, 33, 48, 0.12);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.72);
+  color: #6c625c;
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
   min-width: 0;
   color: #2b2520;
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: clamp(26px, 2.4vw, 32px);
-  font-weight: 700;
-  line-height: 1.3;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-expert-name);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-name);
   white-space: nowrap;
 }
 
 .name-row p {
   flex: 0 0 auto;
-  color: var(--color-primary);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.55;
+  color: #2b2520;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-relaxed);
   text-align: right;
+}
+
+.expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row h1,
+.expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row p {
+  color: #2b2520;
 }
 
 .bio {
   margin-top: clamp(12px, 1.7vh, 18px);
   color: #615d59;
-  font-size: clamp(13px, 1.1vw, 14px);
-  line-height: 1.8;
+  font-size: var(--font-size-expert-copy);
+  line-height: var(--line-height-reading);
   text-align: justify;
 }
 
@@ -528,18 +560,18 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 .publication-copy span {
   flex: 0 0 auto;
   color: #99908b;
-  font-family: "Liberation Mono", Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  line-height: 1;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-wider);
+  line-height: var(--line-height-none);
 }
 
 .publication-copy h2 {
   overflow: hidden;
-  color: #504945;
-  font-size: clamp(15px, 1.25vw, 17px);
-  font-weight: 500;
-  line-height: 1.45;
+  color: var(--color-primary);
+  font-size: var(--font-size-expert-item);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -688,10 +720,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 .expert-card-copy h2 {
   overflow: hidden;
   color: #2b2520;
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -700,8 +732,8 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   overflow: hidden;
   margin-top: 4px;
   color: var(--color-primary);
-  font-size: 10px;
-  line-height: 1.45;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -711,8 +743,8 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   display: block;
   margin-top: 7px;
   color: #99908b;
-  font-size: 9px;
-  line-height: 1.4;
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-control);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -728,50 +760,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   gap: 16px;
 }
 
-.secondary-action,
-.primary-action {
-  min-width: 118px;
-  height: 40px;
-  padding: 0 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: 6px;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 14px;
-  line-height: 20px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
 
-.secondary-action {
-  border: 1px solid #d4ccc6;
-  background-color: rgba(255, 255, 255, 0.74);
-  color: #615d59;
-}
 
-.secondary-action:hover {
-  background-color: #fff;
-}
 
-.primary-action {
-  border: 1px solid var(--color-primary);
-  background-color: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 10px 18px -14px rgba(132, 33, 48, 0.7);
-}
 
-.primary-action:hover {
-  background-color: var(--color-primary-hover);
-}
 
-.secondary-action img,
-.primary-action img {
-  width: 10px;
-  height: 10px;
-}
 
 @media (max-width: 1360px) {
   .profile-panel {
@@ -786,7 +779,6 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 @media (min-width: 821px) and (max-height: 820px) {
   .profile-panel {
-    height: calc(100vh - 250px);
     min-height: 430px;
     padding: 24px 34px;
     grid-template-columns: minmax(230px, 0.78fr) clamp(40px, 6vw, 78px) minmax(440px, 1.22fr);
@@ -838,18 +830,16 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 @media (max-width: 820px) {
   .expert-stage {
-    padding: 18px 16px 158px;
+    padding: 18px 16px 80px;
   }
 
   .profile-panel {
     width: calc(100vw - 32px);
-    height: 410px;
-    max-height: calc(100vh - 262px);
+    min-height: 410px;
     padding: 16px;
     grid-template-columns: minmax(140px, 0.78fr) minmax(0, 1fr);
     gap: 16px;
     border-radius: 18px;
-    overflow: hidden;
   }
 
   .portrait-wrap {
@@ -863,7 +853,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .name-row h1 {
-    font-size: 24px;
+    font-size: var(--font-size-7xl);
   }
 
   .name-row p {
@@ -880,7 +870,6 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   .publication-list {
     align-self: center;
     width: 100%;
-    height: 100%;
     min-height: 0;
   }
 
@@ -895,7 +884,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .publication-copy h2 {
-    font-size: 14px;
+    font-size: var(--font-size-xl);
     white-space: nowrap;
   }
 
@@ -924,8 +913,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
     flex-direction: row;
   }
 
-  .secondary-action,
-  .primary-action {
+  .return-action {
     height: 34px;
   }
 }
@@ -948,12 +936,12 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .name-row h1 {
-    font-size: 20px;
+    font-size: var(--font-size-5xl);
   }
 
   .name-row p,
   .bio {
-    font-size: 12px;
+    font-size: var(--font-size-md);
   }
 
   .bio {
@@ -986,11 +974,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
     gap: 8px;
   }
 
-  .secondary-action,
-  .primary-action {
+  .return-action {
     min-width: 0;
     padding: 0 12px;
-    font-size: 12px;
+    font-size: var(--font-size-md);
   }
 }
 </style>
