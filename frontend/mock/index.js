@@ -20,10 +20,10 @@ const databases = [
     title: '巴蜀古籍医籍数据库',
     status: 'active',
     info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。',
-    url: asset('databases/bronze-acupuncture-figure.jpg'),
+    url: asset('books/book-classics-second.jpg'),
     icon: 'book',
     sort: 2,
-    backimg: asset('databases/bronze-acupuncture-figure.jpg')
+    backimg: asset('books/book-classics-second.jpg')
   },
   {
     id: 'db_wanjuan',
@@ -365,7 +365,7 @@ const papers = [
     doi: '',
     abstract: '提出面向古医籍图像、释文与校注信息协同处理的多模态校勘流程。',
     keywords: ['古医籍', '多模态', '图文校勘'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('papers/paper-004.jpeg')
   },
   {
     id: 'paper_007',
@@ -393,7 +393,7 @@ const papers = [
     doi: '',
     abstract: '构建中医古籍实体关系标注规范，并从标注一致性角度评估规范可用性。',
     keywords: ['中医古籍', '实体关系', '标注规范'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/annotation-system.png')
   },
   {
     id: 'paper_009',
@@ -407,7 +407,7 @@ const papers = [
     doi: '',
     abstract: '从版本源流、刻印信息与馆藏线索出发，探索巴蜀医籍版本谱系的数字化表达方式。',
     keywords: ['巴蜀医籍', '版本谱系', '数字化建模'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('books/book-classics-second.jpg')
   },
   {
     id: 'paper_010',
@@ -449,7 +449,7 @@ const papers = [
     doi: '',
     abstract: '以古医籍知识图谱辅助检索场景为对象，评估检索效率、结果解释性与用户满意度。',
     keywords: ['古医籍', '知识图谱', '用户体验'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/wanjuan-platform.png')
   },
   {
     id: 'paper_013',
@@ -505,7 +505,7 @@ const papers = [
     doi: '',
     abstract: '总结中医古籍数字化项目中题名、责任者、版本与主题词等元数据治理经验。',
     keywords: ['中医古籍', '数字化项目', '元数据治理'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('activities/rare-books-digitization.jpeg')
   },
   {
     id: 'paper_017',
@@ -533,7 +533,7 @@ const papers = [
     doi: '',
     abstract: '结合医学古籍影像采集实践，讨论色彩校准、光照控制与后期质检流程。',
     keywords: ['医学古籍', '影像采集', '色彩一致性'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('activities/activity-lab-room.jpeg')
   },
   {
     id: 'paper_019',
@@ -561,7 +561,7 @@ const papers = [
     doi: '',
     abstract: '针对中医文献问答中的答案溯源需求，研究证据片段抽取、排序与组织展示方法。',
     keywords: ['中医文献问答', '证据片段', '知识服务'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/wanjuan-platform.png')
   },
   {
     id: 'paper_021',
@@ -589,7 +589,7 @@ const papers = [
     doi: '',
     abstract: '针对古籍图像污损、透印和版面残缺问题，设计图像去噪与版面复原协同流程。',
     keywords: ['中医古籍', '图像去噪', '版面复原'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('papers/paper-004.jpeg')
   },
   {
     id: 'paper_023',
@@ -617,7 +617,7 @@ const papers = [
     doi: '',
     abstract: '面向医学文物三维采集成果，讨论模型压缩、纹理优化与 Web 展示策略。',
     keywords: ['医学文物', '三维采集', '轻量化展示'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/bronze-acupuncture-figure.jpg')
   },
   {
     id: 'paper_025',
@@ -631,7 +631,7 @@ const papers = [
     doi: '',
     abstract: '总结出土医学文献数据库建设中的字段设计、录入规范和质量控制流程。',
     keywords: ['出土医学文献', '数据库', '质量控制'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/tianhui-database.png')
   },
   {
     id: 'paper_026',
@@ -673,7 +673,7 @@ const papers = [
     doi: '',
     abstract: '针对中医古籍知识图谱中证候名称多义和异名问题，提出节点消歧流程。',
     keywords: ['知识图谱', '证候节点', '消歧'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('databases/wanjuan-platform.png')
   },
   {
     id: 'paper_029',
@@ -701,7 +701,7 @@ const papers = [
     doi: '',
     abstract: '讨论人工智能辅助古籍审读中的可用边界、人工复核责任与成果可信度。',
     keywords: ['古籍整理', '人工智能', '辅助审读'],
-    coverImage: asset('papers/tianhui-slip-column.png')
+    coverImage: asset('papers/paper-004.jpeg')
   }
 ]
 
@@ -898,6 +898,54 @@ const activityPhotos = [
     thumbUrl: asset('activities/activity-training.jpg'),
     activityTime: '2025-11-10T14:00:00Z',
     summary: '围绕中医药冷门绝学传承、古籍整理与学术能力提升开展专题培训。'
+  },
+  {
+    id: 'photo_003',
+    activityId: 'activity_003',
+    title: '实验室数字化环境建设现场',
+    activityName: '实验室数字化环境建设现场',
+    organizer: '成都中医药大学',
+    location: '出土医学文献文物保护研究数字实验室',
+    imageUrl: asset('activities/activity-lab-room.jpeg'),
+    thumbUrl: asset('activities/activity-lab-room.jpeg'),
+    activityTime: '2025-05-20T09:00:00Z',
+    summary: '展示实验室数字化采集、数据处理与古籍整理支撑环境。'
+  },
+  {
+    id: 'photo_004',
+    activityId: 'activity_004',
+    title: '古籍数字化标注工作座谈会',
+    activityName: '古籍数字化标注工作座谈会',
+    organizer: '出土医学文献文物保护研究数字实验室',
+    location: '古籍数字化国家实验室',
+    imageUrl: asset('activities/rare-books-digitization.jpeg'),
+    thumbUrl: asset('activities/rare-books-digitization.jpeg'),
+    activityTime: '2025-03-12T10:00:00Z',
+    summary: '围绕古籍文献图像标注、术语规范与数据审核流程进行工作交流。'
+  },
+  {
+    id: 'photo_005',
+    activityId: 'activity_005',
+    title: '天回医简整理阶段成果交流会',
+    activityName: '天回医简整理阶段成果交流会',
+    organizer: '出土医学文献文物保护研究数字实验室',
+    location: '成都中医药大学图书馆',
+    imageUrl: asset('activities/tianhui-cctv-report.png'),
+    thumbUrl: asset('activities/tianhui-cctv-report.png'),
+    activityTime: '2024-12-06T14:30:00Z',
+    summary: '梳理天回医简文献整理、图像处理与释文对照的阶段性成果。'
+  },
+  {
+    id: 'photo_006',
+    activityId: 'activity_006',
+    title: '中医古籍知识服务平台内部评审会',
+    activityName: '中医古籍知识服务平台内部评审会',
+    organizer: '成都中医药大学',
+    location: '出土医学文献文物保护研究数字实验室',
+    imageUrl: asset('activities/rare-books-digitization.jpeg'),
+    thumbUrl: asset('activities/rare-books-digitization.jpeg'),
+    activityTime: '2024-09-19T09:30:00Z',
+    summary: '对中医古籍知识服务平台的检索、关联分析与可视化模块进行评审。'
   }
 ]
 
@@ -910,6 +958,11 @@ const activities = [
     location: '成都中医药大学博物馆会议厅',
     organizer: '出土医学文献文物保护研究数字实验室',
     coverImage: asset('activities/activity-group-photo.jpg'),
+    gallery: [
+      asset('activities/activity-group-photo.jpg'),
+      asset('activities/activity-lab-room.jpeg'),
+      asset('activities/rare-books-digitization.jpeg')
+    ],
     summary: '围绕出土医学文献数字化采集、标注和知识服务开展专题研讨。',
     content: '<p>本次研讨会邀请医史文献、数字人文和数据工程方向专家，围绕平台建设、数据治理和成果展示进行交流。</p>',
     status: 'past'
@@ -922,6 +975,11 @@ const activities = [
     location: '成都中医药大学',
     organizer: '出土医学文献文物保护研究数字实验室',
     coverImage: asset('activities/activity-training.jpg'),
+    gallery: [
+      asset('activities/activity-training.jpg'),
+      asset('activities/activity-group-photo.jpg'),
+      asset('activities/rare-books-digitization.jpeg')
+    ],
     summary: '围绕中医药冷门绝学传承、古籍整理与学术能力提升开展专题培训。',
     content: '<p>培训班围绕出土医学文献、古籍整理和数字化研究能力提升开展专题交流。</p>',
     status: 'past'
@@ -933,7 +991,12 @@ const activities = [
     endTime: '2025-05-20T11:30:00Z',
     location: '出土医学文献文物保护研究数字实验室',
     organizer: '成都中医药大学',
-    coverImage: asset('activities/rare-books-digitization.jpeg'),
+    coverImage: asset('activities/activity-lab-room.jpeg'),
+    gallery: [
+      asset('activities/activity-lab-room.jpeg'),
+      asset('activities/rare-books-digitization.jpeg'),
+      asset('activities/activity-group-photo.jpg')
+    ],
     summary: '展示实验室数字化采集、数据处理与古籍整理支撑环境。',
     content: '<p>活动展示实验室机房、数据处理环境及中医古籍数字化支撑平台。</p>',
     status: 'past'
@@ -947,6 +1010,11 @@ const activities = [
     location: '古籍数字化国家实验室',
     organizer: '出土医学文献文物保护研究数字实验室',
     coverImage: asset('activities/rare-books-digitization.jpeg'),
+    gallery: [
+      asset('activities/rare-books-digitization.jpeg'),
+      asset('databases/annotation-system.png'),
+      asset('activities/activity-lab-room.jpeg')
+    ],
     summary: '围绕古籍文献图像标注、术语规范与数据审核流程进行工作交流。',
     content: '<p>参会人员就标注标准、实体关系录入和质量检查机制进行了讨论。</p>',
     status: 'past'
@@ -959,6 +1027,11 @@ const activities = [
     location: '成都中医药大学图书馆',
     organizer: '出土医学文献文物保护研究数字实验室',
     coverImage: asset('activities/tianhui-cctv-report.png'),
+    gallery: [
+      asset('activities/tianhui-cctv-report.png'),
+      asset('databases/tianhui-slip-001.png'),
+      asset('papers/tianhui-slip-column.png')
+    ],
     summary: '梳理天回医简文献整理、图像处理与释文对照的阶段性成果。',
     content: '<p>交流会集中展示了简片图像复原、转写校订和数据入库的最新进展。</p>',
     status: 'past'
@@ -971,6 +1044,11 @@ const activities = [
     location: '出土医学文献文物保护研究数字实验室',
     organizer: '成都中医药大学',
     coverImage: asset('activities/rare-books-digitization.jpeg'),
+    gallery: [
+      asset('activities/rare-books-digitization.jpeg'),
+      asset('databases/wanjuan-platform.png'),
+      asset('databases/annotation-system.png')
+    ],
     summary: '对中医古籍知识服务平台的检索、关联分析与可视化模块进行评审。',
     content: '<p>项目组根据内部评审意见调整了检索入口、知识关联展示与文献跳转流程。</p>',
     status: 'past'
@@ -1394,11 +1472,7 @@ export default [
         ...a,
         title: a.name,
         type: '会议',
-        gallery: [
-          a.coverImage,
-          asset('activities/activity-lab-room.jpeg'),
-          asset('activities/activity-group-photo.jpg')
-        ]
+        gallery: a.gallery || [a.coverImage]
       })
     }
   }
