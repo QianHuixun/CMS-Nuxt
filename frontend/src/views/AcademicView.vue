@@ -46,7 +46,7 @@ const bambooSlots = [
  * 水平分轨错落算法 (复刻设计图的竹简散落美学)
  */
 const createWordCloud = (words) => {
-  const MAX_WORDS = 15 
+  const MAX_WORDS = 10 
   const displayWords = words.slice(0, MAX_WORDS)
   const totalWords = displayWords.length
   

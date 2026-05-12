@@ -13,6 +13,8 @@ const activityPhotos = ref([])
 const fallbackPaperId = 'meridian-bioelectric'
 const fallbackBookId = 'book_001'
 const fallbackPatentId = 'software_001'
+const fallbackBookTitle = '出土医学文献叙录'
+const featuredBookCover = '/mock-assets/books/book-tianhui-threadbound-cover.jpg'
 
 const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
 const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
@@ -28,6 +30,10 @@ const fallbackActivityPhotos = [
 ]
 
 const activityPhotoSrc = (photo, index) => photo?.thumbUrl || photo?.imageUrl || fallbackActivityImages[index % fallbackActivityImages.length]
+const formatBookTitle = (title) => {
+  const value = title || fallbackBookTitle
+  return value.startsWith('《') ? value : `《${value}》`
+}
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -134,12 +140,12 @@ onMounted(async () => {
 
         <div class="book-content">
           <div class="book-copy">
-            <h3>《{{ books[0]?.title || '出土医学文献叙录' }}》</h3>
+            <h3>{{ formatBookTitle(books[0]?.title) }}</h3>
             <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年，{{ books[0]?.publisher || '大学出版社' }}。</p>
             <router-link class="book-action" :to="bookRoute(books[0]?.id)">阅读提要</router-link>
           </div>
-          <div class="book-cover" :aria-label="`${books[0]?.title || '出土医学文献叙录'}封面`">
-            <div class="book-calligraphy">医<br>简</div>
+          <div class="book-cover" :aria-label="`${books[0]?.title || fallbackBookTitle}封面`">
+            <img :src="featuredBookCover" :alt="`${books[0]?.title || fallbackBookTitle}封面`">
           </div>
         </div>
       </section>
@@ -470,17 +476,11 @@ onMounted(async () => {
   box-shadow: 0 10px 18px rgba(42, 30, 22, 0.2);
 }
 
-.book-calligraphy {
+.book-cover img {
+  width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(132, 33, 48, 0.16);
-  color: #2e1e17;
-  font-family: var(--font-display);
-  font-size: var(--font-size-8xl);
-  line-height: var(--line-height-title);
-  transform: rotate(-8deg);
+  display: block;
+  object-fit: cover;
 }
 
 .patent-list {

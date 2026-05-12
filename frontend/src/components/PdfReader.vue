@@ -16,7 +16,7 @@ const props = defineProps({
   },
   initialScale: {
     type: Number,
-    default: 1.35,
+    default: 1,
   },
 })
 

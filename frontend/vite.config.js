@@ -4,13 +4,15 @@ import { viteMockServe } from 'vite-plugin-mock'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig(({ command }) => {
+  const enableProdMock = process.env.ENABLE_PROD_MOCK === 'true'
+
   return {
     plugins: [
       vue(),
       viteMockServe({
         mockPath: 'mock',
         localEnabled: command === 'serve',
-        prodEnabled: false,
+        prodEnabled: enableProdMock,
         injectCode: `
           import { setupProdMockServer } from '../mock/index.js'
           setupProdMockServer()
@@ -18,6 +20,9 @@ export default defineConfig(({ command }) => {
         logger: true,
       }),
     ],
+    server: {
+      allowedHosts: ['zkg964gqfbxx8r.honos.dev'],
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
