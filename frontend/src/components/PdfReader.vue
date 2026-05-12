@@ -27,13 +27,22 @@ const currentPage = defineModel('page', {
 
 const emit = defineEmits(['loaded', 'error'])
 
+const containerRef = ref(null)
 const canvasRef = ref(null)
+const imageRef = ref(null)
 const imageLoaded = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const pageCount = ref(0)
 const scale = ref(props.initialScale)
 const pdfDoc = shallowRef(null)
+const imageNaturalWidth = ref(0)
+const imageNaturalHeight = ref(0)
+const isDragging = ref(false)
+const dragStartMouseX = ref(0)
+const dragStartMouseY = ref(0)
+const dragStartScrollLeft = ref(0)
+const dragStartScrollTop = ref(0)
 let activeRenderTask
 let activeLoadingTask
 let activeFetchController
@@ -66,7 +75,10 @@ const toolbarLabel = computed(() => {
   return '文件未上传'
 })
 const loadingLabel = computed(() => hasImage.value ? '图片加载中...' : 'PDF 加载中...')
-const imageStyle = computed(() => ({ width: `${Math.round(scale.value * 100)}%` }))
+const imageStyle = computed(() => {
+  if (!imageNaturalWidth.value) return { width: `${Math.round(scale.value * 100)}%` }
+  return { width: `${Math.round(imageNaturalWidth.value * scale.value)}px` }
+})
 
 const cleanupTasks = () => {
   activeFetchController?.abort()
@@ -135,7 +147,7 @@ const loadPdf = async (version) => {
   }
 
   await nextTick()
-  await renderCurrentPage()
+  await applyFitScale()
   if (version !== loadVersion) return
 
   emit('loaded', { type: 'pdf', pages: loadedPdf.numPages })
@@ -171,7 +183,36 @@ const loadDocument = async () => {
   }
 }
 
-const handleImageLoad = () => {
+const applyFitScale = async () => {
+  const container = containerRef.value
+  if (!container) return
+  const pad = 64
+  const cw = container.clientWidth - pad
+  const ch = container.clientHeight - pad
+  if (cw <= 0 || ch <= 0) return
+
+  if (hasImage.value && imageNaturalWidth.value > 0 && imageNaturalHeight.value > 0) {
+    const fitX = cw / imageNaturalWidth.value
+    const fitY = ch / imageNaturalHeight.value
+    scale.value = Math.min(fitX, fitY, 1)
+    return
+  }
+
+  if (hasPdf.value && pdfDoc.value) {
+    const page = await pdfDoc.value.getPage(currentPage.value)
+    const viewport = page.getViewport({ scale: 1 })
+    scale.value = cw / viewport.width
+    await nextTick()
+    await renderCurrentPage()
+  }
+}
+
+const handleImageLoad = async (e) => {
+  const img = e.target
+  imageNaturalWidth.value = img.naturalWidth
+  imageNaturalHeight.value = img.naturalHeight
+  await nextTick()
+  await applyFitScale()
   imageLoaded.value = true
   loading.value = false
   emit('loaded', { type: 'image' })
@@ -200,17 +241,54 @@ const zoomIn = () => {
   scale.value = Math.min(2.4, Number((scale.value + 0.15).toFixed(2)))
 }
 
-watch([documentSrc, documentType], loadDocument, { immediate: true })
+const onPanStart = (e) => {
+  if (!hasDocument.value || errorMessage.value) return
+  if (e.button !== 0) return
+  const el = containerRef.value
+  if (!el) return
+  isDragging.value = true
+  dragStartMouseX.value = e.clientX
+  dragStartMouseY.value = e.clientY
+  dragStartScrollLeft.value = el.scrollLeft
+  dragStartScrollTop.value = el.scrollTop
+  document.addEventListener('mousemove', onPanMove)
+  document.addEventListener('mouseup', onPanEnd)
+  e.preventDefault()
+}
+
+const onPanMove = (e) => {
+  if (!isDragging.value) return
+  const el = containerRef.value
+  if (!el) return
+  el.scrollLeft = dragStartScrollLeft.value - (e.clientX - dragStartMouseX.value)
+  el.scrollTop = dragStartScrollTop.value - (e.clientY - dragStartMouseY.value)
+}
+
+const onPanEnd = () => {
+  isDragging.value = false
+  document.removeEventListener('mousemove', onPanMove)
+  document.removeEventListener('mouseup', onPanEnd)
+}
+
+watch([documentSrc, documentType], () => {
+  imageNaturalWidth.value = 0
+  imageNaturalHeight.value = 0
+  loadDocument()
+}, { immediate: true })
 watch(currentPage, () => {
   if (hasPdf.value) renderCurrentPage()
 })
 watch(scale, () => {
-  if (hasPdf.value) renderCurrentPage()
+  if (hasPdf.value) {
+    renderCurrentPage()
+  }
 })
 
 onBeforeUnmount(() => {
   cleanupTasks()
   pdfDoc.value?.destroy()
+  document.removeEventListener('mousemove', onPanMove)
+  document.removeEventListener('mouseup', onPanEnd)
 })
 </script>
 
@@ -228,26 +306,35 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div class="pdf-canvas-wrap">
+    <div
+      ref="containerRef"
+      class="pdf-canvas-wrap"
+      :class="{ 'is-dragging': isDragging }"
+      @mousedown="onPanStart"
+    >
       <div v-if="loading" class="reader-state">{{ loadingLabel }}</div>
       <div v-else-if="errorMessage" class="reader-state">{{ errorMessage }}</div>
 
-      <canvas v-show="hasPdf && !errorMessage" ref="canvasRef" class="pdf-canvas"></canvas>
-      <img
-        v-if="hasImage && !errorMessage"
-        v-show="imageLoaded"
-        class="preview-image"
-        :src="documentSrc"
-        :style="imageStyle"
-        alt="文档图片预览"
-        @load="handleImageLoad"
-        @error="handleImageError"
-      >
+      <div class="pdf-inner">
+        <canvas v-show="hasPdf && !errorMessage" ref="canvasRef" class="pdf-canvas"></canvas>
+        <img
+          v-if="hasImage && !errorMessage"
+          v-show="imageLoaded"
+          ref="imageRef"
+          class="preview-image"
+          :src="documentSrc"
+          :style="imageStyle"
+          alt="文档图片预览"
+          @load="handleImageLoad"
+          @error="handleImageError"
+          @dragstart.prevent
+        >
 
-      <article v-if="!hasDocument" class="pdf-fallback">
-        <img v-if="fallbackImage" :src="fallbackImage" alt="文档预览占位">
-        <p v-else>请为该条目配置文件地址</p>
-      </article>
+        <article v-if="!hasDocument" class="pdf-fallback">
+          <img v-if="fallbackImage" :src="fallbackImage" alt="文档预览占位">
+          <p v-else>请为该条目配置文件地址</p>
+        </article>
+      </div>
     </div>
   </section>
 </template>
@@ -325,16 +412,32 @@ onBeforeUnmount(() => {
   flex: 1;
   min-height: 0;
   padding: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   overflow: auto;
   scrollbar-width: none;
   position: relative;
+  user-select: none;
+}
+
+.pdf-canvas-wrap.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .pdf-canvas-wrap::-webkit-scrollbar {
   display: none;
+}
+
+.pdf-inner {
+  min-width: 100%;
+  min-height: 100%;
+  width: max-content;
+}
+
+.pdf-inner > .pdf-canvas,
+.pdf-inner > .preview-image,
+.pdf-inner > .pdf-fallback {
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .pdf-canvas,
@@ -345,6 +448,12 @@ onBeforeUnmount(() => {
 
 .pdf-canvas {
   display: block;
+}
+
+.preview-image {
+  display: block;
+  max-width: none;
+  height: auto;
 }
 
 .pdf-fallback {
