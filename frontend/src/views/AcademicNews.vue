@@ -171,6 +171,10 @@ onMounted(async () => {
       <section class="panel gallery-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>活动剪影</h2>
+          <div class="activity-actions">
+            <span>学术活动存档</span>
+            <router-link class="header-action" to="/activity-timeline">查看全部</router-link>
+          </div>
         </header>
 
         <div class="gallery-layout">
@@ -187,11 +191,6 @@ onMounted(async () => {
           </div>
 
           <section class="activity-panel">
-            <header class="activity-header">
-              <span>学术活动存档</span>
-              <router-link class="header-action" to="/activity-timeline">查看全部</router-link>
-            </header>
-
             <ol>
               <li v-for="activity in activities" :key="`${activity.title}-${activity.date}`">
                 <router-link :to="`/activity/${activity.id}`">
@@ -221,7 +220,7 @@ onMounted(async () => {
 <style scoped>
 .academic-page {
   height: calc(100vh - 53px);
-  padding: 18px 0 18px;
+  padding: 1.125rem 0 1.125rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -238,17 +237,17 @@ onMounted(async () => {
 .academic-hero,
 .academic-grid,
 .page-actions {
-  padding: 0 56px;
+  padding: 0 3.5rem;
   max-width: 100%;
   box-sizing: border-box;
 }
 
 .academic-hero {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .academic-hero h1 {
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem;
   color: var(--color-primary);
   font-size: var(--font-size-8xl);
   font-weight: var(--font-weight-bold);
@@ -265,19 +264,19 @@ onMounted(async () => {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(340px, 1.12fr) minmax(300px, 0.95fr);
-  grid-template-rows: minmax(0, 0.98fr) minmax(0, 0.62fr);
-  gap: 14px 16px;
+  grid-template-columns: minmax(20rem, 1fr) minmax(21.25rem, 1.12fr) minmax(18.75rem, 0.95fr);
+  grid-template-rows: minmax(0, 0.72fr) minmax(0, 0.68fr);
+  gap: 0.875rem 1rem;
   align-items: stretch;
 }
 
 .panel {
   min-width: 0;
-  padding: 18px 18px 16px;
+  padding: 1.125rem 1.125rem 0.625rem;
   display: flex;
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 12px 28px rgba(90, 72, 54, 0.04);
+  box-shadow: 0 0.75rem 1.75rem rgba(90, 72, 54, 0.04);
   min-height: 0;
   overflow: hidden;
 }
@@ -318,19 +317,18 @@ onMounted(async () => {
   min-height: 0;
 }
 
-.panel-header,
-.activity-header {
+.panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
 }
 
 .panel-header h2 {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 0.4375rem;
   color: #3f332c;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
@@ -338,8 +336,8 @@ onMounted(async () => {
 }
 
 .header-icon {
-  width: 11px;
-  height: 11px;
+  width: 0.6875rem;
+  height: 0.6875rem;
   display: inline-block;
   border: 2px solid var(--color-primary);
   background-color: var(--color-primary);
@@ -347,7 +345,6 @@ onMounted(async () => {
 }
 
 .panel-header button,
-.activity-header button,
 .header-action {
   padding: 0;
   border: 0;
@@ -363,7 +360,6 @@ onMounted(async () => {
 }
 
 .panel-header button:hover,
-.activity-header button:hover,
 .header-action:hover {
   color: var(--color-primary-hover);
 }
@@ -374,7 +370,8 @@ onMounted(async () => {
   max-height: none;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  justify-content: space-between;
+  gap: 0.75rem;
   overflow: hidden;
   scrollbar-width: none;
 }
@@ -385,17 +382,17 @@ onMounted(async () => {
 
 .paper-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 104px;
-  gap: 14px;
-  min-height: 46px;
-  padding-bottom: 2px;
+  grid-template-columns: minmax(0, 1fr) 6.5rem;
+  gap: 0.875rem;
+  min-height: 3.125rem;
+  padding-bottom: 0.25rem;
   color: inherit;
   text-decoration: none;
 }
 
 .journal {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
   color: var(--color-primary);
   font-family: var(--font-number);
   font-size: var(--font-size-sm);
@@ -427,26 +424,36 @@ onMounted(async () => {
 
 .paper-item strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 0.3125rem;
   color: var(--color-primary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-regular);
   white-space: nowrap;
 }
 
 .book-content {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px;
-  gap: 16px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  gap: 1rem;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.book-copy {
+  align-self: start;
 }
 
 .book-copy h3 {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
+  overflow: hidden;
   color: #352a24;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .book-copy p {
@@ -458,9 +465,9 @@ onMounted(async () => {
 .book-copy button,
 .book-action {
   position: absolute;
-  left: 18px;
-  bottom: 16px;
-  padding: 8px 14px;
+  left: 1.125rem;
+  bottom: 1rem;
+  padding: 0.5rem 0.875rem;
   display: inline-flex;
   border: 0;
   background-color: var(--color-primary);
@@ -473,32 +480,36 @@ onMounted(async () => {
 }
 
 .book-cover {
-  aspect-ratio: 3 / 4;
-  padding: 6px;
+  justify-self: end;
+  width: auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 0.375rem;
   border: 5px solid #4b3128;
   background: #efe2c7;
-  box-shadow: 0 10px 18px rgba(42, 30, 22, 0.2);
+  box-shadow: 0 0.625rem 1.125rem rgba(42, 30, 22, 0.2);
 }
 
 .book-cover img {
-  width: 100%;
+  width: auto;
   height: 100%;
   display: block;
-  object-fit: cover;
 }
 
 .patent-list {
   display: grid;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .patent-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  min-height: 42px;
-  padding: 8px 12px;
+  gap: 0.625rem;
+  min-height: 2.625rem;
+  padding: 0.5rem 0.75rem;
   border-left: 3px solid #d8a4aa;
   background-color: rgba(255, 255, 255, 0.92);
   color: inherit;
@@ -531,7 +542,8 @@ onMounted(async () => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   height: 100%;
   min-height: 0;
-  gap: 10px;
+  gap: 0.625rem;
+  align-content: center;
 }
 
 .gallery-layout {
@@ -539,14 +551,14 @@ onMounted(async () => {
   min-height: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(16.25rem, 0.92fr);
+  gap: 0.875rem;
   align-items: start;
 }
 
 .gallery-card {
   position: relative;
-  height: 168px;
+  aspect-ratio: 4 / 3;
   display: block;
   overflow: hidden;
   background-color: #333;
@@ -559,40 +571,45 @@ onMounted(async () => {
   height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
 }
 
 .meeting-card {
   background:
     linear-gradient(rgba(20, 20, 20, 0.08), rgba(20, 20, 20, 0.08)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 52px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 3.25rem),
     linear-gradient(135deg, #202020, #777 45%, #151515);
 }
 
 .lab-card {
   background:
-    radial-gradient(circle at 74% 22%, rgba(255, 255, 255, 0.9) 0 6px, transparent 7px),
+    radial-gradient(circle at 74% 22%, rgba(255, 255, 255, 0.9) 0 0.375rem, transparent 0.4375rem),
     linear-gradient(145deg, #0f0f0f, #535353 45%, #101010);
 }
 
 .gallery-card figcaption {
   position: absolute;
-  left: 6px;
-  bottom: 6px;
-  padding: 3px 6px;
+  left: 0.375rem;
+  bottom: 0.375rem;
+  padding: 0.1875rem 0.375rem;
   background-color: rgba(132, 33, 48, 0.92);
   color: #fff;
   font-size: var(--font-size-xs);
 }
 
-.activity-header {
-  margin-bottom: 8px;
+.activity-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.activity-header span {
+.activity-actions span {
   color: #3f332c;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-title);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-control);
+  white-space: nowrap;
 }
 
 .activity-panel ol {
@@ -604,22 +621,22 @@ onMounted(async () => {
 }
 
 .activity-panel li {
-  padding: 7px 0;
+  padding: 0.4375rem 0;
 }
 
 .activity-panel li > a {
   display: grid;
-  grid-template-columns: 6px minmax(0, 1fr) 88px;
-  gap: 10px;
+  grid-template-columns: 0.375rem minmax(0, 1fr) 5.5rem;
+  gap: 0.625rem;
   align-items: start;
   color: inherit;
   text-decoration: none;
 }
 
 .activity-panel li > a > span {
-  width: 5px;
-  height: 5px;
-  margin-top: 6px;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  margin-top: 0.375rem;
   background-color: var(--color-primary);
 }
 
@@ -639,27 +656,27 @@ onMounted(async () => {
 }
 
 .page-actions {
-  margin-top: 8px;
+  margin-top: 1.5rem;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 @media (max-width: 1280px) {
   .academic-page {
-    padding: 16px 0 16px;
+    padding: 1rem 0 1rem;
   }
 
   .academic-hero,
   .page-actions,
   .academic-grid {
-    padding: 0 28px;
+    padding: 0 1.75rem;
   }
 
   .academic-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .paper-panel,
@@ -680,31 +697,28 @@ onMounted(async () => {
   }
 
   .paper-list {
-    max-height: 260px;
+    justify-content: flex-start;
+    max-height: 16.25rem;
   }
 
   .book-content {
-    grid-template-columns: minmax(0, 1.4fr) 92px;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .gallery-layout {
-    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
-  }
-
-  .gallery-card {
-    height: 104px;
+    grid-template-columns: minmax(0, 1.08fr) minmax(17.5rem, 0.92fr);
   }
 }
 
 @media (max-width: 768px) {
   .academic-page {
-    padding: 14px 0 14px;
+    padding: 0.875rem 0 0.875rem;
   }
 
   .academic-hero,
   .page-actions,
   .academic-grid {
-    padding: 0 18px;
+    padding: 0 1.125rem;
   }
 
   .academic-hero h1 {
@@ -713,7 +727,7 @@ onMounted(async () => {
 
   .academic-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .panel {
@@ -727,11 +741,15 @@ onMounted(async () => {
 
   .book-content {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .book-cover {
-    max-width: 128px;
+    width: auto;
+    height: auto;
+    max-width: 10rem;
+    max-height: none;
+    aspect-ratio: 3 / 4;
     margin: 0 auto;
   }
 
@@ -746,13 +764,13 @@ onMounted(async () => {
   .paper-item,
   .activity-panel li > a {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .paper-item aside {
     text-align: left;
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   .paper-item h3,
