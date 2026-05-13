@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchActivityPhotos, fetchActivities, fetchBooks, fetchPapers, fetchSoftwarePatents } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
+import pageBg from '@/assets/images/backgrounds/mult-page/page-bg.png'
 
 const router = useRouter()
 const papers = ref([])
@@ -100,7 +101,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="academic-page">
+  <main class="academic-page" :style="{ '--page-bg': `url(${pageBg})` }">
     <section class="academic-hero">
       <h1>学术动态</h1>
       <p>汇集本实验室最新的科研成果、出版论著以及重要学术进展。</p>
@@ -224,9 +225,12 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background:
-    linear-gradient(rgba(250, 246, 237, 0.88), rgba(250, 246, 237, 0.9)),
-    url('@/assets/images/backgrounds/mult-page/bg.jpg') center center / cover fixed;
+  background-image:
+    linear-gradient(rgba(250, 246, 237, 0.32), rgba(250, 246, 237, 0.36)),
+    var(--page-bg);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
   color: #2e2721;
   font-family: var(--font-serif);
 }

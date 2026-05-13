@@ -362,7 +362,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   flex-direction: column;
   background:
     linear-gradient(rgba(248, 245, 240, 0.88), rgba(248, 245, 240, 0.9)),
-    url('@/assets/images/backgrounds/home/home-bg2.png') center / cover fixed;
+    url('@/assets/images/backgrounds/mult-page/page-bg.png') center / cover fixed;
   color: #2b2520;
   font-family: var(--font-sans);
 }

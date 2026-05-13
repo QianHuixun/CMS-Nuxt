@@ -28,7 +28,7 @@ defineProps({
   height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 400px;
-  background-color: #f0f0f0;
+  background: url('@/assets/images/backgrounds/mult-page/page-bg.png') center center / cover fixed;
   color: #2b2520;
   overflow: hidden;
   font-family: var(--font-sans);

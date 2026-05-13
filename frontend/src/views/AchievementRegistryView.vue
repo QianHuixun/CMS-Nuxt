@@ -277,8 +277,7 @@ const goBack = () => {
   overflow: hidden;
   background:
     linear-gradient(rgba(250, 247, 242, 0.88), rgba(250, 247, 242, 0.9)),
-    url('@/assets/images/backgrounds/mult-page/bg.jpg') center top / cover fixed,
-    #faf7f2;
+    url('@/assets/images/backgrounds/mult-page/page-bg.png') center top / cover fixed;
   color: #2f2522;
   font-family: var(--font-serif);
 }

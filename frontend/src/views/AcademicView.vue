@@ -247,8 +247,7 @@ function goExpert(id) {
   width: 100%;
   height: calc(100vh - 53px);
   overflow: hidden;
-  background-color: var(--bg-page, #f8f5f0);
-  /* 去除了背景网格 */
+  background: url('@/assets/images/backgrounds/mult-page/page-bg.png') center center / cover fixed;
   color: var(--color-text, #333);
   padding: 24px 40px 80px;
 }

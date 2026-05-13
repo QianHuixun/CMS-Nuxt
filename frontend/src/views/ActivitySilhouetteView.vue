@@ -5,6 +5,7 @@ import heroImage from '@/assets/images/pages/activity/hero-image-176857.png'
 import largeImage from '@/assets/images/pages/activity/large-image-50daff.png'
 import sideImageOne from '@/assets/images/pages/activity/side-image-1-56586a.png'
 import sideImageTwo from '@/assets/images/pages/activity/side-image-2-56586a.png'
+import pageBg from '@/assets/images/backgrounds/mult-page/page-bg.png'
 import { fetchActivityDetail } from '@/api/index.js'
 
 const route = useRoute()
@@ -53,7 +54,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="activity-page">
+  <main class="activity-page" :style="{ '--page-bg': `url(${pageBg})` }">
     <section class="page-header">
       <div class="header-label">{{ forumLabel }}</div>
       <h1>{{ pageTitle }}</h1>
@@ -133,10 +134,12 @@ onMounted(async () => {
 .activity-page {
   min-height: calc(100vh - 57px);
   padding: 42px 34px 30px;
-  background:
-    linear-gradient(rgba(255, 253, 247, 0.5), rgba(255, 253, 247, 0.5)),
-    url('@/assets/images/activity-info-bg/4429e2431e33f549b407d18b215dd032.jpg') center top / cover repeat-y,
-    #f7f3ec;
+  background-image:
+    linear-gradient(rgba(255, 253, 247, 0.28), rgba(255, 253, 247, 0.32)),
+    var(--page-bg);
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
   color: #171412;
   font-family: var(--font-serif);
 }

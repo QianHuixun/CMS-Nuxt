@@ -584,7 +584,7 @@ function goHome() {
   width: 100%;
   height: calc(100vh - 53px);
   display: flex;
-  background-color: var(--bg-page);
+  background: url('@/assets/images/backgrounds/mult-page/page-bg.png') center center / cover fixed;
   color: var(--color-text);
   overflow: hidden;
   margin: 0;

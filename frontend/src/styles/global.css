@@ -72,8 +72,8 @@
   --font-size-14xl: 42px;
   --font-size-15xl: 44px;
   --font-size-display: 82px;
-  --font-size-landing-title: clamp(24px, 4.5vw, 56px);
-  --font-size-landing-subtitle: clamp(20px, 2.5vw, 32px);
+  --font-size-landing-title: clamp(20px, 3.6vw, 44px);
+  --font-size-landing-subtitle: clamp(17px, 2vw, 26px);
   --font-size-timeline-title: clamp(42px, 3.75vw, 72px);
   --font-size-expert-name: clamp(26px, 2.4vw, 32px);
   --font-size-expert-copy: clamp(13px, 1.1vw, 14px);
