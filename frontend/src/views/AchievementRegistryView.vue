@@ -277,8 +277,7 @@ const goBack = () => {
   overflow: hidden;
   background:
     linear-gradient(rgba(250, 247, 242, 0.88), rgba(250, 247, 242, 0.9)),
-    url('@/assets/images/backgrounds/mult-page/bg.jpg') center top / cover fixed,
-    #faf7f2;
+    url('@/assets/images/backgrounds/mult-page/page-bg.png') center top / cover fixed;
   color: #2f2522;
   font-family: var(--font-serif);
 }
@@ -415,7 +414,7 @@ const goBack = () => {
 .content-panel {
   width: 100%;
   min-width: 0;
-  padding-top: 0;
+  padding-top: 18px;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -577,7 +576,7 @@ const goBack = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #6f6660;
+  color: #737373;
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
   line-height: var(--line-height-normal);
@@ -586,6 +585,7 @@ const goBack = () => {
 .result-copy .meta-number,
 .result-copy .meta-owner {
   min-width: 0;
+  color: #737373;
 }
 
 .result-copy .meta-owner {
@@ -655,7 +655,8 @@ const goBack = () => {
   font-family: var(--font-number);
   font-size: 64px;
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-compact);
+  line-height: 1;
+  white-space: nowrap;
   text-shadow: 0 4px 5px rgba(94, 42, 49, 0.26);
 }
 
@@ -700,8 +701,9 @@ const goBack = () => {
 .bar-chart {
   height: 112px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(5, 56px);
+  justify-content: center;
+  gap: 4px;
   align-items: end;
 }
 
@@ -739,7 +741,7 @@ const goBack = () => {
   padding: 20px 24px;
   background-color: rgba(234, 232, 227, 0.5);
   color: #6f6660;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xs);
   line-height: var(--line-height-summary);
 }
 

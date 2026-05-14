@@ -35,6 +35,7 @@ function enterSystem() {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-top: 120px;
   background: url('@/assets/images/backgrounds/landing/home-bg.png') no-repeat center center;
   background-size: cover;
 }
@@ -59,20 +60,20 @@ function enterSystem() {
 
 .line {
   position: absolute;
-  bottom: 4px;
-  width: clamp(60px, 12vw, 160px);
+  bottom: -6px;
+  width: clamp(40px, 8vw, 100px);
   height: 2px;
   background-color: #fff;
   opacity: 0.8;
 }
 
 .line-left {
-  right: calc(100% + 16px);
+  right: calc(100% + 36px);
   left: auto;
 }
 
 .line-right {
-  left: calc(100% + 16px);
+  left: calc(100% + 36px);
   right: auto;
 }
 

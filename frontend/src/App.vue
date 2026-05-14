@@ -5,11 +5,9 @@ import NavBar from '@/components/NavBar.vue'
 
 const route = useRoute()
 
-// 隐藏导航栏的详情页路径前
 const hideNavPrefixes = ['/', '/paper', '/activity', '/monograph', '/patent']
 
 const shouldShowNav = computed(() => {
-  // 检查当前路径是否以任何隐藏前缀开头
   for (const prefix of hideNavPrefixes) {
     if (route.path === prefix || route.path.startsWith(prefix + '/')) {
       return false
@@ -17,10 +15,14 @@ const shouldShowNav = computed(() => {
   }
   return true
 })
+
+const isSubPage = computed(() => {
+  return route.path !== '/' && route.path !== '/home'
+})
 </script>
 
 <template>
-  <div :class="['app', { 'app--with-nav': shouldShowNav }]">
+  <div :class="['app', { 'app--with-nav': shouldShowNav, 'app--sub-page': isSubPage }]">
     <NavBar v-if="shouldShowNav" />
     <router-view v-slot="{ Component }">
       <transition name="route-fade" mode="out-in">
@@ -39,5 +41,9 @@ const shouldShowNav = computed(() => {
 
 .app--with-nav {
   padding-top: 53px;
+}
+
+.app--sub-page {
+  background: #f8f6f0 url('@/assets/images/backgrounds/mult-page/page-bg.png') center center / cover fixed;
 }
 </style>

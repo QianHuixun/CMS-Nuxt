@@ -584,7 +584,7 @@ function goHome() {
   width: 100%;
   height: calc(100vh - 53px);
   display: flex;
-  background-color: var(--bg-page);
+  background: url('@/assets/images/backgrounds/mult-page/page-bg.png') center center / cover fixed;
   color: var(--color-text);
   overflow: hidden;
   margin: 0;
@@ -593,8 +593,7 @@ function goHome() {
 
 .sidebar-left {
   width: 280px;
-  background: rgba(248, 246, 240, 0.8);
-  border-right: 1px solid var(--color-border);
+  background: #FBF9F466;
   padding: 30px 24px;
   display: flex;
   flex-direction: column;
@@ -614,6 +613,8 @@ function goHome() {
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #E5DCDC;
 }
 
 .main-tab {
@@ -677,7 +678,7 @@ function goHome() {
 }
 
 .kg-book-item.active {
-  background: #fff;
+  background: #F0E3E4;
   border: 1px solid #d5c8bb;
   color: var(--color-primary);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
@@ -767,8 +768,7 @@ function goHome() {
 
 .sidebar-right {
   width: 360px;
-  background: #fdfaf6;
-  border-left: 1px solid var(--color-border);
+  background: #FBF9F466;
   padding: 30px 24px;
   display: flex;
   flex-direction: column;
@@ -819,13 +819,15 @@ function goHome() {
 }
 
 .detail-label {
-  display: inline-block;
-  color: var(--color-primary);
+  padding: 8px 16px;
+  background: #eedddc;
+  color: #8c5b5f;
+  border: none;
   font-size: var(--font-size-lg);
+  font-family: var(--font-sans);
+  border-radius: 4px;
   margin-bottom: 15px;
-  border-bottom: 2px solid var(--color-primary);
-  padding-bottom: 4px;
-  font-weight: var(--font-weight-bold);
+  display: inline-block;
 }
 
 .kg-detail-title {
@@ -848,20 +850,19 @@ function goHome() {
 }
 
 .kg-d-tab {
-  padding: 6px 14px;
-  border: 1px solid #d5c8bb;
-  background: transparent;
-  color: var(--color-secondary);
+  padding: 8px 16px;
+  background: #eedddc;
+  color: #8c5b5f;
+  border: none;
   font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .kg-d-tab.active {
   background: var(--color-primary);
   color: #fff;
-  border-color: var(--color-primary);
 }
 
 .kg-content-box {

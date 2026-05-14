@@ -32,7 +32,7 @@ const timelineLayout = {
   nodeStartY: 300,
   nodeSpacing: 330,
   nodeCenterX: 489,
-  nodeOffsetX: 220,
+  nodeOffsetX: 360, // [核心修改点]: 从 220 增大到 360，显著增加曲线左右弧度宽度
   pathLead: 240,
   pathTail: 240,
 }
@@ -348,8 +348,7 @@ const back = () => {
   min-height: 100vh;
   background:
     linear-gradient(rgba(251, 249, 244, 0.9), rgba(251, 249, 244, 0.92)),
-    url('@/assets/images/backgrounds/mult-page/bg.jpg') center top / cover fixed,
-    #fbf9f4;
+    url('@/assets/images/backgrounds/mult-page/page-bg.png') center top / cover fixed;
   color: #842130;
   font-family: var(--font-serif);
 }
