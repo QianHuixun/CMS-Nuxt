@@ -13,7 +13,7 @@ const fallbackTeamList = [
 ]
 
 // 示例词库
-const fallbackWords = ['天回医简', '经脉数字化', '出土文献', '知识服务', '简牍', '中医药', '古籍', '针灸铜人', '金石篆刻', '黄帝内经', '汉代医学', '现代医学', '数据挖掘', '古籍修复']
+const fallbackWords = ['天回医简', '经脉数字化', '出土文献', '知识服务', '简牍', '中医药', '古籍', '针灸铜人', '金石篆刻', '黄帝内经', '汉代医学', '现代医学', '数据挖掘', '古籍修复', '本草纲目', '经络系统', '辨证论治']
 
 const fallbackProjectList = [
   { tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },
@@ -23,30 +23,45 @@ const fallbackProjectList = [
   { tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
 ]
 
-// 15个固定竹简位置，按视觉主次排列，横向留出间隔避免相接。
+// 15个固定竹简位置，上下舒展，左右收拢
 const bambooSlots = [
-  { left: 47.7, bottom: 7 },
-  { left: 41, bottom: 30 },
-  { left: 54.4, bottom: 23 },
-  { left: 27.6, bottom: 38 },
-  { left: 67.8, bottom: 36 },
-  { left: 14.2, bottom: 17 },
-  { left: 81.2, bottom: 14 },
-  { left: 34.3, bottom: 4 },
-  { left: 61.1, bottom: 5 },
-  { left: 20.9, bottom: 45 },
-  { left: 74.5, bottom: 46 },
-  { left: 7.5, bottom: 36 },
-  { left: 87.9, bottom: 34 },
-  { left: 0.8, bottom: 6 },
-  { left: 94.6, bottom: 8 },
+  { left: 50, bottom: 4 },
+  { left: 45, bottom: 37 },
+  { left: 55, bottom: 27 },
+  { left: 35, bottom: 49 },
+  { left: 65, bottom: 46 },
+  { left: 25, bottom: 19 },
+  { left: 75, bottom: 14 },
+  { left: 40, bottom: 0 },
+  { left: 60, bottom: 1 },
+  { left: 30, bottom: 59 },
+  { left: 70, bottom: 60 },
+  { left: 20, bottom: 46 },
+  { left: 80, bottom: 43 },
+  { left: 15, bottom: 3 },
+  { left: 85, bottom: 6 },
 ]
+
+/**
+ * 高低权重交错排列：使大词与小词在位置上穿插，营造自然错落感
+ */
+const interleaveSlots = (total) => {
+  const indices = []
+  let lo = 0
+  let hi = total - 1
+  let pickLow = true
+  while (indices.length < total) {
+    indices.push(pickLow ? lo++ : hi--)
+    pickLow = !pickLow
+  }
+  return indices
+}
 
 /**
  * 水平分轨错落算法 (复刻设计图的竹简散落美学)
  */
 const createWordCloud = (words) => {
-  const MAX_WORDS = 10 
+  const MAX_WORDS = 15
   const displayWords = words.slice(0, MAX_WORDS)
   const totalWords = displayWords.length
   
@@ -59,11 +74,21 @@ const createWordCloud = (words) => {
     return { text, weight }
   })
 
-  // 模拟指数级权重，拉开大小差距
-  if (wordsWithWeight[0].weight === null) {
+  const hasManualWeights = wordsWithWeight[0].weight !== null
+
+  if (!hasManualWeights) {
     wordsWithWeight = wordsWithWeight.map((w, i) => {
       const normalized = 1 - (i / (totalWords - 1))
-      w.weight = Math.pow(normalized, 2) * 0.85 + 0.15 
+      w.weight = normalized * 0.9 + 0.1
+      return w
+    })
+  } else {
+    const weights = wordsWithWeight.map(w => w.weight)
+    const minW = Math.min(...weights)
+    const maxW = Math.max(...weights)
+    const range = maxW - minW || 1
+    wordsWithWeight = wordsWithWeight.map(w => {
+      w.weight = ((w.weight - minW) / range) * 0.9 + 0.1
       return w
     })
   }
@@ -71,15 +96,17 @@ const createWordCloud = (words) => {
   // 按权重严格降序
   wordsWithWeight.sort((a, b) => b.weight - a.weight)
 
+  const slotOrder = interleaveSlots(wordsWithWeight.length)
+
   return wordsWithWeight.map((wordObj, i) => {
     const { text, weight } = wordObj
-    const slot = bambooSlots[i]
+    const slot = bambooSlots[slotOrder[i]]
     
     // --- 视觉特征映射 ---
-    const height = Math.floor(190 + weight * 280) // 190px ~ 470px
-    const width = Math.floor(22 + weight * 30)    // 22px ~ 52px
-    const fontSize = Math.floor(13 + weight * 16) // 13px ~ 29px
-    const opacity = (0.2 + weight * 0.8).toFixed(2)
+    const height = Math.floor(150 + weight * 350) // 150px ~ 500px
+    const width = Math.floor(18 + weight * 42)    // 18px ~ 60px
+    const fontSize = Math.floor(10 + weight * 28) // 10px ~ 38px
+    const opacity = (0.08 + weight * 0.92).toFixed(2)
     const zIndex = Math.floor(weight * 10) + 1
 
     const leftPct = slot.left
@@ -254,7 +281,7 @@ function goExpert(id) {
 
 .main-container {
   display: grid;
-  grid-template-columns: 30% 40% 30%;
+  grid-template-columns: 23% 54% 23%;
   gap: 20px;
   align-items: flex-start;
   height: calc(100vh - 150px);
@@ -374,6 +401,10 @@ function goExpert(id) {
   cursor: pointer;
   opacity: var(--target-opacity); 
   
+  filter: 
+    drop-shadow(3px 5px 4px rgba(0, 0, 0, 0.18))
+    drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.10));
+  
   animation: 
     slip-entrance 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) both,
     slip-float 6s ease-in-out infinite alternate;
@@ -386,10 +417,10 @@ function goExpert(id) {
 
 .word-rect:hover {
   animation-play-state: paused, paused;
-  transform: scale(1.1) !important;
+  transform: scale(1.1) translateY(-4px) !important;
   opacity: 1 !important;
   z-index: 99 !important;
-  filter: drop-shadow(4px 4px 12px rgba(132, 33, 48, 0.3));
+  filter: drop-shadow(6px 10px 16px rgba(132, 33, 48, 0.35)) drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.25));
   -webkit-mask-image: none;
   mask-image: none;
 }
@@ -513,7 +544,7 @@ function goExpert(id) {
   margin-bottom: 8px;
   text-transform: uppercase; 
 }
-.project-title { font-size: 16px; color: #333; line-height: 1.4; font-family: serif; }
+.project-title { font-size: 16px; color: #333; line-height: 1.4; font-family: serif; text-align: right; }
 .project-meta { font-size: 12px; color: #999; margin-top: 6px; }
 
 .view-all-btn {
@@ -529,7 +560,7 @@ function goExpert(id) {
   justify-content: center;
   cursor: pointer;
   margin-left: auto;
-  margin-top: 16px;
+  margin-top: auto;
   margin-right: 0;
   margin-bottom: 0;
   font-size: 12px;
