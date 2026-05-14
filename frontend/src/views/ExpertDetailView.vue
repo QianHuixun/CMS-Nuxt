@@ -54,6 +54,8 @@ const splitTitleLines = (title = '') => title
   .map(part => part.trim())
   .filter(Boolean)
 
+const formatExpertName = (expert) => [expert?.name, expert?.professionalTitle].filter(Boolean).join(' ')
+
 const isNumericId = (id) => id !== undefined && id !== null && id !== '' && Number.isFinite(Number(id))
 
 const loadExperts = async () => {
@@ -64,9 +66,11 @@ const loadExperts = async () => {
       experts.value = list.map((item, index) => ({
         id: item.id,
         name: item.name,
+        professionalTitle: item.professionalTitle || '',
         degree: item.degree || '博士',
         title: item.title || '',
         subtitle: item.institution || '',
+        position: item.position || '',
         photo: item.avatar || expertPhotos[index % expertPhotos.length],
         focusAreas: normalizeFocusAreas(item),
         bio: ''
@@ -92,6 +96,7 @@ const loadExpert = async (id) => {
       const idx = experts.value.findIndex(e => String(e.id) === String(id))
       if (idx >= 0) {
         experts.value[idx].bio = data.bio || ''
+        experts.value[idx].position = data.position || experts.value[idx].position || ''
       }
       publications.value = (data.achievements || []).map((a, i) => ({
         number: String(i + 1).padStart(2, '0'),
@@ -280,28 +285,15 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
           <div class="portrait-wrap">
             <img
               :src="currentExpert.photo"
-              alt=""
-              class="portrait-bg"
-              aria-hidden="true"
-            >
-            <img
-              :src="currentExpert.photo"
-              :alt="`${currentExpert.name}${currentExpert.degree}`"
+              :alt="formatExpertName(currentExpert)"
               class="portrait"
             >
           </div>
 
           <div class="expert-copy">
             <div class="name-row">
-              <h1>{{ currentExpert.name }} {{ currentExpert.degree }}</h1>
-              <p>
-                <span v-for="line in splitTitleLines(currentExpert.title)" :key="line">{{ line }}</span>
-                <span>{{ currentExpert.subtitle }}</span>
-              </p>
-            </div>
-
-            <div v-if="currentExpert.focusAreas?.length" class="expert-focus-tags">
-              <span v-for="focus in currentExpert.focusAreas" :key="focus" class="expert-focus-tag">{{ focus }}</span>
+              <h1>{{ formatExpertName(currentExpert) }}</h1>
+              <p v-if="currentExpert.position">{{ currentExpert.position }}</p>
             </div>
 
             <p class="bio">{{ currentExpert.bio || '暂无简介' }}</p>
@@ -351,10 +343,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
             :data-current="isCurrentStripCard(item) ? 'true' : undefined"
             @click="handleStripCardClick(item, $event)"
           >
-            <img :src="item.expert.photo" :alt="`${item.expert.name}${item.expert.degree}`">
+            <img :src="item.expert.photo" :alt="formatExpertName(item.expert)">
             <div class="expert-card-copy">
-              <h2>{{ item.expert.name }} {{ item.expert.degree }}</h2>
-              <p>{{ splitTitleLines(item.expert.title).join('\n') }}</p>
+              <h2>{{ formatExpertName(item.expert) }}</h2>
+              <p v-if="item.expert.position">{{ item.expert.position }}</p>
               <span>{{ item.expert.focusAreas?.slice(0, 2).join(' / ') }} / {{ item.expert.subtitle }}</span>
             </div>
           </router-link>
@@ -447,10 +439,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 .portrait-wrap {
   width: 100%;
-  max-width: clamp(260px, 24vw, 460px);
+  max-width: clamp(190px, 16vw, 280px);
   height: auto;
-  max-height: clamp(220px, 24vh, 400px);
-  aspect-ratio: 1 / 0.86;
+  max-height: clamp(260px, 36vh, 440px);
+  aspect-ratio: 7 / 9;
+  margin-inline: auto;
   overflow: hidden;
   border-radius: 3px;
   background-color: #eee4dc;
@@ -458,25 +451,12 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   position: relative;
 }
 
-.portrait-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: blur(18px);
-  z-index: 0;
-  mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
-}
-
 .portrait {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center top;
   position: relative;
   z-index: 1;
   transition: transform 0.45s ease;
@@ -487,50 +467,35 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .expert-copy {
-  margin-top: clamp(14px, 2vh, 22px);
+  width: 100%;
+  max-width: clamp(190px, 16vw, 280px);
+  margin: clamp(10px, 1.4vh, 16px) auto 0;
 }
 
 .name-row {
   display: flex;
-  color: #2b2520;
-  justify-content: space-between;
-  gap: 18px;
+  flex-direction: column;
+  color: #842130;
+  gap: 4px;
 }
 
 .name-row h1 {
-
-.expert-focus-tags {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.expert-focus-tag {
-  padding: 4px 10px;
-  border: 1px solid rgba(132, 33, 48, 0.12);
-  border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.72);
-  color: #6c625c;
-  font-size: var(--font-size-sm);
-  line-height: 1.2;
-}
   min-width: 0;
-  color: #2b2520;
+  color: #842130;
   font-family: var(--font-serif);
-  font-size: var(--font-size-expert-name);
+  font-size: clamp(24px, 2.1vw, 34px);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-name);
+  line-height: 1.08;
   white-space: nowrap;
 }
 
 .name-row p {
-  flex: 0 0 auto;
-  color: #2b2520;
-  font-size: var(--font-size-xl);
+  margin: 0;
+  color: #842130;
+  font-size: clamp(13px, 0.95vw, 16px);
   font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-relaxed);
-  text-align: right;
+  line-height: 1.35;
+  text-align: left;
 }
 
 .name-row p span {
@@ -539,12 +504,12 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 .expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row h1,
 .expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row p {
-  color: #2b2520;
+  color: #842130;
 }
 
 .bio {
   margin-top: clamp(12px, 1.7vh, 18px);
-  color: #615d59;
+  color: #8a817a;
   font-size: var(--font-size-expert-copy);
   line-height: var(--line-height-reading);
   text-align: justify;
@@ -744,9 +709,9 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   max-height: clamp(48px, 5.2vh, 66px);
   display: block;
   border-radius: 2px;
-  object-fit: cover;
-  object-position: center;
-  background-color: #eee4dc;
+  object-fit: contain;
+  object-position: center top;
+  background-color: transparent;
 }
 
 .expert-card.is-current img {
@@ -759,6 +724,13 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 .expert-card-copy {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.expert-card:not(.is-current) .expert-card-copy {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .expert-card-copy h2 {
@@ -795,6 +767,15 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 0.7;
+}
+
+.expert-card:not(.is-current) .expert-card-copy p {
+  margin-top: 2px;
+  -webkit-line-clamp: 1;
+}
+
+.expert-card:not(.is-current) .expert-card-copy span {
+  margin-top: 3px;
 }
 
 .page-actions {
