@@ -438,7 +438,7 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, auto);
   gap: 1rem;
-  align-items: stretch;
+  align-items: start;
   overflow: hidden;
 }
 
@@ -483,8 +483,9 @@ onMounted(async () => {
 .book-cover {
   justify-self: end;
   width: auto;
-  height: 100%;
-  min-height: 0;
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   box-sizing: border-box;
   padding: 0.375rem;
@@ -494,9 +495,10 @@ onMounted(async () => {
 }
 
 .book-cover img {
-  width: auto;
+  width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
 }
 
 .patent-list {
@@ -544,6 +546,7 @@ onMounted(async () => {
   height: 100%;
   min-height: 0;
   gap: 0.625rem;
+  padding-top: 0.75rem;
 }
 
 .gallery-layout {
