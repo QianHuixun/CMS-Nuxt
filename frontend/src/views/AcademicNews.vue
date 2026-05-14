@@ -4,6 +4,11 @@ import { useRouter } from 'vue-router'
 import { fetchActivityPhotos, fetchActivities, fetchBooks, fetchPapers, fetchSoftwarePatents } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 import pageBg from '@/assets/images/backgrounds/mult-page/page-bg.png'
+import paperIcon from '@/assets/images/pages/academic-news/paper-icon.svg'
+import bookIcon from '@/assets/images/pages/academic-news/book-icon.svg'
+import activityIcon from '@/assets/images/pages/academic-news/activity-icon.svg'
+import patentIcon from '@/assets/images/pages/academic-news/patent-icon.svg'
+import patentItemIcon from '@/assets/images/pages/academic-news/patent-item-icon.svg'
 
 const router = useRouter()
 const papers = ref([])
@@ -110,7 +115,7 @@ onMounted(async () => {
     <section class="academic-grid">
       <section class="panel paper-panel">
         <header class="panel-header">
-          <h2><span class="header-icon"></span>发表论文</h2>
+          <h2><img class="header-icon" :src="paperIcon" alt="">发表论文</h2>
           <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'papers' } }">查看全部</router-link>
         </header>
 
@@ -137,7 +142,7 @@ onMounted(async () => {
         <div class="academic-top-row">
       <section class="panel book-panel">
         <header class="panel-header">
-          <h2><span class="header-icon"></span>学术著作</h2>
+          <h2><img class="header-icon" :src="bookIcon" alt="">学术著作</h2>
           <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'books' } }">查看全部</router-link>
         </header>
 
@@ -155,7 +160,7 @@ onMounted(async () => {
 
       <section class="panel patent-panel">
         <header class="panel-header">
-          <h2><span class="header-icon"></span>软著专利</h2>
+          <h2><img class="header-icon" :src="patentIcon" alt="">软著专利</h2>
           <router-link class="header-action" :to="{ path: '/achievements', query: { tab: 'patents' } }">查看全部</router-link>
         </header>
 
@@ -165,7 +170,7 @@ onMounted(async () => {
               <span>{{ patent.code }}</span>
               <h3>{{ patent.title }}</h3>
             </div>
-            <span class="gear">◆</span>
+            <img class="gear-icon" :src="patentItemIcon" alt="">
           </router-link>
         </div>
       </section>
@@ -174,7 +179,7 @@ onMounted(async () => {
 
       <section class="panel gallery-panel">
         <header class="panel-header">
-          <h2><span class="header-icon"></span>活动剪影</h2>
+          <h2><img class="header-icon" :src="activityIcon" alt="">活动剪影</h2>
           <div class="activity-actions">
             <span>学术活动存档</span>
             <router-link class="header-action" to="/activity-timeline">查看全部</router-link>
@@ -354,12 +359,10 @@ onMounted(async () => {
 }
 
 .header-icon {
-  width: 0.6875rem;
-  height: 0.6875rem;
+  height: 1.25rem;
+  width: auto;
   display: inline-block;
-  border: 2px solid var(--color-primary);
-  background-color: var(--color-primary);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+  vertical-align: middle;
 }
 
 .panel-header button,
@@ -567,10 +570,10 @@ onMounted(async () => {
   line-height: var(--line-height-normal);
 }
 
-.gear {
+.gear-icon {
   flex: 0 0 auto;
-  color: var(--color-primary);
-  font-size: var(--font-size-2xl);
+  height: 1.125rem;
+  width: auto;
 }
 
 .gallery-list {

@@ -12,15 +12,25 @@ import {
   fetchSoftwarePatents
 } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
+import registryIcon from '@/assets/images/pages/academic-news/registry-icon.svg'
+import papersIconRaw from '@/assets/images/pages/academic-news/registry-papers-icon.svg?raw'
+import booksIconRaw from '@/assets/images/pages/academic-news/registry-books-icon.svg?raw'
+import patentsIconRaw from '@/assets/images/pages/academic-news/registry-patents-icon.svg?raw'
+import topicsIconRaw from '@/assets/images/pages/academic-news/registry-topics-icon.svg?raw'
+
+const papersIcon = `data:image/svg+xml,${encodeURIComponent(papersIconRaw)}`
+const booksIcon = `data:image/svg+xml,${encodeURIComponent(booksIconRaw)}`
+const patentsIcon = `data:image/svg+xml,${encodeURIComponent(patentsIconRaw)}`
+const topicsIcon = `data:image/svg+xml,${encodeURIComponent(topicsIconRaw)}`
 
 const route = useRoute()
 const router = useRouter()
 
 const sections = [
-  { key: 'papers', title: '发表论文', icon: 'home' },
-  { key: 'patents', title: '软著专利', icon: 'badge' },
-  { key: 'books', title: '学术著作', icon: 'doc' },
-  { key: 'topics', title: '获批课题', icon: 'chart' },
+  { key: 'papers', title: '发表论文', iconUrl: papersIcon },
+  { key: 'patents', title: '软著专利', iconUrl: patentsIcon },
+  { key: 'books', title: '学术著作', iconUrl: booksIcon },
+  { key: 'topics', title: '获批课题', iconUrl: topicsIcon },
 ]
 
 const sectionKeys = sections.map((section) => section.key)
@@ -166,7 +176,7 @@ const goBack = () => {
     <div class="registry-shell">
       <aside class="side-panel" aria-label="成果库分类">
         <div class="side-title">
-          <span class="flask-icon" aria-hidden="true"></span>
+          <img class="registry-icon" :src="registryIcon" alt="">
           <strong>成果库</strong>
         </div>
 
@@ -174,10 +184,13 @@ const goBack = () => {
           v-for="section in sections"
           :key="section.key"
           type="button"
-          :class="['side-link', section.icon, { active: currentKey === section.key }]"
+          :class="['side-link', { active: currentKey === section.key }]"
           @click="switchSection(section.key)"
         >
-          <span aria-hidden="true"></span>
+          <span
+            class="side-icon"
+            :style="{ maskImage: `url(${section.iconUrl})`, WebkitMaskImage: `url(${section.iconUrl})` }"
+          ></span>
           {{ section.title }}
         </button>
       </aside>
@@ -312,13 +325,10 @@ const goBack = () => {
   font-weight: var(--font-weight-bold);
 }
 
-.flask-icon {
+.registry-icon {
   width: 22px;
-  height: 28px;
+  height: 22px;
   display: inline-block;
-  position: relative;
-  background-color: #842130;
-  clip-path: polygon(28% 0, 72% 0, 72% 28%, 100% 82%, 86% 100%, 14% 100%, 0 82%, 28% 28%);
 }
 
 .side-link {
@@ -343,72 +353,17 @@ const goBack = () => {
   color: #842130;
 }
 
-.side-link span {
+.side-icon {
   width: 18px;
   height: 18px;
-  border: 2px solid currentColor;
-  position: relative;
-}
-
-.side-link.home span {
-  border-radius: 3px 3px 2px 2px;
-  transform: translateY(3px);
-}
-
-.side-link.home span::before {
-  content: "";
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  left: 1px;
-  top: -8px;
-  border-left: 2px solid currentColor;
-  border-top: 2px solid currentColor;
-  transform: rotate(45deg);
-  background: transparent;
-}
-
-.side-link.badge span {
-  border-radius: 50%;
-}
-
-.side-link.badge span::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
+  display: inline-block;
   background-color: currentColor;
-  border-radius: 50%;
-}
-
-.side-link.doc span::before,
-.side-link.doc span::after,
-.side-link.chart span::before,
-.side-link.chart span::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  height: 2px;
-  background-color: currentColor;
-}
-
-.side-link.doc span::before {
-  top: 5px;
-}
-
-.side-link.doc span::after {
-  top: 10px;
-}
-
-.side-link.chart span::before {
-  bottom: 4px;
-}
-
-.side-link.chart span::after {
-  left: 8px;
-  width: 4px;
-  height: 8px;
-  bottom: 4px;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
 }
 
 .content-panel {
