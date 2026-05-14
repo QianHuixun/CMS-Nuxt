@@ -141,7 +141,7 @@ onMounted(async () => {
       id: t.id,
       name: t.name,
       title: t.title,
-      desc: t.researchArea,
+      desc: t.summary || t.description || t.researchAreas?.join('、') || t.researchArea || '',
       avatar: t.avatar,
     }))
     if (nextTeamList.length) teamList.value = nextTeamList
@@ -196,14 +196,18 @@ function goExpert(id) {
             @click="goExpert(member.id)"
             @keydown.enter="goExpert(member.id)"
           >
-            <div class="avatar">
-              <img :src="member.avatar" :alt="member.name" />
+            <div class="member-main">
+              <div class="member-profile">
+                <div class="avatar">
+                  <img :src="member.avatar" :alt="member.name" />
+                </div>
+              </div>
+              <div class="card-info">
+                <div class="name">{{ member.name }}</div>
+                <div class="title">{{ member.title }}</div>
+              </div>
             </div>
-            <div class="card-info">
-              <div class="name">{{ member.name }}</div>
-              <div class="title">{{ member.title }}</div>
-              <div class="desc">{{ member.desc }}</div>
-            </div>
+            <div class="member-intro">{{ member.desc }}</div>
           </div>
         </div>
       </div>
@@ -318,8 +322,8 @@ function goExpert(id) {
   direction: rtl;
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary, #842130) transparent;
-  padding-left: 8px;
-  padding-right: 20px;
+  padding-left: 20px;
+  padding-right: 8px;
 }
 .team-section > * { direction: ltr; }
 .team-section::-webkit-scrollbar { width: 2px; }
@@ -341,16 +345,33 @@ function goExpert(id) {
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-radius: 4px;
-  display: flex; 
-  align-items: flex-start;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 16px; 
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .team-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(132, 33, 48, 0.1); }
-.avatar { width: 48px; height: 48px; border-radius: 4px; background-color: #e8e3d8; overflow: hidden; flex-shrink: 0; }
+.member-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.member-profile { width: 48px; flex-shrink: 0; }
+.avatar { width: 48px; height: 48px; border-radius: 4px; background-color: #e8e3d8; overflow: hidden; margin: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
+.member-intro {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 .card-info { flex: 1; }
 .name { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 4px; }
 .title { font-size: 12px; color: #999; margin-bottom: 8px; }

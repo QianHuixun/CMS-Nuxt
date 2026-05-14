@@ -19,6 +19,7 @@ const dragOffsetX = ref(0)
 const isDraggingStrip = ref(false)
 const suppressStripClick = ref(false)
 const wasRealDrag = ref(false)
+const windowWidth = ref(window.innerWidth)
 let wheelLock = false
 let connectorResizeObserver
 
@@ -47,6 +48,11 @@ const normalizeFocusAreas = (item) => {
   }
   return []
 }
+
+const splitTitleLines = (title = '') => title
+  .split('/')
+  .map(part => part.trim())
+  .filter(Boolean)
 
 const isNumericId = (id) => id !== undefined && id !== null && id !== '' && Number.isFinite(Number(id))
 
@@ -125,8 +131,8 @@ const normalizeOffset = (index) => {
 }
 
 const getOffsetX = (offset) => {
-  const positions = { '-3': -760, '-2': -520, '-1': -315, 0: 0, 1: 315, 2: 520, 3: 760 }
-  return positions[offset] ?? offset * 260
+  const step = Math.round(Math.min(380, Math.max(240, windowWidth.value * 0.19)))
+  return offset * step
 }
 
 const stripExperts = computed(() => {
@@ -221,7 +227,6 @@ const updateConnectorPaths = () => {
     return
   }
   const svgRect = svgEl.getBoundingClientRect()
-  const listRect = listEl.getBoundingClientRect()
   const itemEls = [...listEl.querySelectorAll('.publication-item')]
   if (!svgRect.width || !svgRect.height || !itemEls.length) {
     connectorPaths.value = []
@@ -229,9 +234,7 @@ const updateConnectorPaths = () => {
   }
   const startX = 0
   const startY = svgRect.height / 2
-  const endX = svgRect.width
-  const listLeftInSvg = listRect.left - svgRect.left
-  const targetX = Math.min(endX, Math.max(startX, listLeftInSvg))
+  const targetX = svgRect.width
   connectorPaths.value = itemEls.map((itemEl) => {
     const itemRect = itemEl.getBoundingClientRect()
     const targetY = itemRect.top + itemRect.height / 2 - svgRect.top
@@ -245,9 +248,14 @@ const syncLayout = () => {
   nextTick(updateConnectorPaths)
 }
 
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+  updateConnectorPaths()
+}
+
 onMounted(() => {
   syncLayout()
-  window.addEventListener('resize', updateConnectorPaths)
+  window.addEventListener('resize', handleResize)
   connectorResizeObserver = new ResizeObserver(updateConnectorPaths)
   ;[profilePanel.value, connectorSvg.value, publicationList.value].forEach((element) => {
     if (element) connectorResizeObserver.observe(element)
@@ -255,7 +263,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateConnectorPaths)
+  window.removeEventListener('resize', handleResize)
   connectorResizeObserver?.disconnect()
 })
 
@@ -267,8 +275,15 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   <main class="expert-detail-page">
     <section class="expert-stage" aria-label="专家详情">
       <article ref="profilePanel" class="profile-panel">
-        <section class="profile-column">
+        <div class="profile-content">
+          <section class="profile-column">
           <div class="portrait-wrap">
+            <img
+              :src="currentExpert.photo"
+              alt=""
+              class="portrait-bg"
+              aria-hidden="true"
+            >
             <img
               :src="currentExpert.photo"
               :alt="`${currentExpert.name}${currentExpert.degree}`"
@@ -279,7 +294,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
           <div class="expert-copy">
             <div class="name-row">
               <h1>{{ currentExpert.name }} {{ currentExpert.degree }}</h1>
-              <p>{{ currentExpert.title }}<br>{{ currentExpert.subtitle }}</p>
+              <p>
+                <span v-for="line in splitTitleLines(currentExpert.title)" :key="line">{{ line }}</span>
+                <span>{{ currentExpert.subtitle }}</span>
+              </p>
             </div>
 
             <div v-if="currentExpert.focusAreas?.length" class="expert-focus-tags">
@@ -310,6 +328,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
             </div>
           </article>
         </section>
+        </div>
       </article>
 
       <section ref="expertStrip" class="expert-strip" aria-label="专家列表">
@@ -335,7 +354,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
             <img :src="item.expert.photo" :alt="`${item.expert.name}${item.expert.degree}`">
             <div class="expert-card-copy">
               <h2>{{ item.expert.name }} {{ item.expert.degree }}</h2>
-              <p>{{ item.expert.title }}</p>
+              <p>{{ splitTitleLines(item.expert.title).join('\n') }}</p>
               <span>{{ item.expert.focusAreas?.slice(0, 2).join(' / ') }} / {{ item.expert.subtitle }}</span>
             </div>
           </router-link>
@@ -397,15 +416,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .profile-panel {
-  width: 1320px;
+  width: clamp(800px, 88vw, 1600px);
   max-width: 100%;
-  min-height: 570px;
+  min-height: clamp(430px, 58vh, 700px);
   margin: 0 auto;
-  padding: 36px 56px;
-  display: grid;
-  grid-template-columns: minmax(300px, 0.82fr) clamp(64px, 7vw, 112px) minmax(602px, 1.28fr);
-  gap: clamp(20px, 2.2vw, 34px);
-  align-items: stretch;
+  padding: clamp(24px, 3.5vh, 44px) clamp(34px, 4vw, 64px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: clamp(16px, 2vw, 24px);
   background-color: rgb(245, 238, 234);
@@ -413,23 +428,47 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   box-shadow: 0 18px 42px -18px rgba(36, 28, 22, 0.28);
 }
 
+.profile-content {
+  height: 100%;
+  min-height: inherit;
+  display: flex;
+  align-items: stretch;
+  gap: clamp(20px, 2.2vw, 34px);
+}
+
 .profile-column {
+  flex: 0.82 1 300px;
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .portrait-wrap {
   width: 100%;
-  max-width: 386px;
+  max-width: clamp(260px, 24vw, 460px);
   height: auto;
-  max-height: 330px;
+  max-height: clamp(220px, 24vh, 400px);
   aspect-ratio: 1 / 0.86;
   overflow: hidden;
   border-radius: 3px;
   background-color: #eee4dc;
   box-shadow: 0 12px 26px rgba(43, 37, 32, 0.16);
+  position: relative;
+}
+
+.portrait-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(18px);
+  z-index: 0;
+  mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%);
 }
 
 .portrait {
@@ -438,12 +477,12 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   display: block;
   object-fit: contain;
   object-position: center;
-  filter: grayscale(1);
-  transition: filter 0.45s ease, transform 0.45s ease;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.45s ease;
 }
 
 .portrait-wrap:hover .portrait {
-  filter: grayscale(0);
   transform: scale(1.015);
 }
 
@@ -494,6 +533,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   text-align: right;
 }
 
+.name-row p span {
+  display: block;
+}
+
 .expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row h1,
 .expert-detail-page[data-current-expert-id="ren-yu-lan"] .name-row p {
   color: #2b2520;
@@ -508,10 +551,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .connector-lines {
-  width: 100%;
-  height: 100%;
+  flex: 0 0 clamp(64px, 7vw, 112px);
+  width: clamp(64px, 7vw, 112px);
+  height: auto;
   min-height: 0;
-  align-self: center;
+  align-self: stretch;
   overflow: visible;
 }
 
@@ -524,24 +568,25 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .publication-list {
+  flex: 1.28 1 602px;
   min-width: 0;
-  height: min(420px, 100%);
-  min-height: 320px;
+  height: auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0;
+  justify-content: center;
+  gap: clamp(12px, 1.8vh, 18px);
 }
 
 .publication-item {
-  width: min(100%, 602px);
-  height: 63px;
-  min-height: 63px;
-  padding: 16px;
+  width: min(100%, clamp(440px, 46vw, 720px));
+  height: clamp(52px, 6.5vh, 72px);
+  min-height: clamp(52px, 6.5vh, 72px);
+  padding: clamp(10px, 1.2vh, 18px) clamp(12px, 1.2vw, 20px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: clamp(10px, 1.2vw, 20px);
   border: 1px solid rgba(132, 33, 48, 0.06);
   border-radius: 0;
   background-color: rgba(255, 255, 255, 0.82);
@@ -577,9 +622,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .expert-strip {
-  width: min(1280px, 100%);
+  width: clamp(760px, 84vw, 1560px);
+  max-width: 100%;
   flex: 0 0 auto;
-  height: 128px;
+  height: clamp(120px, 14vh, 160px);
   padding: 0 28px 10px;
   position: fixed;
   left: 50%;
@@ -604,14 +650,13 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .expert-card {
-  width: 214px;
-  min-width: 214px;
-  height: 78px;
-  padding: 9px 12px;
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 10px;
+  width: clamp(170px, 14vw, 260px);
+  min-width: clamp(170px, 14vw, 260px);
+  height: clamp(68px, 7vh, 90px);
+  padding: clamp(6px, 0.7vh, 12px) clamp(8px, 0.9vw, 16px);
+  display: flex;
   align-items: center;
+  gap: clamp(6px, 0.7vw, 12px);
   border: 1px solid rgba(220, 211, 202, 0.85);
   border-radius: 3px;
   background-color: rgba(250, 247, 241, 0.78);
@@ -621,7 +666,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   opacity: 0.42;
   position: absolute;
   left: 50%;
-  bottom: 18px;
+  bottom: 8px;
   z-index: var(--z);
   transform: translateX(calc(-50% + var(--x))) scale(0.86);
   transform-origin: bottom center;
@@ -656,35 +701,34 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .expert-card.is-near {
-  width: 238px;
-  min-width: 238px;
-  height: 88px;
+  width: clamp(190px, 15.5vw, 288px);
+  min-width: clamp(190px, 15.5vw, 288px);
+  height: clamp(74px, 7.6vh, 100px);
   opacity: 0.72;
   transform: translateX(calc(-50% + var(--x))) scale(0.94);
   box-shadow: 0 7px 16px rgba(54, 42, 32, 0.14);
 }
 
 .expert-card.is-mid {
-  width: 204px;
-  min-width: 204px;
-  height: 74px;
+  width: clamp(164px, 13.4vw, 248px);
+  min-width: clamp(164px, 13.4vw, 248px);
+  height: clamp(62px, 6.4vh, 84px);
   opacity: 0.38;
   transform: translateX(calc(-50% + var(--x))) scale(0.84);
 }
 
 .expert-card.is-far {
-  width: 176px;
-  min-width: 176px;
-  height: 68px;
+  width: clamp(140px, 11.5vw, 214px);
+  min-width: clamp(140px, 11.5vw, 214px);
+  height: clamp(56px, 5.8vh, 78px);
   opacity: 0.16;
   transform: translateX(calc(-50% + var(--x))) scale(0.76);
 }
 
 .expert-card.is-current {
-  width: 286px;
-  min-width: 286px;
-  height: 104px;
-  grid-template-columns: 74px minmax(0, 1fr);
+  width: clamp(230px, 18.8vw, 346px);
+  min-width: clamp(230px, 18.8vw, 346px);
+  height: clamp(90px, 9.2vh, 120px);
   margin-bottom: 0;
   border-color: rgba(132, 33, 48, 0.24);
   background-color: rgba(250, 247, 241, 0.98);
@@ -694,32 +738,32 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 }
 
 .expert-card img {
-  width: 52px;
-  max-width: 52px;
-  height: 60px;
-  max-height: 60px;
+  width: clamp(42px, 3.8vw, 56px);
+  max-width: clamp(42px, 3.8vw, 56px);
+  height: clamp(48px, 5.2vh, 66px);
+  max-height: clamp(48px, 5.2vh, 66px);
   display: block;
   border-radius: 2px;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
-  filter: grayscale(1);
   background-color: #eee4dc;
 }
 
 .expert-card.is-current img {
-  width: 74px;
-  max-width: 74px;
-  height: 86px;
-  max-height: 86px;
+  width: clamp(60px, 5.5vw, 82px);
+  max-width: clamp(60px, 5.5vw, 82px);
+  height: clamp(68px, 7.4vh, 94px);
+  max-height: clamp(68px, 7.4vh, 94px);
 }
 
 .expert-card-copy {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
 .expert-card-copy h2 {
   overflow: hidden;
-  color: #2b2520;
+  color: #842130;
   font-family: var(--font-serif);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
@@ -731,22 +775,26 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 .expert-card-copy p {
   overflow: hidden;
   margin-top: 4px;
-  color: var(--color-primary);
+  color: #842130;
   font-size: var(--font-size-xs);
   line-height: var(--line-height-normal);
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: pre-line;
 }
 
 .expert-card-copy span {
   overflow: hidden;
   display: block;
   margin-top: 7px;
-  color: #99908b;
+  color: #842130;
   font-size: var(--font-size-2xs);
   line-height: var(--line-height-control);
   text-overflow: ellipsis;
   white-space: nowrap;
+  opacity: 0.7;
 }
 
 .page-actions {
@@ -769,7 +817,6 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 @media (max-width: 1360px) {
   .profile-panel {
     width: calc(100vw - 32px);
-    grid-template-columns: minmax(280px, 0.88fr) minmax(460px, 1.12fr);
   }
 
   .connector-lines {
@@ -781,7 +828,10 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   .profile-panel {
     min-height: 430px;
     padding: 24px 34px;
-    grid-template-columns: minmax(230px, 0.78fr) clamp(40px, 6vw, 78px) minmax(440px, 1.22fr);
+  }
+
+  .profile-content {
+    min-height: inherit;
   }
 
   .portrait-wrap {
@@ -800,31 +850,31 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .publication-list {
-    height: min(360px, 100%);
-    min-height: 280px;
+    height: auto;
+    min-height: 0;
   }
 
   .expert-strip {
-    height: 108px;
+    height: clamp(104px, 16vh, 118px);
     padding-top: 0;
     bottom: 50px;
   }
 
   .expert-card {
-    height: 76px;
+    height: clamp(60px, 8vh, 74px);
   }
 
   .expert-card.is-current {
-    height: 92px;
+    height: clamp(80px, 10vh, 90px);
     margin-bottom: 0;
   }
 
   .expert-card img {
-    height: 60px;
+    height: clamp(42px, 6vh, 58px);
   }
 
   .expert-card.is-current img {
-    height: 76px;
+    height: clamp(60px, 8vh, 74px);
   }
 }
 
@@ -837,9 +887,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
     width: calc(100vw - 32px);
     min-height: 410px;
     padding: 16px;
-    grid-template-columns: minmax(140px, 0.78fr) minmax(0, 1fr);
-    gap: 16px;
     border-radius: 18px;
+  }
+
+  .profile-content {
+    gap: 16px;
   }
 
   .portrait-wrap {
@@ -875,8 +927,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
   .publication-item {
     padding: 9px 12px;
-    height: 52px;
-    min-height: 52px;
+    gap: 10px;
   }
 
   .publication-copy {
@@ -889,22 +940,8 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .expert-strip {
-    height: 108px;
     padding: 0 8px 10px;
     bottom: 48px;
-  }
-
-  .expert-card {
-    width: 176px;
-    min-width: 176px;
-    height: 76px;
-  }
-
-  .expert-card.is-current {
-    width: 228px;
-    min-width: 228px;
-    height: 94px;
-    grid-template-columns: 66px minmax(0, 1fr);
   }
 
   .page-actions {
@@ -926,9 +963,11 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   .profile-panel {
     width: calc(100vw - 24px);
     height: 380px;
-    grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1fr);
-    gap: 12px;
     padding: 12px;
+  }
+
+  .profile-content {
+    gap: 12px;
   }
 
   .portrait-wrap {
@@ -957,16 +996,15 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   }
 
   .expert-card {
-    width: 154px;
-    min-width: 154px;
-    height: 74px;
+    width: clamp(140px, 22vw, 170px);
+    min-width: clamp(140px, 22vw, 170px);
+    height: clamp(60px, 9vh, 76px);
   }
 
   .expert-card.is-current {
-    width: 202px;
-    min-width: 202px;
-    height: 88px;
-    grid-template-columns: 58px minmax(0, 1fr);
+    width: clamp(180px, 28vw, 230px);
+    min-width: clamp(180px, 28vw, 230px);
+    height: clamp(74px, 11vh, 92px);
     transform: translateX(calc(-50% + var(--x))) scale(1.02);
   }
 
