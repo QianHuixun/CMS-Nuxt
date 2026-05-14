@@ -70,7 +70,7 @@ onMounted(async () => {
     console.error('获取著作列表失败', e)
   }
   try {
-    const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 5 })
+    const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 4 })
     patents.value = (res.rows || []).map(p => ({
       id: p.id,
       code: p.registrationNo || '',
@@ -133,6 +133,8 @@ onMounted(async () => {
         </div>
       </section>
 
+      <div class="academic-side">
+        <div class="academic-top-row">
       <section class="panel book-panel">
         <header class="panel-header">
           <h2><span class="header-icon"></span>学术著作</h2>
@@ -167,6 +169,8 @@ onMounted(async () => {
           </router-link>
         </div>
       </section>
+
+        </div>
 
       <section class="panel gallery-panel">
         <header class="panel-header">
@@ -203,6 +207,7 @@ onMounted(async () => {
           </section>
         </div>
       </section>
+      </div>
     </section>
 
     <div class="page-actions return-actions">
@@ -263,10 +268,25 @@ onMounted(async () => {
 .academic-grid {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(20rem, 1fr) minmax(21.25rem, 1.12fr) minmax(18.75rem, 0.95fr);
-  grid-template-rows: minmax(0, 0.72fr) minmax(0, 0.68fr);
-  gap: 0.875rem 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.academic-side {
+  flex: 2.07 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.academic-top-row {
+  flex: 0.72 1 0;
+  min-height: 0;
+  display: flex;
+  gap: 1rem;
   align-items: stretch;
 }
 
@@ -282,8 +302,7 @@ onMounted(async () => {
 }
 
 .paper-panel {
-  grid-column: 1;
-  grid-row: 1 / span 2;
+  flex: 0 0 25rem;
   border-left: 2px solid rgba(132, 33, 48, 0.25);
   height: 100%;
   min-height: 0;
@@ -292,20 +311,17 @@ onMounted(async () => {
 
 .book-panel {
   position: relative;
-  grid-column: 2;
-  grid-row: 1;
+  flex: 1.12 1 21.25rem;
 }
 
 .patent-panel {
-  grid-column: 3;
-  grid-row: 1;
+  flex: 0.95 1 18.75rem;
   background-color: rgba(248, 246, 240, 0.84);
   box-shadow: 0 0.125rem 0.5rem rgba(90, 72, 54, 0.12);
 }
 
 .gallery-panel {
-  grid-column: 2 / 4;
-  grid-row: 2;
+  flex: 0.68 1 0;
   height: 100%;
   min-height: 0;
 }
@@ -315,6 +331,7 @@ onMounted(async () => {
   padding-top: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
 }
 
@@ -382,13 +399,18 @@ onMounted(async () => {
 }
 
 .paper-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 6.5rem;
+  display: flex;
+  justify-content: space-between;
   gap: 0.875rem;
   min-height: 3.125rem;
   padding-bottom: 0.25rem;
   color: inherit;
   text-decoration: none;
+}
+
+.paper-item > div {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .journal {
@@ -412,6 +434,7 @@ onMounted(async () => {
 }
 
 .paper-item aside {
+  flex: 0 0 6.5rem;
   text-align: right;
 }
 
@@ -435,14 +458,16 @@ onMounted(async () => {
 .book-content {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  display: flex;
   gap: 1rem;
   align-items: start;
+  justify-content: space-between;
   overflow: hidden;
 }
 
 .book-copy {
+  flex: 1 1 auto;
+  min-width: 0;
   align-self: start;
 }
 
@@ -481,7 +506,7 @@ onMounted(async () => {
 }
 
 .book-cover {
-  justify-self: end;
+  flex: 0 0 auto;
   width: auto;
   height: auto;
   max-height: 100%;
@@ -502,21 +527,29 @@ onMounted(async () => {
 }
 
 .patent-list {
-  display: grid;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
 .patent-item {
+  flex: 1 1 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.625rem;
-  min-height: 2.625rem;
+  min-height: 0;
   padding: 0.5rem 0.75rem;
   border-left: 3px solid #d8a4aa;
   background-color: rgba(255, 255, 255, 0.92);
   color: inherit;
   text-decoration: none;
+}
+
+.patent-item > div {
+  min-width: 0;
 }
 
 .patent-item span:not(.gear) {
@@ -541,8 +574,7 @@ onMounted(async () => {
 }
 
 .gallery-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
   height: 100%;
   min-height: 0;
   gap: 0.625rem;
@@ -553,10 +585,28 @@ onMounted(async () => {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(16.25rem, 0.92fr);
+  display: flex;
   gap: 0.875rem;
-  align-items: start;
+  align-items: stretch;
+}
+
+.gallery-list,
+.activity-panel {
+  flex: 1 1 0;
+}
+
+.gallery-list {
+  flex-grow: 1.08;
+}
+
+.activity-panel {
+  flex-grow: 0.92;
+  flex-basis: 16.25rem;
+}
+
+.gallery-card {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .gallery-card {
@@ -617,19 +667,24 @@ onMounted(async () => {
 
 .activity-panel ol {
   flex: 1;
+  height: 100%;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   list-style: none;
   max-height: none;
   overflow: hidden;
 }
 
 .activity-panel li {
+  flex: 1 1 0;
+  min-height: 0;
   padding: 0.4375rem 0;
 }
 
 .activity-panel li > a {
-  display: grid;
-  grid-template-columns: 0.375rem minmax(0, 1fr) 5.5rem;
+  height: 100%;
+  display: flex;
   gap: 0.625rem;
   align-items: start;
   color: inherit;
@@ -637,6 +692,7 @@ onMounted(async () => {
 }
 
 .activity-panel li > a > span {
+  flex: 0 0 0.3125rem;
   width: 0.3125rem;
   height: 0.3125rem;
   margin-top: 0.375rem;
@@ -644,6 +700,8 @@ onMounted(async () => {
 }
 
 .activity-panel p {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   color: var(--color-primary);
   font-size: var(--font-size-md);
@@ -653,6 +711,7 @@ onMounted(async () => {
 }
 
 .activity-panel time {
+  flex: 0 0 5.5rem;
   text-align: right;
   line-height: var(--line-height-snug);
   white-space: nowrap;
@@ -677,25 +736,21 @@ onMounted(async () => {
   }
 
   .academic-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto;
+    flex-wrap: wrap;
     gap: 0.75rem;
   }
 
   .paper-panel,
-  .book-panel,
-  .patent-panel,
-  .gallery-panel {
-    grid-column: auto;
-    grid-row: auto;
+  .academic-side {
+    flex: 1 1 calc(50% - 0.375rem);
   }
 
-  .gallery-panel {
-    grid-column: 1 / -1;
+  .academic-top-row {
+    flex: 0 1 auto;
+    gap: 0.75rem;
   }
 
   .paper-panel {
-    grid-row: span 1;
     min-height: auto;
   }
 
@@ -704,12 +759,8 @@ onMounted(async () => {
     max-height: 16.25rem;
   }
 
-  .book-content {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .gallery-layout {
-    grid-template-columns: minmax(0, 1.08fr) minmax(17.5rem, 0.92fr);
+  .activity-panel {
+    flex-basis: 17.5rem;
   }
 }
 
@@ -729,8 +780,29 @@ onMounted(async () => {
   }
 
   .academic-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .academic-side,
+  .academic-top-row,
+  .book-content,
+  .gallery-layout,
+  .gallery-list,
+  .paper-item,
+  .activity-panel li > a {
+    flex-direction: column;
+  }
+
+  .paper-panel,
+  .academic-side,
+  .book-panel,
+  .patent-panel,
+  .gallery-panel,
+  .gallery-list,
+  .activity-panel,
+  .gallery-card {
+    flex-basis: auto;
   }
 
   .panel {
@@ -743,7 +815,6 @@ onMounted(async () => {
   }
 
   .book-content {
-    grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 
@@ -756,17 +827,8 @@ onMounted(async () => {
     margin: 0 auto;
   }
 
-  .gallery-list {
-    grid-template-columns: 1fr;
-  }
-
-  .gallery-layout {
-    grid-template-columns: 1fr;
-  }
-
   .paper-item,
   .activity-panel li > a {
-    grid-template-columns: 1fr;
     gap: 0.375rem;
   }
 

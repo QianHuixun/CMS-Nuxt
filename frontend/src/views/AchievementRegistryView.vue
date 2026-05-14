@@ -652,9 +652,9 @@ const goBack = () => {
 
 .total-count strong {
   color: #842130;
-  font-family: var(--font-number);
+  font-family: "Noto Serif SC", serif;
   font-size: 64px;
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-bold);
   line-height: 1;
   white-space: nowrap;
   text-shadow: 0 4px 5px rgba(94, 42, 49, 0.26);
@@ -686,7 +686,7 @@ const goBack = () => {
 
 .stats-pair dd {
   color: #842130;
-  font-family: var(--font-number);
+  font-family: "Noto Serif SC", serif;
   font-size: var(--font-size-10xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-none);
