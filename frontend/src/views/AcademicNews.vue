@@ -300,6 +300,7 @@ onMounted(async () => {
   grid-column: 3;
   grid-row: 1;
   background-color: rgba(248, 246, 240, 0.84);
+  box-shadow: 0 0.125rem 0.5rem rgba(90, 72, 54, 0.12);
 }
 
 .gallery-panel {
@@ -543,7 +544,6 @@ onMounted(async () => {
   height: 100%;
   min-height: 0;
   gap: 0.625rem;
-  align-content: center;
 }
 
 .gallery-layout {
