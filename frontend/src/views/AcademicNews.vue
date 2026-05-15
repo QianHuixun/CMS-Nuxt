@@ -16,29 +16,17 @@ const patents = ref([])
 const activities = ref([])
 const books = ref([])
 const activityPhotos = ref([])
-const fallbackPaperId = 'meridian-bioelectric'
-const fallbackBookId = 'book_001'
-const fallbackPatentId = 'software_001'
-const fallbackBookTitle = '出土医学文献叙录'
 const featuredBookCover = '/mock-assets/books/book-tianhui-threadbound-cover.jpg'
 
-const paperRoute = (id) => `/paper/${id || fallbackPaperId}`
-const bookRoute = (id) => `/monograph/${id || fallbackBookId}`
-const patentRoute = (id) => `/patent/${id || fallbackPatentId}`
+const paperRoute = (id) => `/paper/${id}`
+const bookRoute = (id) => `/monograph/${id}`
+const patentRoute = (id) => `/patent/${id}`
 const activityTimelineRoute = '/activity-timeline'
-const fallbackActivityImages = [
-  '/mock-assets/activities/activity-group-photo.jpg',
-  '/mock-assets/activities/activity-training.jpg',
-]
-const fallbackActivityPhotos = [
-  { id: 'fallback-photo-1', title: '出土医学文献数字化研讨会现场', thumbUrl: fallbackActivityImages[0] },
-  { id: 'fallback-photo-2', title: '中医药冷门绝学继承型人才学术能力提升培训班', thumbUrl: fallbackActivityImages[1] },
-]
 
-const activityPhotoSrc = (photo, index) => photo?.thumbUrl || photo?.imageUrl || fallbackActivityImages[index % fallbackActivityImages.length]
+const activityPhotoSrc = (photo) => photo?.thumbUrl || photo?.imageUrl || ''
 const formatBookTitle = (title) => {
-  const value = title || fallbackBookTitle
-  return value.startsWith('《') ? value : `《${value}》`
+  if (!title) return ''
+  return title.startsWith('《') ? title : `《${title}》`
 }
 
 const formatDate = (value) => {
@@ -86,11 +74,9 @@ onMounted(async () => {
   }
   try {
     const res = await fetchActivityPhotos({ pageNum: 1, pageSize: 2 })
-    const rows = res.rows || []
-    activityPhotos.value = [...rows.slice(0, 2), ...fallbackActivityPhotos.slice(rows.length)].slice(0, 2)
+    activityPhotos.value = (res.rows || []).slice(0, 2)
   } catch (e) {
     console.error('获取活动剪影失败', e)
-    activityPhotos.value = fallbackActivityPhotos
   }
   try {
     const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
@@ -152,8 +138,8 @@ onMounted(async () => {
             <p>{{ books[0]?.author || '出土医学文献分析书目' }}，{{ books[0]?.year || '2024' }} 年，{{ books[0]?.publisher || '大学出版社' }}。</p>
             <router-link class="book-action" :to="bookRoute(books[0]?.id)">阅读提要</router-link>
           </div>
-          <div class="book-cover" :aria-label="`${books[0]?.title || fallbackBookTitle}封面`">
-            <img :src="featuredBookCover" :alt="`${books[0]?.title || fallbackBookTitle}封面`">
+          <div class="book-cover" :aria-label="`${books[0]?.title || '著作'}封面`">
+            <img :src="featuredBookCover" :alt="`${books[0]?.title || '著作'}封面`">
           </div>
         </div>
       </section>
@@ -167,7 +153,7 @@ onMounted(async () => {
         <div class="patent-list">
           <router-link v-for="patent in patents" :key="`${patent.code}-${patent.title}`" class="patent-item" :to="patentRoute(patent.id)">
             <div>
-              <span>{{ patent.code }}</span>
+              <time>{{ patent.code }}</time>
               <h3>{{ patent.title }}</h3>
             </div>
             <img class="gear-icon" :src="patentItemIcon" alt="">
@@ -194,7 +180,7 @@ onMounted(async () => {
               :class="['gallery-card', index === 0 ? 'meeting-card' : 'lab-card']"
               :to="activityTimelineRoute"
             >
-              <img :src="activityPhotoSrc(photo, index)" :alt="photo.title || '活动剪影'">
+              <img :src="activityPhotoSrc(photo)" :alt="photo.title || '活动剪影'">
               <figcaption>{{ photo.title }}</figcaption>
             </router-link>
           </div>
@@ -273,26 +259,24 @@ onMounted(async () => {
 .academic-grid {
   flex: 1;
   min-height: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(21rem, 25rem) minmax(0, 1fr);
   gap: 1rem;
-  align-items: stretch;
 }
 
 .academic-side {
-  flex: 2.07 1 0;
   min-width: 0;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(13.5rem, 0.86fr) minmax(18rem, 1.14fr);
   gap: 0.875rem;
 }
 
 .academic-top-row {
-  flex: 0.72 1 0;
   min-height: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(20rem, 1.12fr) minmax(17rem, 0.95fr);
   gap: 1rem;
-  align-items: stretch;
 }
 
 .panel {
@@ -307,9 +291,8 @@ onMounted(async () => {
 }
 
 .paper-panel {
-  flex: 0 0 25rem;
   border-left: 2px solid rgba(132, 33, 48, 0.25);
-  height: 100%;
+  height: auto;
   min-height: 0;
   background-color: rgba(248, 247, 242, 0.86);
 }
@@ -326,8 +309,7 @@ onMounted(async () => {
 }
 
 .gallery-panel {
-  flex: 0.68 1 0;
-  height: 100%;
+  height: auto;
   min-height: 0;
 }
 
@@ -391,17 +373,22 @@ onMounted(async () => {
   max-height: none;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.75rem;
-  overflow: hidden;
-  scrollbar-width: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .paper-list::-webkit-scrollbar {
-  display: none;
+  width: 0.375rem;
+}
+
+.paper-list::-webkit-scrollbar-thumb {
+  background-color: rgba(132, 33, 48, 0.22);
 }
 
 .paper-item {
+  flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
   gap: 0.875rem;
@@ -463,7 +450,7 @@ onMounted(async () => {
   min-height: 0;
   display: flex;
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
   justify-content: space-between;
   overflow: hidden;
 }
@@ -510,8 +497,8 @@ onMounted(async () => {
 
 .book-cover {
   flex: 0 0 auto;
-  width: auto;
-  height: auto;
+  width: clamp(7.5rem, 8.5vw, 10rem);
+  height: 100%;
   max-height: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -555,12 +542,12 @@ onMounted(async () => {
   min-width: 0;
 }
 
-.patent-item span:not(.gear) {
+.patent-item time {
   display: block;
   color: #9d938c;
-  font-family: var(--font-number);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-snug);
+  font-family: "Work Sans", var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-heading);
 }
 
 .patent-item h3 {
@@ -581,7 +568,6 @@ onMounted(async () => {
   height: 100%;
   min-height: 0;
   gap: 0.625rem;
-  padding-top: 0.75rem;
 }
 
 .gallery-layout {
@@ -627,7 +613,7 @@ onMounted(async () => {
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center;
+  object-position: top center;
 }
 
 .meeting-card {
@@ -676,11 +662,20 @@ onMounted(async () => {
   flex-direction: column;
   list-style: none;
   max-height: none;
-  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.activity-panel ol::-webkit-scrollbar {
+  width: 0.375rem;
+}
+
+.activity-panel ol::-webkit-scrollbar-thumb {
+  background-color: rgba(132, 33, 48, 0.22);
 }
 
 .activity-panel li {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-height: 0;
   padding: 0.4375rem 0;
 }
@@ -739,6 +734,7 @@ onMounted(async () => {
   }
 
   .academic-grid {
+    display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
