@@ -23,18 +23,8 @@ const windowWidth = ref(window.innerWidth)
 let wheelLock = false
 let connectorResizeObserver
 
-const fallbackExperts = [
-  { id: 'ren-yu-lan', name: '任玉兰', degree: '博士', title: '教授', subtitle: '成都中医药大学', photo: expertPhoto, focusAreas: ['古籍整理', '医案校勘', '文献考证', '版本比对', '研究生指导'], bio: '' },
-  { id: 'luo-chen', name: '罗晨', degree: '硕士', title: '副教授', subtitle: '成都中医药大学', photo: cardImageOne, focusAreas: ['中药炮制', '质量评价'], bio: '' },
-  { id: 'zheng-yi', name: '郑逸', degree: '博士', title: '研究员', subtitle: '四川省中医药科学院', photo: cardImageTwo, focusAreas: ['经方数据库', '数据标注', '知识抽取'], bio: '' },
-  { id: 'he-jing', name: '何静', degree: '硕士', title: '副研究员', subtitle: '成都中医药大学', photo: expertPhoto, focusAreas: ['针灸知识图谱', '穴位语义建模', '临床路径整理', '术语标准化'], bio: '' },
-  { id: 'wei-shu', name: '魏书', degree: '博士', title: '主任医师', subtitle: '附属医院', photo: cardImageOne, focusAreas: ['临床病例整理', '中医循证', '病案结构化'], bio: '' },
-  { id: 'sun-qiao', name: '孙桥', degree: '博士后', title: '讲师', subtitle: '成都中医药大学', photo: cardImageTwo, focusAreas: ['方剂文献比对'], bio: '' },
-  { id: 'cai-ning', name: '蔡宁', degree: '硕士', title: '助理研究员', subtitle: '西南中医药研究所', photo: expertPhoto, focusAreas: ['药材溯源', '产地分析', '供应链追踪', '检测方法', '样本归档'], bio: '' },
-]
-
 const expertPhotos = [expertPhoto, cardImageOne, cardImageTwo]
-const experts = ref([...fallbackExperts])
+const experts = ref([])
 
 const publications = ref([])
 
@@ -119,11 +109,13 @@ watch(() => route.params.id, (newId) => {
 })
 
 const currentExpert = computed(() => {
-  return experts.value.find((expert) => String(expert.id) === String(route.params.id)) ?? experts.value[0]
+  return experts.value.find((expert) => String(expert.id) === String(route.params.id)) ?? experts.value[0] ?? {}
 })
 
 const currentExpertIndex = computed(() => {
-  const index = experts.value.findIndex((expert) => expert.id === currentExpert.value.id)
+  const id = currentExpert.value?.id
+  if (id === undefined) return 0
+  const index = experts.value.findIndex((expert) => expert.id === id)
   return index === -1 ? 0 : index
 })
 
@@ -278,12 +270,13 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
 
 <template>
   <main class="expert-detail-page">
-    <section class="expert-stage" aria-label="专家详情">
+    <section v-if="currentExpert.id" class="expert-stage" aria-label="专家详情">
       <article ref="profilePanel" class="profile-panel">
         <div class="profile-content">
           <section class="profile-column">
           <div class="portrait-wrap">
             <img
+              :key="currentExpert.id"
               :src="currentExpert.photo"
               :alt="formatExpertName(currentExpert)"
               class="portrait"
@@ -459,11 +452,12 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   object-position: center top;
   position: relative;
   z-index: 1;
-  transition: transform 0.45s ease;
+  animation: portrait-fade-in 0.35s ease;
 }
 
-.portrait-wrap:hover .portrait {
-  transform: scale(1.015);
+@keyframes portrait-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .expert-copy {
@@ -624,7 +618,7 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   gap: clamp(6px, 0.7vw, 12px);
   border: 1px solid rgba(220, 211, 202, 0.85);
   border-radius: 3px;
-  background-color: rgba(250, 247, 241, 0.78);
+  background-color: #F3ECE7;
   box-shadow: 0 5px 12px rgba(54, 42, 32, 0.12);
   color: inherit;
   text-decoration: none;
@@ -709,9 +703,9 @@ watch(() => publications.value.length, () => nextTick(updateConnectorPaths))
   max-height: clamp(48px, 5.2vh, 66px);
   display: block;
   border-radius: 2px;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center top;
-  background-color: transparent;
+  overflow: hidden;
 }
 
 .expert-card.is-current img {

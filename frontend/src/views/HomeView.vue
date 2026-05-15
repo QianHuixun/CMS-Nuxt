@@ -1,4 +1,4 @@
-<script setup>
+  <script setup>
 import iconResources from '@/assets/icons/home/Group 1.svg'
 import iconKnowledge from '@/assets/icons/home/Union2.svg'
 import iconAcademic from '@/assets/icons/home/Union3.svg'

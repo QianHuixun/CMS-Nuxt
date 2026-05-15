@@ -1,4 +1,4 @@
-﻿﻿﻿﻿const wrap = (data) => ({ code: 200, message: 'success', data })
+﻿﻿const wrap = (data) => ({ code: 200, message: 'success', data })
 
 const asset = (path) => `/mock-assets/${path}`
 const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
@@ -986,38 +986,38 @@ const activityPhotos = [
   {
     id: 'photo_001',
     activityId: 'activity_001',
-    title: '出土医学文献数字化研讨会现场',
-    activityName: '出土医学文献数字化研讨会',
+    title: '出土医学文献文物保护研究数字重点实验室发布成果暨举办学术研讨会',
+    activityName: '出土医学文献文物保护研究数字重点实验室发布成果暨举办学术研讨会',
     organizer: '出土医学文献文物保护研究数字实验室',
-    location: '成都中医药大学博物馆会议厅',
-    imageUrl: asset('activities/activity-group-photo.jpg'),
-    thumbUrl: asset('activities/activity-group-photo.jpg'),
-    activityTime: '2026-04-18T09:00:00Z',
-    summary: '围绕出土医学文献数字化采集、标注和知识服务开展专题研讨。'
+    location: '成都中医药大学',
+    imageUrl: asset('activities/activity-lab-release.jpg'),
+    thumbUrl: asset('activities/activity-lab-release.jpg'),
+    activityTime: '2025-05-16T09:00:00Z',
+    summary: '实验室发布"出土医学古籍Agent"成果，举办出土医学文献文物数字研究学术研讨会，展示AI赋能医学文献研究的最新进展。'
   },
   {
     id: 'photo_002',
     activityId: 'activity_002',
-    title: '中医药冷门绝学继承型人才学术能力提升培训班',
-    activityName: '中医药冷门绝学继承型人才学术能力提升培训班（第六期）',
-    organizer: '出土医学文献文物保护研究数字实验室',
-    location: '成都中医药大学',
-    imageUrl: asset('activities/activity-training.jpg'),
-    thumbUrl: asset('activities/activity-training.jpg'),
-    activityTime: '2025-11-10T14:00:00Z',
-    summary: '围绕中医药冷门绝学传承、古籍整理与学术能力提升开展专题培训。'
+    title: '中国哲学史学会中医哲学专委会2025学术年会暨中医药社科哲学专家委员会成立大会',
+    activityName: '中国哲学史学会中医哲学专委会2025学术年会',
+    organizer: '中国哲学史学会中医哲学专委会、中国中医药出版社、成都中医药大学',
+    location: '成都',
+    imageUrl: asset('activities/activity-philosophy-conf.jpg'),
+    thumbUrl: asset('activities/activity-philosophy-conf.jpg'),
+    activityTime: '2025-10-19T09:00:00Z',
+    summary: '大会以"中医哲学传统与现代性对话"为主题，举行全国中医药院校首个中医哲学研究中心成立仪式，发布"中医哲学研究专家共识（成都）"。'
   },
   {
     id: 'photo_003',
     activityId: 'activity_003',
-    title: '实验室数字化环境建设现场',
-    activityName: '实验室数字化环境建设现场',
-    organizer: '成都中医药大学',
-    location: '出土医学文献文物保护研究数字实验室',
-    imageUrl: asset('activities/activity-lab-room.jpeg'),
-    thumbUrl: asset('activities/activity-lab-room.jpeg'),
-    activityTime: '2025-05-20T09:00:00Z',
-    summary: '展示实验室数字化采集、数据处理与古籍整理支撑环境。'
+    title: '2023年出土医学文献与文物学术会议（第二届）',
+    activityName: '2023年出土医学文献与文物学术会议（第二届）',
+    organizer: '成都中医药大学、世界中医药学会联合会',
+    location: '成都',
+    imageUrl: asset('activities/activity-conf-2023.jpg'),
+    thumbUrl: asset('activities/activity-conf-2023.jpg'),
+    activityTime: '2023-12-23T09:00:00Z',
+    summary: '以"返本开新——开启与上古的对话"为主题，35名专家学者集中探讨《天回医简》相关学术问题，全国100余名专家学者、400余名硕博研究生参会。'
   },
   {
     id: 'photo_004',
@@ -1060,56 +1060,55 @@ const activityPhotos = [
 const activities = [
   {
     id: 'activity_001',
-    name: '出土医学文献数字化研讨会',
-    time: '2026-04-18T09:00:00Z',
-    endTime: '2026-04-18T17:30:00Z',
-    location: '成都中医药大学博物馆会议厅',
+    name: '出土医学文献文物保护研究数字重点实验室发布成果暨举办学术研讨会',
+    time: '2025-05-16T09:00:00Z',
+    endTime: '2025-05-16T17:00:00Z',
+    location: '成都中医药大学',
     organizer: '出土医学文献文物保护研究数字实验室',
-    coverImage: asset('activities/activity-group-photo.jpg'),
+    coverImage: asset('activities/activity-lab-release.jpg'),
     gallery: [
-      asset('activities/activity-group-photo.jpg'),
+      asset('activities/activity-lab-release.jpg'),
       asset('activities/activity-lab-room.jpeg'),
       asset('activities/rare-books-digitization.jpeg')
     ],
-    summary: '围绕出土医学文献数字化采集、标注和知识服务开展专题研讨。',
-    content: '<p>本次研讨会邀请医史文献、数字人文和数据工程方向专家，围绕平台建设、数据治理和成果展示进行交流。</p>',
+    summary: '实验室发布"出土医学古籍Agent"成果，举办出土医学文献文物数字研究学术研讨会，展示AI赋能医学文献研究的最新进展。',
+    content: '<p>5月16日，出土医学文献文物保护研究数字重点实验室发布"出土医学古籍Agent"成果并举办出土医学文献文物数字研究学术研讨会。</p><p>大会发布了省级重点实验室出土医学文献文物保护研究数字实验室自研的"出土医学古籍Agent"，展示了人工智能技术对"天回"汉代医简等文物进行数字化保护与研究成果。成果以出土医学文献文物为核心资源，依托尖端扫描、存储、算力设备，通过智能数据库构建、数字研究、展示传播、修复保护四个分实验室协同联动，构建从古籍解码到文化传承的创新生态。</p><p>围绕"AI时代下医学文献文物的数字活化"，与会专家从数字孪生、古籍数字化保存活化、知识分类与人工智能结合等角度展开学术研讨。实验室学术委员会还召开建设与发展学术研讨会，共同讨论实验室"十五五"学术规划。</p><p>下一步，实验室将在学术委员会指导下优化规划，扎实推进出土医学文献文物与数字技术的融合创新，持续引领出土医学文献文物前沿研究。</p>',
     status: 'past'
   },
   {
     id: 'activity_002',
-    name: '中医药冷门绝学继承型人才学术能力提升培训班（第六期）',
-    time: '2025-11-10T14:00:00Z',
-    endTime: '2025-11-10T17:00:00Z',
-    location: '成都中医药大学',
-    organizer: '出土医学文献文物保护研究数字实验室',
-    coverImage: asset('activities/activity-training.jpg'),
+    name: '中国哲学史学会中医哲学专委会2025学术年会暨中医药社科哲学专家委员会成立大会',
+    time: '2025-10-19T09:00:00Z',
+    endTime: '2025-10-20T17:00:00Z',
+    location: '成都',
+    organizer: '中国哲学史学会中医哲学专委会、中国中医药出版社、成都中医药大学',
+    coverImage: asset('activities/activity-philosophy-conf.jpg'),
     gallery: [
-      asset('activities/activity-training.jpg'),
+      asset('activities/activity-philosophy-conf.jpg'),
       asset('activities/activity-group-photo.jpg'),
       asset('activities/rare-books-digitization.jpeg')
     ],
-    summary: '围绕中医药冷门绝学传承、古籍整理与学术能力提升开展专题培训。',
-    content: '<p>培训班围绕出土医学文献、古籍整理和数字化研究能力提升开展专题交流。</p>',
+    summary: '大会以"中医哲学传统与现代性对话"为主题，举行全国中医药院校首个中医哲学研究中心成立仪式，发布"中医哲学研究专家共识（成都）"，为成都中医药大学70周年校庆学术活动拉开序幕。',
+    content: '<p>10月19—20日，由中国哲学史学会中医哲学专委会、中国中医药出版社、成都中医药大学共同主办的中国哲学史学会中医哲学专委会2025学术年会、中国中医药出版社中医药社科哲学专家委员会成立大会在成都召开。</p><p>本次大会主题为"中医哲学传统与现代性对话"，吸引来自中国社会科学院、中国中医科学院、中国科学技术信息研究所、北京大学、南开大学、北京中医药大学、上海中医药大学等20余所高校、科研院所的120余位专家学者参会，共同探讨中医哲学的原创智慧与现代转化。</p><p>开幕式举行了"成都中医药大学中医哲学研究中心"成立仪式，该中心为全国中医药院校首家中医哲学研究中心。中国哲学史学会中医哲学专委会、中国中医药出版社与成都中医药大学共同发布"中医哲学研究专家共识（成都）"。</p><p>大会设置主旨报告、主题报告和分论坛报告，40余名专家围绕中医哲学及其当代建构、中国哲学与中医哲学、生命哲学与中医生命伦理等议题展开交流，为成都中医药大学70周年校庆学术活动拉开序幕。</p>',
     status: 'past'
   },
   {
     id: 'activity_003',
-    name: '实验室数字化环境建设现场',
-    time: '2025-05-20T09:00:00Z',
-    endTime: '2025-05-20T11:30:00Z',
-    location: '出土医学文献文物保护研究数字实验室',
-    organizer: '成都中医药大学',
-    coverImage: asset('activities/activity-lab-room.jpeg'),
+    name: '2023年出土医学文献与文物学术会议（第二届）',
+    time: '2023-12-23T09:00:00Z',
+    endTime: '2023-12-24T17:00:00Z',
+    location: '成都',
+    organizer: '成都中医药大学、世界中医药学会联合会',
+    coverImage: asset('activities/activity-conf-2023.jpg'),
     gallery: [
-      asset('activities/activity-lab-room.jpeg'),
-      asset('activities/rare-books-digitization.jpeg'),
-      asset('activities/activity-group-photo.jpg')
+      asset('activities/activity-conf-2023.jpg'),
+      asset('activities/activity-group-photo.jpg'),
+      asset('activities/rare-books-digitization.jpeg')
     ],
-    summary: '展示实验室数字化采集、数据处理与古籍整理支撑环境。',
-    content: '<p>活动展示实验室机房、数据处理环境及中医古籍数字化支撑平台。</p>',
+    summary: '以"返本开新——开启与上古的对话"为主题，35名专家学者集中探讨《天回医简》相关学术问题，全国100余名专家学者、400余名硕博研究生参会。',
+    content: '<p>12月23日至24日，海内外医史界、考古界、古文字界等领域的专家学者聚首四川成都，参加由成都中医药大学与世界中医药学会联合会主办的2023年出土医学文献与文物（第二届）学术会议。</p><p>大会开幕式上举行了国家中医药管理局重点研究室"出土医学文献与文物重点研究室"揭牌仪式。与会嘉宾围绕出土医学文献与文物研究的学术价值、学科建设、人才培养和文化传播展开交流。</p><p>为期两天的会议以"返本开新——开启与上古的对话"为主题，来自成都中医药大学、中国中医科学院、复旦大学、南京大学、武汉大学、北京中医药大学等高校，以及英国、日本等国的35名专家学者集中探讨《天回医简》相关学术问题。</p><p>会议重点围绕文物与医学实践、简帛与传世文献、简帛文字考释、文物与传统文化以及文物与医学思想发表主题演讲，全国50余所科研院所的100余名专家学者、400余名硕博研究生现场参会。</p>',
     status: 'past'
-  }
-  ,
+  },
   {
     id: 'activity_004',
     name: '古籍数字化标注工作座谈会',
