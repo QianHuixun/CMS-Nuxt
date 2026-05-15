@@ -93,10 +93,13 @@ const createWordCloud = (words) => {
     const { text, weight } = wordObj
     const slot = bambooLayoutSlots[i]
     
+    const charCount = text.length
     // --- 视觉特征映射 ---
-    const baseHeight = 136 + weight * 282
-    const baseWidth = 16 + weight * 34
-    const baseFontSize = 10 + weight * 24
+    const baseFontSize = Math.max(12, 10 + weight * 22)
+    // 高度根据字数决定，每个字占 fontSize * 2，再加上下内边距
+    const baseHeight = charCount * (baseFontSize * 2) + 24
+    // 宽度随高度增长但长词比例更高，竹简更修长
+    const baseWidth = Math.max(10, baseHeight / (3.5 + charCount * 0.55))
     const baseOpacity = 0.14 + weight * 0.86
 
     const leftPct = slot.left
@@ -122,8 +125,7 @@ const createWordCloud = (words) => {
     return {
       text, 
       left: `clamp(calc(${width}px / 2 + 16px), ${leftPct}%, calc(100% - ${width}px / 2 - 16px))`, 
-      // 底部放宽到 70px，顶部放宽到 height 的 75%，允许轻微溢出边界以打破"平滑切刀"的直线死板感
-      bottom: `clamp(70px, ${bottomPct}%, calc(100% - ${height}px * 0.75))`, 
+      bottom: `clamp(70px, ${bottomPct}%, calc(100% - ${height}px))`, 
       height: `${height}px`, 
       width: `${width}px`, 
       fontSize: `${fontSize}px`, 
@@ -267,8 +269,10 @@ function goExpert(id) {
         <p class="section-subtitle">2024 科研资助项目</p>
         <div class="project-list">
           <div v-for="(project, index) in projectList" :key="index" class="project-item">
-            <div class="project-tag">{{ project.tag }}</div>
-            <div class="project-title">{{ project.title }}</div>
+            <div class="project-title">
+              <span class="project-title-main">{{ project.title }}</span>
+              <span class="project-title-sub">{{ project.tag }}</span>
+            </div>
             <div class="project-meta">{{ project.meta }}</div>
           </div>
         </div>
@@ -372,7 +376,7 @@ function goExpert(id) {
 }
 .member-profile { width: 48px; flex-shrink: 0; }
 .avatar { width: 48px; height: 48px; border-radius: 4px; background-color: #e8e3d8; overflow: hidden; margin: 0; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-intro {
   display: -webkit-box;
   overflow: hidden;
@@ -432,6 +436,9 @@ function goExpert(id) {
   transform-origin: center center;
   overflow: hidden;
   cursor: pointer;
+  animation:
+    slip-entrance 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+  animation-delay: var(--entrance-delay);
 }
 
 .word-rect-inner {
@@ -443,6 +450,7 @@ function goExpert(id) {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   color: var(--color-primary, #842130);
   font-weight: bold;
   letter-spacing: 6px;
@@ -453,9 +461,8 @@ function goExpert(id) {
     drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.10));
   
   animation: 
-    slip-entrance 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) both,
     slip-float 6s ease-in-out infinite alternate;
-  animation-delay: var(--entrance-delay), calc(1.5s + var(--float-delay));
+  animation-delay: calc(1.5s + var(--float-delay));
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   
   -webkit-mask-image: linear-gradient(to bottom, transparent 2%, black 15%, black 85%, transparent 98%);
@@ -464,10 +471,11 @@ function goExpert(id) {
 
 .word-rect:hover {
   z-index: 99 !important;
+  animation-play-state: paused;
 }
 
 .word-rect:hover .word-rect-inner {
-  animation-play-state: paused, paused;
+  animation-play-state: paused;
   transform: scale(1.03) translateY(-2px) !important;
   opacity: 1 !important;
   filter: drop-shadow(6px 10px 16px rgba(132, 33, 48, 0.35)) drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.25));
@@ -481,7 +489,7 @@ function goExpert(id) {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  object-fit: fill;
+  object-fit: cover;
   z-index: 0;
   pointer-events: none;
 }
@@ -494,7 +502,8 @@ function goExpert(id) {
   font-family: "TengXiangFanXiaoGeJianDu", "STKaiti", "SimSun", serif;
   font-weight: 500;
   text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.4);
-  max-height: 90%;
+  max-height: 100%;
+  white-space: nowrap;
   overflow: hidden;
   pointer-events: none;
   transform: scaleX(0.76);
@@ -588,17 +597,9 @@ function goExpert(id) {
   cursor: pointer; 
 }
 .project-item:hover { opacity: 0.8; }
-.project-tag {
-  display: inline-block;
-  padding: 4px 8px;
-  background-color: rgba(132, 33, 48, 0.08);
-  color: var(--color-primary, #842130);
-  font-size: 10px;
-  border-radius: 2px;
-  margin-bottom: 8px;
-  text-transform: uppercase; 
-}
-.project-title { font-size: 16px; color: #333; line-height: 1.4; font-family: serif; text-align: right; }
+.project-title { font-size: 16px; color: #333; font-family: serif; }
+.project-title-main { display: block; text-align: left; line-height: 1.4; }
+.project-title-sub { display: inline-block; text-align: left; line-height: 1.4; margin-top: 4px; font-size: 11px; color: var(--color-primary, #842130); background-color: rgba(132, 33, 48, 0.08); padding: 3px 8px; border-radius: 2px; }
 .project-meta { font-size: 12px; color: #999; margin-top: 6px; }
 
 .view-all-btn {
