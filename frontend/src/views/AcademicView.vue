@@ -267,8 +267,10 @@ function goExpert(id) {
         <p class="section-subtitle">2024 科研资助项目</p>
         <div class="project-list">
           <div v-for="(project, index) in projectList" :key="index" class="project-item">
-            <div class="project-tag">{{ project.tag }}</div>
-            <div class="project-title">{{ project.title }}</div>
+            <div class="project-title">
+              <span class="project-title-main">{{ project.title }}</span>
+              <span class="project-title-sub">{{ project.tag }}</span>
+            </div>
             <div class="project-meta">{{ project.meta }}</div>
           </div>
         </div>
@@ -372,7 +374,7 @@ function goExpert(id) {
 }
 .member-profile { width: 48px; flex-shrink: 0; }
 .avatar { width: 48px; height: 48px; border-radius: 4px; background-color: #e8e3d8; overflow: hidden; margin: 0; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .member-intro {
   display: -webkit-box;
   overflow: hidden;
@@ -588,17 +590,9 @@ function goExpert(id) {
   cursor: pointer; 
 }
 .project-item:hover { opacity: 0.8; }
-.project-tag {
-  display: inline-block;
-  padding: 4px 8px;
-  background-color: rgba(132, 33, 48, 0.08);
-  color: var(--color-primary, #842130);
-  font-size: 10px;
-  border-radius: 2px;
-  margin-bottom: 8px;
-  text-transform: uppercase; 
-}
-.project-title { font-size: 16px; color: #333; line-height: 1.4; font-family: serif; text-align: right; }
+.project-title { font-size: 16px; color: #333; font-family: serif; }
+.project-title-main { display: block; text-align: left; line-height: 1.4; }
+.project-title-sub { display: inline-block; text-align: left; line-height: 1.4; margin-top: 4px; font-size: 11px; color: var(--color-primary, #842130); background-color: rgba(132, 33, 48, 0.08); padding: 3px 8px; border-radius: 2px; }
 .project-meta { font-size: 12px; color: #999; margin-top: 6px; }
 
 .view-all-btn {
