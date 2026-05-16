@@ -5,13 +5,14 @@ import { fetchDatabases, fetchTools } from '@/api/index.js'
 
 const router = useRouter()
 const fallbackDatabases = [
-  { id: 'db_tianhui', title: '天回医简数据库', info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。', icon: 'database' },
-  { id: 'db_bashu', title: '巴蜀古籍医籍数据库', info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。', icon: 'book' },
-  { id: 'db_wanjuan', title: '万卷华章数据库', info: '整合出土医学文献与传世医籍，构建多维度知识关联。', icon: 'scroll' },
+  { id: 'db_tianhui', title: '《天回医简》数据库', info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。', icon: 'database' },
+  { id: 'db_wanjuan', title: '"万卷精华"中医文献文物资源聚合及协同创新平台', info: '整合出土医学文献与传世医籍，构建多维度知识关联。', icon: 'scroll' },
+  { id: 'db_bashu', title: '巴蜀中医古籍知识库平台', info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。', icon: 'book' },
+  { id: 'db_museum', title: '成都中医药大学博物馆数字VR展厅', info: '以沉浸式VR技术呈现中医药历史文物与馆藏精品，支持线上虚拟参观。', icon: 'default' },
 ]
 const fallbackTools = [
-  { id: 'tool_annotation', title: '出土医学文献标注工具', description: '支持原简图像、释文、注释、实体和关系的协同标注。' },
-  { id: 'tool_digitize', title: '简牍图像数字化处理工具', description: '提供简牍图像增强、切分、字符识别与批量导出功能。' },
+  { id: 'tool_annotation', title: '基于大模型的中医古籍数据标注系统', description: '支持原简图像、释文、注释、实体和关系的协同标注。' },
+  { id: 'tool_digitize', title: `敝昔智枢（Bixi Intellihub）\n——智能科研工作流平台`, description: '提供简牍图像增强、切分、字符识别与批量导出功能。' },
 ]
 const databases = ref([...fallbackDatabases])
 const tools = ref([...fallbackTools])
@@ -302,6 +303,7 @@ function goBack() {
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
   margin-bottom: 4px;
+  white-space: pre-line;
 }
 
 .software-info p {
