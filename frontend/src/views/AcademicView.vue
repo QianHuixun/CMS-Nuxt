@@ -167,7 +167,7 @@ onMounted(async () => {
   }
   
   try {
-    const projectRes = await fetchProjects({ pageNum: 1, pageSize: 5 })
+    const projectRes = await fetchProjects({ pageNum: 1, pageSize: 50 })
     const nextProjectList = (projectRes.rows || []).map(p => ({
       tag: p.type,
       title: p.title,
@@ -568,28 +568,25 @@ function goExpert(id) {
   text-align: left;
   padding-left: 8px;
   padding-right: 20px;
+  position: relative;
 }
 
 .project-section > .section-title,
 .project-section > .section-subtitle {
   text-align: right;
+  flex-shrink: 0;
 }
 
 /* 让列表承接滚动能力，撑开中间区域 */
 .project-list { 
-  flex: 0 1 auto;
-  max-height: calc(100% - 128px);
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: calc(100% - 188px);
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-primary, #842130) transparent;
+  scrollbar-width: none;
   padding-right: 4px;
 }
-.project-list::-webkit-scrollbar { width: 4px; }
-.project-list::-webkit-scrollbar-track { background: transparent; }
-.project-list::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary, #842130);
-  border-radius: 2px;
-}
+.project-list::-webkit-scrollbar { display: none; }
 
 .project-item { 
   margin-bottom: 24px; 
@@ -598,12 +595,23 @@ function goExpert(id) {
 }
 .project-item:hover { opacity: 0.8; }
 .project-title { font-size: 16px; color: #333; font-family: serif; }
-.project-title-main { display: block; text-align: left; line-height: 1.4; }
+.project-title-main {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-align: left;
+  line-height: 1.4;
+  word-break: break-all;
+}
 .project-title-sub { display: inline-block; text-align: left; line-height: 1.4; margin-top: 4px; font-size: 11px; color: var(--color-primary, #842130); background-color: rgba(132, 33, 48, 0.08); padding: 3px 8px; border-radius: 2px; }
 .project-meta { font-size: 12px; color: #999; margin-top: 6px; }
 
 .view-all-btn {
-  flex-shrink: 0;
+  position: absolute;
+  bottom: 0;
+  right: 20px;
   width: 50px;
   height: 50px;
   background-color: rgba(132, 33, 48, 0.05);
@@ -614,10 +622,6 @@ function goExpert(id) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-left: auto;
-  margin-top: auto;
-  margin-right: 0;
-  margin-bottom: 0;
   font-size: 12px;
   font-weight: bold;
   line-height: 1.35;
