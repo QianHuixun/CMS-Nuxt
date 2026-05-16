@@ -16,31 +16,31 @@ const databases = [
     backimg: asset('databases/tianhui-slip-001.png')
   },
   {
-    id: 'db_bashu',
-    title: '巴蜀古籍医籍数据库',
-    status: 'active',
-    info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。',
-    url: asset('books/book-classics-second.jpg'),
-    icon: 'book',
-    sort: 2,
-    backimg: asset('books/book-classics-second.jpg')
-  },
-  {
     id: 'db_wanjuan',
-    title: '万卷精华平台',
+    title: '"万卷精华"中医文献文物资源聚合及协同创新平台',
     status: 'active',
     info: '整合出土医学文献与传世医籍，构建多维度知识关联与检索服务。',
     url: asset('databases/wanjuan-platform.png'),
     videoUrl: asset('videos/wanjuan-demo.mp4'),
     icon: 'scroll',
-    sort: 3,
+    sort: 2,
     backimg: asset('databases/wanjuan-platform.png')
   },
   {
-    id: 'db_annotation',
-    title: '中医古籍数据标注系统',
+    id: 'db_bashu',
+    title: '巴蜀中医古籍知识库平台',
     status: 'active',
-    info: '面向中医古籍整理场景，提供实体关系标注、数据治理与协作审核能力。',
+    info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。',
+    url: asset('books/book-classics-second.jpg'),
+    icon: 'book',
+    sort: 3,
+    backimg: asset('books/book-classics-second.jpg')
+  },
+  {
+    id: 'db_museum',
+    title: '成都中医药大学博物馆数字VR展厅',
+    status: 'active',
+    info: '以沉浸式VR技术呈现中医药历史文物与馆藏精品，支持线上虚拟参观。',
     url: asset('databases/annotation-system.png'),
     videoUrl: asset('videos/annotation-demo.mp4'),
     icon: 'default',
@@ -52,7 +52,7 @@ const databases = [
 const tools = [
   {
     id: 'tool_annotation',
-    title: '中医文献分析与实体关系标注系统',
+    title: '基于大模型的中医古籍数据标注系统',
     description: '支持中医古籍实体、关系与语义信息的协同标注。',
     icon: 'pen-tool',
     url: asset('databases/annotation-system.png'),
@@ -61,7 +61,7 @@ const tools = [
   },
   {
     id: 'tool_wanjuan',
-    title: '万卷精华演示平台',
+    title: '敝昔智枢（Bixi Intellihub）\n——智能科研工作流平台',
     description: '面向古籍知识服务，提供全文检索、知识关联与成果展示。',
     icon: 'image',
     url: asset('databases/wanjuan-platform.png'),
@@ -136,6 +136,23 @@ const talents = [
     projects: ['出土医药文物3D数据库的建设模式与示范研究', '巴蜀古医籍书目汇考及数据库建设', '“巴蜀中医药·健康行天下”科普活动', '新文科视域下中医药院校美育教学体系建设研究', '成都历代名医的历史贡献与当代价值研究', '文字、文化与医道的融通研究', '《伤寒述微》整理研究', '闭经古籍文献挖掘与出版', '出土医学简帛数据库的构建及模式研究', '基于BERT预训练模型的医案类古籍知识关联与溯源研究'],
     papers: ['新文科视域下高等中医药院校美育教学体系构建的价值意蕴及路径——以成都中医药大学为例', '刘民叔《素问痿论释难》治痿学术思想探析', 'Research Report on Red Traditional Chinese Medicine Cultural Resources in  Bazhong Area', '从简帛医书看早期中医外感病因理论的发生', '从简帛医书到《伤寒论》：张仲景伤寒辨治体系源流论', '基于系统论的脾肾先后天理论新释', '从痉病理论的演进看张仲景对早期简帛医籍的继承与超越', '从瘴气到疠气:吴又可瘟疫学说考源', 'Medical prediction from missing data with max-minus negative regularized dropout'],
     books: ['中医文献学', '中医药文化学\n（全国高等医学院校中医药类系列教材）', '中国古医籍整理丛书续编 伤寒集验'],
+    patents: [],
+    softwareCopyrights: []
+  },
+  {
+    id: 6,
+    name: '赵琼',
+    avatar: asset('talents/zhao-qiong.png'),
+    title: '修复保护分实验室主任 / 研究员',
+    position: '修复保护分实验室主任',
+    professionalTitle: '研究员',
+    researchAreas: ['中医古籍整理研究'],
+    summary: '多年来主要从事中医儿科学的文献整理与临床诊治，擅长中医古籍文献的整理研究。',
+    description: '二级教授、医学博士、博士生导师，现为四川省学术技术带头人、四川省中医药学术技术带头人、中华中医药学会儿科分会常务委员、世界中医药联合会儿科专委会常务理事、中国民族医药学会儿科分会常务委员、四川省中医药学会儿科专业委员会常务委员、四川省中医药学会儿童早期发展与健康研究会中医儿科慢病管理委员会副主任委员、四川省儿童优生托育协会中西医结合儿科分会常务委员等。先后发表学术论文140余篇，主编专著/教材8部，参编21部。主持承担国家级项目3项、部省级课题12项，主持获得省科技进步奖1项，其他科研奖励2项，取得发明专利及软件著作权9项。',
+    institution: '成都中医药大学',
+    projects: ['巴蜀中医古籍知识库平台构建', '巴蜀名医处方脉案手迹搜集整理研究', '《寒疫合编四卷》整理出版', '汉文古籍普查研究', '儿科古籍藏文文献整理、修复与挖掘利用研究', '中药材纸张与古籍修复保护研究', '基于名医处方手迹浅析巴蜀医家道方用药特点及思想', '明代医家徐用宣《袖珍小儿方》学术思想研究'],
+    papers: ['非遗视域下高校传统文化美育教育路径研究——以成都中医药大学图书馆为例', '古籍文献修复可持续发展研究——以四川为例', '《白喉治法要言》治法用药探析', '数字人文视域下巴蜀中医特色资源知识库构建研究', '芝妈橙客《儿科醒》儿科疾病诊治思想探蠡', '巴蜀中医古籍知识建设思路的探讨', '基于名医处方手迹浅析巴蜀医家道方用药特点及思想'],
+    books: ['儿科古籍文献选读', '民国时期温病学文献汇编', '中国古医籍整理丛书续编 儿科醒', '川派中医名家珍本汇刊'],
     patents: [],
     softwareCopyrights: []
   },
