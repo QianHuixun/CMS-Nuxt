@@ -71,7 +71,7 @@ const tools = [
 ]
 
 const talents = [
-  {
+{
     id: 1,
     name: '杨静',
     avatar: asset('talents/yang-jing.jpg'),
@@ -88,7 +88,7 @@ const talents = [
     patents: ['中医古籍知识图谱构建方法、设备、介质', '中医古籍异体字字典构建及文本对齐方法、系统和介质', '基于大语言模型的中医古籍症状标准化处理方法', '多层次中医古籍症状标准化处理方法', '小样本中医古籍标注模型适配方法', '中医古籍隐含语义与显式术语的关联方法、系统和介质', '融合多维度上下文进行模型自适应优化的中医古籍标注方法'],
     softwareCopyrights: ['《天回医简》数据库软件V1.0']
   },
-  {
+{
     id: 2,
     name: '柳长华',
     avatar: asset('talents/liu-changhua.jpg'),
@@ -105,7 +105,7 @@ const talents = [
     patents: [],
     softwareCopyrights: ['《天回医简》数据库软件V1.0']
   },
-  {
+{
     id: 3,
     name: '温川飙',
     avatar: asset('talents/wen-chuanbiao.jpg'),
@@ -122,24 +122,7 @@ const talents = [
     patents: ['一种基于面部视觉的多模态融合中医体质判别方法及系统', '一种基于计算机视觉的面部视频判别中医气血系统', '中医古籍知识图谱构建方法、设备、介质', '基于多波长光源的面部视频判别中医脉象的系统及方法', '中医古籍异体字字典构建及文本对齐方法、系统和介质', '基于大语言模型的中医古籍症状标准化处理方法', '多层次中医古籍症状标准化处理方法', '小样本中医古籍标注模型适配方法', '中医古籍隐含语义与显式术语的关联方法、系统和介质', '融合多维度上下文进行模型自适应优化的中医古籍标注方法'],
     softwareCopyrights: ['基于中医症状、信息量表和智能交互问诊的数据归一化分层处理系统V1.0', '中医文献分析与实体关系标注系统V1.0']
   },
-  {
-    id: 5,
-    name: '任玉兰',
-    avatar: asset('talents/ren-yulan.jpg'),
-    title: '展示传播分实验室主任 / 教授',
-    position: '展示传播分实验室主任',
-    professionalTitle: '教授',
-    researchAreas: ['中医医史文献与文化研究'],
-    summary: '成都中医药大学二级教授，医史文献学硕士、针灸学博士，博士研究生导师、博士后合作导师。四川省第十三批学术与技术带头人。',
-    description: '成都中医药大学二级教授，医史文献学硕士、针灸学博士，博士研究生导师、博士后合作导师。四川省第十三批学术与技术带头人。从事中医学科研、教学、医疗工作18年。主要研究方向为中医医史文献与文化研究、中医针灸的临床效应与机制研究。先后主持国家自然科学基金项目4项，省部级项目10项，发表学术论文128篇，其中第一作者/通讯作者SCI源刊论文20余篇，主编/副主编规划教材、学术专著8部，获国家科技进步奖二等奖1项、省科技进步一等奖2项，专利11项。',
-    institution: '成都中医药大学',
-    projects: ['出土医药文物3D数据库的建设模式与示范研究', '巴蜀古医籍书目汇考及数据库建设', '“巴蜀中医药·健康行天下”科普活动', '新文科视域下中医药院校美育教学体系建设研究', '成都历代名医的历史贡献与当代价值研究', '文字、文化与医道的融通研究', '《伤寒述微》整理研究', '闭经古籍文献挖掘与出版', '出土医学简帛数据库的构建及模式研究', '基于BERT预训练模型的医案类古籍知识关联与溯源研究'],
-    papers: ['新文科视域下高等中医药院校美育教学体系构建的价值意蕴及路径——以成都中医药大学为例', '刘民叔《素问痿论释难》治痿学术思想探析', 'Research Report on Red Traditional Chinese Medicine Cultural Resources in  Bazhong Area', '从简帛医书看早期中医外感病因理论的发生', '从简帛医书到《伤寒论》：张仲景伤寒辨治体系源流论', '基于系统论的脾肾先后天理论新释', '从痉病理论的演进看张仲景对早期简帛医籍的继承与超越', '从瘴气到疠气:吴又可瘟疫学说考源', 'Medical prediction from missing data with max-minus negative regularized dropout'],
-    books: ['中医文献学', '中医药文化学\n（全国高等医学院校中医药类系列教材）', '中国古医籍整理丛书续编 伤寒集验'],
-    patents: [],
-    softwareCopyrights: []
-  },
-  {
+{
     id: 6,
     name: '赵琼',
     avatar: asset('talents/zhao-qiong.png'),
@@ -157,6 +140,57 @@ const talents = [
     softwareCopyrights: []
   },
   {
+    id: 17,
+    name: '蒋玉明',
+    avatar: asset('talents/jiang-yuming.jpg'),
+    title: '实验室教授 / 学术委员会委员',
+    position: '实验室教授',
+    professionalTitle: '教授',
+    researchAreas: ['大数据', '人工智能', '数据库与分布式计算'],
+    summary: '长期从事大数据，人工智能，数据库与分布式计算，信息集成技术，企业数智化方面的研究，开发与应用。',
+    description: '长期从事大数据，人工智能，数据库与分布式计算，信息集成技术，企业数智化方面的研究，开发与应用。',
+    institution: '成都中医药大学',
+    projects: [],
+    papers: [],
+    books: [],
+    patents: [],
+    softwareCopyrights: []
+  },
+  {
+    id: 18,
+    name: '王家葵',
+    avatar: asset('talents/wang-jiakui.jpg'),
+    title: '实验室教授 / 学术委员会委员',
+    position: '实验室教授',
+    professionalTitle: '教授',
+    researchAreas: ['本草历史', '道教文献', '书法金石'],
+    summary: '主要研究领域为本草历史、道教文献、书法金石。代表著作有《神农本草经研究》《陶弘景丛考》《养性延命录校注》等。',
+    description: '主要研究领域为本草历史、道教文献、书法金石。代表著作有《神农本草经研究》《陶弘景丛考》《养性延命录校注》等。',
+    institution: '成都中医药大学',
+    projects: [],
+    papers: [],
+    books: [],
+    patents: [],
+    softwareCopyrights: []
+  },
+{
+    id: 5,
+    name: '任玉兰',
+    avatar: asset('talents/ren-yulan.jpg'),
+    title: '展示传播分实验室主任 / 教授',
+    position: '展示传播分实验室主任',
+    professionalTitle: '教授',
+    researchAreas: ['中医医史文献与文化研究'],
+    summary: '成都中医药大学二级教授，医史文献学硕士、针灸学博士，博士研究生导师、博士后合作导师。四川省第十三批学术与技术带头人。',
+    description: '成都中医药大学二级教授，医史文献学硕士、针灸学博士，博士研究生导师、博士后合作导师。四川省第十三批学术与技术带头人。从事中医学科研、教学、医疗工作18年。主要研究方向为中医医史文献与文化研究、中医针灸的临床效应与机制研究。先后主持国家自然科学基金项目4项，省部级项目10项，发表学术论文128篇，其中第一作者/通讯作者SCI源刊论文20余篇，主编/副主编规划教材、学术专著8部，获国家科技进步奖二等奖1项、省科技进步一等奖2项，专利11项。',
+    institution: '成都中医药大学',
+    projects: ['出土医药文物3D数据库的建设模式与示范研究', '巴蜀古医籍书目汇考及数据库建设', '“巴蜀中医药·健康行天下”科普活动', '新文科视域下中医药院校美育教学体系建设研究', '成都历代名医的历史贡献与当代价值研究', '文字、文化与医道的融通研究', '《伤寒述微》整理研究', '闭经古籍文献挖掘与出版', '出土医学简帛数据库的构建及模式研究', '基于BERT预训练模型的医案类古籍知识关联与溯源研究'],
+    papers: ['新文科视域下高等中医药院校美育教学体系构建的价值意蕴及路径——以成都中医药大学为例', '刘民叔《素问痿论释难》治痿学术思想探析', 'Research Report on Red Traditional Chinese Medicine Cultural Resources in  Bazhong Area', '从简帛医书看早期中医外感病因理论的发生', '从简帛医书到《伤寒论》：张仲景伤寒辨治体系源流论', '基于系统论的脾肾先后天理论新释', '从痉病理论的演进看张仲景对早期简帛医籍的继承与超越', '从瘴气到疠气:吴又可瘟疫学说考源', 'Medical prediction from missing data with max-minus negative regularized dropout'],
+    books: ['中医文献学', '中医药文化学\n（全国高等医学院校中医药类系列教材）', '中国古医籍整理丛书续编 伤寒集验'],
+    patents: [],
+    softwareCopyrights: []
+  },
+{
     id: 7,
     name: '章红梅',
     avatar: asset('talents/zhang-hongmei.jpg'),
@@ -173,7 +207,7 @@ const talents = [
     patents: [],
     softwareCopyrights: []
   },
-  {
+{
     id: 8,
     name: '王丽',
     avatar: asset('talents/wang-li.jpg'),
@@ -190,7 +224,7 @@ const talents = [
     patents: [],
     softwareCopyrights: []
   },
-  {
+{
     id: 9,
     name: '陈菊',
     avatar: asset('talents/chen-ju.jpg'),
@@ -207,7 +241,7 @@ const talents = [
     patents: [],
     softwareCopyrights: []
   },
-  {
+{
     id: 11,
     name: '闵新',
     avatar: asset('talents/min-xin.jpg'),
@@ -224,7 +258,7 @@ const talents = [
     patents: ['基于大语言模型的中医古籍症状标准化处理方法', '多层次中医古籍症状标准化处理方法'],
     softwareCopyrights: []
   },
-  {
+{
     id: 12,
     name: '赵智慧',
     avatar: asset('talents/zhao-zhihui.jpg'),
@@ -241,7 +275,7 @@ const talents = [
     patents: ['一种基于面部视觉的多模态融合中医体质判别方法及系统', '一种基于计算机视觉的面部视频判别中医气血系统', '基于多波长光源的面部视频判别中医脉象的系统及方法'],
     softwareCopyrights: []
   },
-  {
+{
     id: 13,
     name: '谭超群',
     avatar: asset('talents/tan-chaoqun.jpg'),
@@ -258,7 +292,7 @@ const talents = [
     patents: ['基于多尺度特征深度神经网络的半夏产地识别方法与系统'],
     softwareCopyrights: []
   },
-  {
+{
     id: 15,
     name: '赖雪瑜',
     avatar: asset('talents/lai-xueyu.jpg'),
@@ -275,7 +309,7 @@ const talents = [
     patents: [],
     softwareCopyrights: []
   },
-  {
+{
     id: 16,
     name: '雷霆',
     avatar: asset('talents/lei-ting.jpg'),
