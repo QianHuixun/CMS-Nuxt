@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
@@ -14,6 +14,7 @@ const normalizeList = (value, separator = ';') => {
   if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
   return []
 }
+const normalizeText = (value) => String(value ?? '').trim()
 
 const getAttachmentPdfUrl = (attachments) => {
   const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
@@ -72,16 +73,16 @@ onMounted(async () => {
     const data = await fetchBookDetail(route.params.id || 'book_001')
     if (data) {
       monograph.value = {
-        title: `《${data.title}》`,
-        subtitle: data.description ? data.description.slice(0, 30) : '',
-        source: data.publisher || '',
+        title: data.title,
+        subtitle: normalizeText(data.description) ? data.description.slice(0, 30) : `${data.publisher || '出版信息'} · ${data.year || ''}`,
+        source: normalizeText(data.publisher),
         authors: [data.author || '未知'],
         date: data.year ? `${data.year}年` : '',
         edition: '第一版',
-        isbn: data.isbn || '',
+        isbn: normalizeText(data.isbn),
         previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
-        abstract: data.description || '',
+        abstract: normalizeText(data.description) || `${data.title}，${data.author || '作者信息待补充'}，${data.publisher || '出版单位待补充'}，${data.year ? `${data.year}年` : '出版年份待补充'}。`,
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '68 MB',
       }
@@ -94,6 +95,14 @@ onMounted(async () => {
 const closePage = () => {
   safeBack(router, '/academic')
 }
+
+const monographInfoRows = computed(() => [
+  { label: '作者', value: monograph.value.authors.join(' / ') },
+  { label: '出版社', value: monograph.value.source },
+  { label: '出版年份', value: monograph.value.date },
+  { label: 'ISBN', value: monograph.value.isbn },
+  { label: '版本', value: monograph.value.edition }
+].filter(item => item.value))
 </script>
 
 <template>
@@ -122,9 +131,19 @@ const closePage = () => {
           <time>{{ monograph.date }}</time>
         </div>
         <div class="monograph-id">
-          <span>ISBN: {{ monograph.isbn }}</span>
+          <span v-if="monograph.isbn">ISBN: {{ monograph.isbn }}</span>
           <span>{{ monograph.edition }}</span>
         </div>
+      </section>
+
+      <section class="info-section">
+        <h2>基础信息</h2>
+        <dl class="info-grid">
+          <div v-for="item in monographInfoRows" :key="item.label">
+            <dt>{{ item.label }}</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
+        </dl>
       </section>
 
       <section class="detail-section">
@@ -134,9 +153,10 @@ const closePage = () => {
 
       <section class="detail-section">
         <h2>关键词</h2>
-        <div class="keyword-list">
+        <div v-if="monograph.keywords.length" class="keyword-list">
           <span v-for="keyword in monograph.keywords" :key="keyword">{{ keyword }}</span>
         </div>
+        <p v-else class="empty-text">暂无关键词，当前条目展示基础出版信息。</p>
       </section>
 
       <section class="monograph-actions">
@@ -145,7 +165,7 @@ const closePage = () => {
           :href="monograph.pdfUrl || undefined"
           :aria-disabled="!monograph.pdfUrl"
         >
-          下载全文 PDF ({{ monograph.downloads }})
+          {{ monograph.pdfUrl ? `下载全文 PDF (${monograph.downloads})` : '暂无 PDF 文件' }}
         </a>
         <div class="secondary-actions">
           <button type="button">请求纸本</button>
@@ -242,6 +262,11 @@ const closePage = () => {
   margin-bottom: 28px;
 }
 
+.info-section {
+  margin-bottom: 28px;
+}
+
+.info-section h2,
 .detail-section h2 {
   margin-bottom: 12px;
   display: flex;
@@ -254,6 +279,7 @@ const closePage = () => {
   line-height: var(--line-height-control);
 }
 
+.info-section h2::before,
 .detail-section h2::before {
   content: "";
   width: 4px;
@@ -266,6 +292,31 @@ const closePage = () => {
   font-size: var(--font-size-md);
   line-height: var(--line-height-article);
   text-align: justify;
+}
+
+.info-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.info-grid div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  color: #77716d;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+}
+
+.info-grid dt {
+  color: #9a9692;
+}
+
+.info-grid dd {
+  min-width: 0;
+  margin: 0;
+  color: #4f4945;
+  overflow-wrap: anywhere;
 }
 
 .keyword-list {
@@ -289,6 +340,12 @@ const closePage = () => {
 
 .keyword-list span:hover {
   background-color: #f1f1f1;
+}
+
+.empty-text {
+  color: #9a9692;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
 .monograph-actions {

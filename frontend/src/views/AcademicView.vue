@@ -13,7 +13,29 @@ const fallbackTeamList = [
 ]
 
 // 示例词库
-const fallbackWords = ['天回医简', '经脉数字化', '出土文献', '知识服务', '简牍', '中医药', '古籍', '针灸铜人', '金石篆刻', '黄帝内经', '汉代医学', '现代医学', '数据挖掘', '古籍修复', '本草纲目', '经络系统', '辨证论治', '医案整理', '方剂研究', '脉诊模型']
+const fallbackWords = [
+  '天回医简',
+  '脉书',
+  '简帛医书',
+  '中医药',
+  '三世医学',
+  '黄帝内经',
+  '生成式人工智能',
+  '川派中医',
+  '多模态',
+  '知识图谱',
+  '高质量数据集',
+  '中医药AI模型',
+  '数字人文',
+  '知识库',
+  '特藏文献',
+  '文物保护',
+  '中医生命伦理',
+  '非物质文化遗产',
+  '中华优秀传统文化',
+  '深度学习',
+  '中医古籍著录规则'
+]
 
 const fallbackProjectList = [
   { tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },

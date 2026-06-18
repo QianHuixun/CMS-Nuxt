@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   fetchBookStats,
   fetchBooks,
@@ -34,10 +34,74 @@ const sections = [
 ]
 
 const sectionKeys = sections.map((section) => section.key)
-const initialKey = typeof route.query.tab === 'string' && sectionKeys.includes(route.query.tab)
-  ? route.query.tab
-  : 'papers'
+const getRouteSectionKey = () => {
+  return typeof route.query.tab === 'string' && sectionKeys.includes(route.query.tab)
+    ? route.query.tab
+    : 'papers'
+}
+const initialKey = getRouteSectionKey()
 const currentKey = ref(initialKey)
+const resultListRef = ref(null)
+const scrollStorageKey = 'cms-nuxt:achievement-registry-scroll'
+
+const normalizeScrollPositions = (value = {}) => {
+  return sectionKeys.reduce((positions, key) => {
+    const nextValue = Number(value?.[key])
+    positions[key] = Number.isFinite(nextValue) ? nextValue : 0
+    return positions
+  }, {})
+}
+
+const readScrollPositions = () => {
+  if (typeof window === 'undefined') return normalizeScrollPositions()
+
+  try {
+    const rawValue = window.sessionStorage.getItem(scrollStorageKey)
+    return normalizeScrollPositions(rawValue ? JSON.parse(rawValue) : {})
+  } catch (e) {
+    console.warn('读取成果库滚动位置失败', e)
+    return normalizeScrollPositions()
+  }
+}
+
+const scrollPositions = ref(readScrollPositions())
+
+const persistScrollPositions = () => {
+  if (typeof window === 'undefined') return
+
+  try {
+    window.sessionStorage.setItem(scrollStorageKey, JSON.stringify(scrollPositions.value))
+  } catch (e) {
+    console.warn('保存成果库滚动位置失败', e)
+  }
+}
+
+const saveScrollPosition = (key = currentKey.value) => {
+  scrollPositions.value = {
+    ...scrollPositions.value,
+    [key]: resultListRef.value?.scrollTop || 0,
+  }
+  persistScrollPositions()
+}
+
+const restoreScrollPosition = async (key = currentKey.value) => {
+  await nextTick()
+  if (currentKey.value !== key || !resultListRef.value) return
+
+  resultListRef.value.scrollTop = scrollPositions.value[key] || 0
+}
+
+const syncRouteTab = async (key) => {
+  if (route.query.tab === key) return
+
+  await router.replace({
+    name: 'Achievements',
+    query: {
+      ...route.query,
+      tab: key,
+    },
+  })
+}
 
 const currentSection = computed(() => {
   return sections.find((section) => section.key === currentKey.value) ?? sections[0]
@@ -108,7 +172,7 @@ const loadData = async (key = currentKey.value) => {
   try {
     let nextResults = []
     if (key === 'papers') {
-      const res = await fetchPapers({ pageNum: 1, pageSize: 10 })
+      const res = await fetchPapers({ pageNum: 1, pageSize: 200 })
       nextResults = (res.rows || []).map(p => ({
         id: p.id,
         route: detailRoute(key, p.id),
@@ -119,7 +183,7 @@ const loadData = async (key = currentKey.value) => {
         date: p.year ? String(p.year) : '',
       }))
     } else if (key === 'patents') {
-      const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 10 })
+      const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 11 })
       nextResults = (res.rows || []).map(p => ({
         id: p.id,
         route: detailRoute(key, p.id),
@@ -130,7 +194,7 @@ const loadData = async (key = currentKey.value) => {
         date: p.year ? String(p.year) : '',
       }))
     } else if (key === 'books') {
-      const res = await fetchBooks({ pageNum: 1, pageSize: 10 })
+      const res = await fetchBooks({ pageNum: 1, pageSize: 4 })
       nextResults = (res.rows || []).map(b => ({
         id: b.id,
         route: detailRoute(key, b.id),
@@ -141,7 +205,7 @@ const loadData = async (key = currentKey.value) => {
         date: b.year ? String(b.year) : '',
       }))
     } else if (key === 'topics') {
-      const res = await fetchProjects({ pageNum: 1, pageSize: 10 })
+      const res = await fetchProjects({ pageNum: 1, pageSize: 105 })
       nextResults = (res.rows || []).map(p => ({
         id: p.id,
         route: detailRoute(key, p.id),
@@ -152,19 +216,45 @@ const loadData = async (key = currentKey.value) => {
         date: p.startYear ? String(p.startYear) : '',
       }))
     }
-    if (currentKey.value === key) results.value = nextResults
+    if (currentKey.value === key) {
+      results.value = nextResults
+      await restoreScrollPosition(key)
+    }
   } catch (e) {
     console.error('加载成果列表失败', e)
   }
   await loadStats(key)
 }
 
-const switchSection = (key) => {
+const switchSection = async (key) => {
+  if (key === currentKey.value) return
+
+  saveScrollPosition(currentKey.value)
   currentKey.value = key
-  loadData(key)
+  await syncRouteTab(key)
+  await loadData(key)
 }
 
-onMounted(() => loadData())
+watch(
+  () => route.query.tab,
+  async () => {
+    const nextKey = getRouteSectionKey()
+    if (nextKey === currentKey.value) return
+
+    saveScrollPosition(currentKey.value)
+    currentKey.value = nextKey
+    await loadData(nextKey)
+  }
+)
+
+onBeforeRouteLeave(() => {
+  saveScrollPosition(currentKey.value)
+})
+
+onMounted(async () => {
+  await syncRouteTab(currentKey.value)
+  await loadData()
+})
 
 const goBack = () => {
   safeBack(router, '/academic')
@@ -213,7 +303,7 @@ const goBack = () => {
           <button type="button">类型: 全部 <i aria-hidden="true"></i></button>
         </div>
 
-        <div class="result-list">
+        <div ref="resultListRef" class="result-list">
           <component
             :is="item.route ? 'router-link' : 'article'"
             v-for="item in results"
