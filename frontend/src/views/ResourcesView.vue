@@ -5,10 +5,10 @@ import { fetchDatabases, fetchTools } from '@/api/index.js'
 
 const router = useRouter()
 const fallbackDatabases = [
-  { id: 'db_tianhui', title: '《天回医简》数据库', info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。', icon: 'database' },
-  { id: 'db_wanjuan', title: '"万卷精华"中医文献文物资源聚合及协同创新平台', info: '整合出土医学文献与传世医籍，构建多维度知识关联。', icon: 'scroll' },
-  { id: 'db_bashu', title: '巴蜀中医古籍知识库平台', info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。', icon: 'book' },
-  { id: 'db_museum', title: '成都中医药大学博物馆数字VR展厅', info: '以沉浸式VR技术呈现中医药历史文物与馆藏精品，支持线上虚拟参观。', icon: 'default' },
+  { id: 'db_tianhui', title: '《天回医简》数据库', info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。', icon: 'database', link: 'https://thyj.cdutcm.edu.cn/' },
+  { id: 'db_wanjuan', title: '"万卷精华"中医文献文物资源聚合及协同创新平台', info: '整合出土医学文献与传世医籍，构建多维度知识关联。', icon: 'scroll', link: 'http://116.228.198.134:1651/' },
+  { id: 'db_bashu', title: '巴蜀中医古籍知识库平台', info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。', icon: 'book', link: 'http://210.41.219.244:9024/frontend/home' },
+  { id: 'db_museum', title: '成都中医药大学博物馆数字VR展厅', info: '以沉浸式VR技术呈现中医药历史文物与馆藏精品，支持线上虚拟参观。', icon: 'default', link: 'http://bwgvr.cdutcm.edu.cn/?scene_id=102603802' },
 ]
 const fallbackTools = [
   { id: 'tool_annotation', title: '基于大模型的中医古籍数据标注系统', description: '支持原简图像、释文、注释、实体和关系的协同标注。' },
@@ -50,11 +50,15 @@ function goBack() {
             现有数据库集群
           </h3>
           <div class="database-group">
-            <div
+            <a
               v-for="db in databases"
               :key="db.id"
               class="db-card"
               :class="`db-card-${db.icon || 'default'}`"
+              :href="db.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              :aria-label="`打开${db.title}`"
             >
               <div class="db-card-bg"></div>
               <div class="db-card-content">
@@ -62,7 +66,7 @@ function goBack() {
                 <p class="db-card-desc">{{ db.info }}</p>
                 <img src="@/assets/icons/resources/Vector 1.svg" alt="icon" class="db-card-icon" />
               </div>
-            </div>
+            </a>
           </div>
         </div>
 
@@ -158,6 +162,7 @@ function goBack() {
 }
 
 .db-card {
+  display: block;
   background-color: #fff;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
@@ -166,6 +171,8 @@ function goBack() {
   overflow: hidden;
   transition: var(--transition-fast);
   min-height: 180px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .db-card:hover {

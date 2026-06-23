@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
@@ -14,6 +14,7 @@ const normalizeList = (value, separator = ';') => {
   if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
   return []
 }
+const normalizeText = (value) => String(value ?? '').trim()
 
 const getAttachmentPdfUrl = (attachments) => {
   const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
@@ -73,13 +74,13 @@ onMounted(async () => {
       patent.value = {
         title: data.title,
         subtitle: `${data.typeName || data.type} · ${data.year}年`,
-        source: data.owner || '',
+        source: normalizeText(data.owner),
         inventors: normalizeList(data.inventors),
         date: data.year ? `${data.year}年` : '',
-        patentNo: data.registrationNo || '',
+        patentNo: normalizeText(data.registrationNo),
         previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
-        abstract: data.description || '',
+        abstract: normalizeText(data.description) || `${data.title}，${data.typeName || data.type || '知识产权'}，登记号/日期：${data.registrationNo || '待补充'}，权利人：${data.owner || '待补充'}。`,
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
         downloads: '12 MB',
       }
@@ -92,6 +93,14 @@ onMounted(async () => {
 const closePage = () => {
   safeBack(router, '/academic')
 }
+
+const patentInfoRows = computed(() => [
+  { label: '类型', value: patent.value.subtitle },
+  { label: '权利人', value: patent.value.source },
+  { label: '发明人', value: patent.value.inventors.join(' / ') },
+  { label: '登记号', value: patent.value.patentNo },
+  { label: '年份', value: patent.value.date }
+].filter(item => item.value))
 </script>
 
 <template>
@@ -122,11 +131,14 @@ const closePage = () => {
         </div>
       </section>
 
-      <section class="inventor-section">
-        <h2>发明人</h2>
-        <div class="inventor-list">
-          <span v-for="inventor in patent.inventors" :key="inventor">{{ inventor }}</span>
-        </div>
+      <section class="info-section">
+        <h2>基础信息</h2>
+        <dl class="info-grid">
+          <div v-for="item in patentInfoRows" :key="item.label">
+            <dt>{{ item.label }}</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
+        </dl>
       </section>
 
       <section class="detail-section">
@@ -136,9 +148,10 @@ const closePage = () => {
 
       <section class="detail-section">
         <h2>关键词</h2>
-        <div class="keyword-list">
+        <div v-if="patent.keywords.length" class="keyword-list">
           <span v-for="keyword in patent.keywords" :key="keyword">{{ keyword }}</span>
         </div>
+        <p v-else class="empty-text">暂无关键词，当前条目展示登记与权利人信息。</p>
       </section>
 
       <section class="patent-actions">
@@ -147,7 +160,7 @@ const closePage = () => {
           :href="patent.pdfUrl || undefined"
           :aria-disabled="!patent.pdfUrl"
         >
-          下载说明书 ({{ patent.downloads }})
+          {{ patent.pdfUrl ? `下载说明书 (${patent.downloads})` : '暂无说明书文件' }}
         </a>
         <div class="secondary-actions">
           <button type="button">法律状态</button>
@@ -238,11 +251,11 @@ const closePage = () => {
   font-size: var(--font-size-sm);
 }
 
-.inventor-section {
+.info-section {
   margin-bottom: 28px;
 }
 
-.inventor-section h2,
+.info-section h2,
 .detail-section h2 {
   margin-bottom: 12px;
   display: flex;
@@ -255,7 +268,7 @@ const closePage = () => {
   line-height: var(--line-height-control);
 }
 
-.inventor-section h2::before,
+.info-section h2::before,
 .detail-section h2::before {
   content: "";
   width: 4px;
@@ -263,21 +276,29 @@ const closePage = () => {
   background-color: var(--color-primary);
 }
 
-.inventor-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.info-grid {
+  display: grid;
+  gap: 10px;
 }
 
-.inventor-list span {
-  min-height: 28px;
-  padding: 4px 12px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 4px;
-  background-color: #faf8f5;
-  color: var(--color-primary);
+.info-grid div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  color: #77716d;
   font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+}
+
+.info-grid dt {
+  color: #9a9692;
+}
+
+.info-grid dd {
+  min-width: 0;
+  margin: 0;
+  color: #4f4945;
+  overflow-wrap: anywhere;
 }
 
 .detail-section {
@@ -312,6 +333,12 @@ const closePage = () => {
 
 .keyword-list span:hover {
   background-color: #f1f1f1;
+}
+
+.empty-text {
+  color: #9a9692;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
 .patent-actions {

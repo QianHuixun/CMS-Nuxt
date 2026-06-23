@@ -21,7 +21,7 @@ export default defineConfig(({ command }) => {
       }),
     ],
     server: {
-      allowedHosts: ['zkg964gqfbxx8r.honos.dev'],
+      allowedHosts: ['zkg964gqfbxx8r.honos.dev', 'tcmu.hub.feashow.cn'],
     },
     resolve: {
       alias: {

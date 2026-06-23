@@ -3,45 +3,36 @@ import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
-import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
-import { fetchBookDetail } from '@/api/index.js'
+import { fetchProjectDetail } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
 
 const route = useRoute()
 const router = useRouter()
-const normalizeList = (value, separator = ';') => {
+
+const normalizeList = (value, separator = /[;；、]/) => {
   if (Array.isArray(value)) return value.filter(Boolean)
   if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
   return []
 }
+
 const normalizeText = (value) => String(value ?? '').trim()
-
-const getAttachmentPdfUrl = (attachments) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
 const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
 const isPreviewUrl = (url = '') => /\.(pdf|png|jpe?g|gif|webp|bmp|svg)($|[?#])/i.test(url)
 
-const getAttachmentPreviewUrl = (attachments) => {
+const getAttachmentUrl = (attachments, checker) => {
   const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
     const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
     const name = item?.name || ''
-    return isPreviewUrl(url) || isPreviewUrl(name)
+    return checker(url) || checker(name)
   })
   return file?.url || file?.fileUrl || file?.downloadUrl || ''
 }
 
 const getPreviewUrl = (data) => {
-  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || data?.coverImage || ''
+  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
   if (isPreviewUrl(directUrl)) return directUrl
 
-  const attachmentUrl = getAttachmentPreviewUrl(data?.attachments)
+  const attachmentUrl = getAttachmentUrl(data?.attachments, isPreviewUrl)
   return isPreviewUrl(attachmentUrl) ? attachmentUrl : ''
 }
 
@@ -49,97 +40,99 @@ const getPdfUrl = (data) => {
   const directUrl = data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
   if (isPdfUrl(directUrl)) return directUrl
 
-  const attachmentUrl = getAttachmentPdfUrl(data?.attachments)
+  const attachmentUrl = getAttachmentUrl(data?.attachments, isPdfUrl)
   return isPdfUrl(attachmentUrl) ? attachmentUrl : ''
 }
 
-const monograph = ref({
+const project = ref({
   title: '',
-  subtitle: '',
-  source: '',
-  authors: [],
+  category: '获批课题',
+  leader: '',
+  institution: '',
   date: '',
-  edition: '',
-  isbn: '',
+  period: '',
+  projectNo: '',
+  members: [],
   previewUrl: '',
   pdfUrl: '',
   abstract: '',
   keywords: [],
-  downloads: '',
+  downloads: 'PDF',
 })
 
 onMounted(async () => {
   try {
-    const data = await fetchBookDetail(route.params.id || 'book_001')
-    if (data) {
-      monograph.value = {
-        title: data.title,
-        subtitle: normalizeText(data.description) ? data.description.slice(0, 30) : `${data.publisher || '出版信息'} · ${data.year || ''}`,
-        source: normalizeText(data.publisher),
-        authors: [data.author || '未知'],
-        date: data.year ? `${data.year}年` : '',
-        edition: '第一版',
-        isbn: normalizeText(data.isbn),
-        previewUrl: getPreviewUrl(data),
-        pdfUrl: getPdfUrl(data),
-        abstract: normalizeText(data.description) || `${data.title}，${data.author || '作者信息待补充'}，${data.publisher || '出版单位待补充'}，${data.year ? `${data.year}年` : '出版年份待补充'}。`,
-        keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
-        downloads: '68 MB',
-      }
+    const data = await fetchProjectDetail(route.params.id || 'project_001')
+    if (!data) return
+
+    const startYear = data.startYear ? String(data.startYear) : ''
+    const endYear = data.endYear ? String(data.endYear) : ''
+    const period = [startYear, endYear].filter(Boolean).join('-')
+
+    project.value = {
+      title: normalizeText(data.title),
+      category: data.type || data.level || '获批课题',
+      leader: normalizeText(data.leader),
+      institution: normalizeText(data.institution),
+      date: startYear ? `${startYear}年` : '',
+      period,
+      projectNo: normalizeText(data.projectNo),
+      members: normalizeList(data.members?.length ? data.members : data.participant),
+      previewUrl: getPreviewUrl(data),
+      pdfUrl: getPdfUrl(data),
+      abstract: normalizeText(data.description || data.summary) || `${data.title}，负责人：${data.leader || '待补充'}，立项周期：${period || '待补充'}。`,
+      keywords: normalizeList(data.keywords),
+      downloads: 'PDF',
     }
   } catch (e) {
-    console.error('获取专著详情失败', e)
+    console.error('获取课题详情失败', e)
   }
 })
 
 const closePage = () => {
-  safeBack(router, '/academic')
+  safeBack(router, '/achievements?tab=topics')
 }
 
-const monographInfoRows = computed(() => [
-  { label: '作者', value: monograph.value.authors.join(' / ') },
-  { label: '出版社', value: monograph.value.source },
-  { label: '出版年份', value: monograph.value.date },
-  { label: 'ISBN', value: monograph.value.isbn },
-  { label: '版本', value: monograph.value.edition }
+const projectInfoRows = computed(() => [
+  { label: '课题类型', value: project.value.category },
+  { label: '负责人', value: project.value.leader },
+  { label: '承担单位', value: project.value.institution },
+  { label: '项目周期', value: project.value.period },
+  { label: '项目编号', value: project.value.projectNo },
+  { label: '参与人员', value: project.value.members.join(' / ') }
 ].filter(item => item.value))
 </script>
 
 <template>
-  <DocumentReaderLayout :reader-label="'\u4e13\u8457\u9605\u8bfb\u533a'" :aside-label="'\u4e13\u8457\u8be6\u60c5'">
+  <DocumentReaderLayout :reader-label="'\u8bfe\u9898\u9605\u8bfb\u533a'" :aside-label="'\u8bfe\u9898\u8be6\u60c5'">
     <template #reader>
       <PdfReader
-        :src="monograph.previewUrl"
-        :fallback-image="documentPage"
+        :src="project.previewUrl"
       />
     </template>
 
     <template #aside>
       <div class="aside-close">
-        <button type="button" aria-label="关闭专著详情" @click="closePage">×</button>
+        <button type="button" aria-label="关闭课题详情" @click="closePage">×</button>
       </div>
 
-      <section class="monograph-hero">
-        <span>学术著作</span>
-        <h1>{{ monograph.title }}</h1>
-        <p class="monograph-subtitle">{{ monograph.subtitle }}</p>
-        <div class="monograph-meta">
-          <p>{{ monograph.authors.join(' / ') }}</p>
+      <section class="project-hero">
+        <span>{{ project.category }}</span>
+        <h1>{{ project.title }}</h1>
+        <p class="project-subtitle">{{ project.period || '项目周期待补充' }}</p>
+        <div class="project-meta">
+          <p>{{ project.leader }}</p>
           <i aria-hidden="true"></i>
-          <p>{{ monograph.source }}</p>
+          <p>{{ project.institution }}</p>
           <i aria-hidden="true"></i>
-          <time>{{ monograph.date }}</time>
-        </div>
-        <div class="monograph-id">
-          <span v-if="monograph.isbn">ISBN: {{ monograph.isbn }}</span>
-          <span>{{ monograph.edition }}</span>
+          <time>{{ project.date }}</time>
         </div>
       </section>
 
       <section class="info-section">
         <h2>基础信息</h2>
         <dl class="info-grid">
-          <div v-for="item in monographInfoRows" :key="item.label">
+          <div v-for="item in projectInfoRows" :key="item.label">
             <dt>{{ item.label }}</dt>
             <dd>{{ item.value }}</dd>
           </div>
@@ -147,29 +140,30 @@ const monographInfoRows = computed(() => [
       </section>
 
       <section class="detail-section">
-        <h2>内容简介</h2>
-        <p>{{ monograph.abstract }}</p>
+        <h2>课题简介</h2>
+        <p>{{ project.abstract }}</p>
       </section>
 
       <section class="detail-section">
         <h2>关键词</h2>
-        <div v-if="monograph.keywords.length" class="keyword-list">
-          <span v-for="keyword in monograph.keywords" :key="keyword">{{ keyword }}</span>
+        <div v-if="project.keywords.length" class="keyword-list">
+          <span v-for="keyword in project.keywords" :key="keyword">{{ keyword }}</span>
         </div>
-        <p v-else class="empty-text">暂无关键词，当前条目展示基础出版信息。</p>
+        <p v-else class="empty-text">暂无关键词，当前条目展示基础立项信息。</p>
       </section>
 
-      <section class="monograph-actions">
+      <section class="project-actions">
         <a
           class="download-button"
-          :href="monograph.pdfUrl || undefined"
-          :aria-disabled="!monograph.pdfUrl"
+          :href="project.pdfUrl || undefined"
+          :aria-disabled="!project.pdfUrl"
+          :download="project.pdfUrl ? '' : undefined"
         >
-          {{ monograph.pdfUrl ? `下载全文 PDF (${monograph.downloads})` : '暂无 PDF 文件' }}
+          {{ project.pdfUrl ? `下载课题文件 (${project.downloads})` : '暂无课题文件' }}
         </a>
         <div class="secondary-actions">
-          <button type="button">请求纸本</button>
           <button type="button">引用导出</button>
+          <button type="button">收藏课题</button>
         </div>
       </section>
     </template>
@@ -201,11 +195,11 @@ const monographInfoRows = computed(() => [
   color: #615d59;
 }
 
-.monograph-hero {
+.project-hero {
   padding-bottom: 28px;
 }
 
-.monograph-hero > span {
+.project-hero > span {
   margin-bottom: 16px;
   padding: 4px 8px;
   display: inline-flex;
@@ -218,7 +212,7 @@ const monographInfoRows = computed(() => [
   line-height: var(--line-height-control);
 }
 
-.monograph-hero h1 {
+.project-hero h1 {
   color: #333;
   font-family: var(--font-serif);
   font-size: var(--font-size-7xl);
@@ -226,14 +220,14 @@ const monographInfoRows = computed(() => [
   line-height: var(--line-height-heading);
 }
 
-.monograph-subtitle {
+.project-subtitle {
   margin-top: 8px;
   color: #9a9692;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-regular);
 }
 
-.monograph-meta {
+.project-meta {
   margin-top: 16px;
   display: flex;
   flex-wrap: wrap;
@@ -243,25 +237,14 @@ const monographInfoRows = computed(() => [
   line-height: var(--line-height-control);
 }
 
-.monograph-meta i {
+.project-meta i {
   width: 1px;
   height: 12px;
   margin-top: 2px;
   background-color: #eee;
 }
 
-.monograph-id {
-  margin-top: 12px;
-  display: flex;
-  gap: 16px;
-  color: #b0aba7;
-  font-size: var(--font-size-sm);
-}
-
-.detail-section {
-  margin-bottom: 28px;
-}
-
+.detail-section,
 .info-section {
   margin-bottom: 28px;
 }
@@ -348,7 +331,7 @@ const monographInfoRows = computed(() => [
   line-height: var(--line-height-normal);
 }
 
-.monograph-actions {
+.project-actions {
   margin-top: auto;
   display: grid;
   gap: 12px;
@@ -403,7 +386,7 @@ const monographInfoRows = computed(() => [
 }
 
 @media (max-width: 680px) {
-  .monograph-hero h1 {
+  .project-hero h1 {
     font-size: var(--font-size-6xl);
     line-height: var(--line-height-heading);
   }

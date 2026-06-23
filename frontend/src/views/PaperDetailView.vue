@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
@@ -14,6 +14,10 @@ const normalizeList = (value, separator = ',') => {
   if (Array.isArray(value)) return value.filter(Boolean)
   if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
   return []
+}
+const normalizeText = (value) => {
+  const text = String(value ?? '').trim()
+  return text && text !== '/' ? text : ''
 }
 
 const getAttachmentPdfUrl = (attachments) => {
@@ -57,8 +61,10 @@ const paper = ref({
   title: '',
   category: '学术论文',
   authors: [],
+  corresponding: '',
   source: '',
   date: '',
+  doi: '',
   downloads: '',
   previewUrl: '',
   pdfUrl: '',
@@ -71,17 +77,26 @@ onMounted(async () => {
   try {
     const data = await fetchPaperDetail(route.params.id || 'paper_001')
     if (data) {
+      const authors = normalizeList(data.authors).length ? normalizeList(data.authors) : [data.firstAuthor || '未知']
+      const fallbackAbstract = [
+        normalizeText(data.title),
+        normalizeText(data.journal),
+        data.year ? `${data.year}年` : '',
+        normalizeText(data.type)
+      ].filter(Boolean).join(' / ')
       paper.value = {
         title: data.title,
         category: data.type || '学术论文',
-        authors: normalizeList(data.authors).length ? normalizeList(data.authors) : [data.firstAuthor || '未知'],
-        source: data.journal || '',
+        authors,
+        corresponding: normalizeText(data.corresponding),
+        source: normalizeText(data.journal),
         date: data.year ? `${data.year}年` : '',
+        doi: normalizeText(data.doi),
         downloads: '14.2 MB',
         previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
         previewImage: documentPage,
-        abstract: data.abstract || '',
+        abstract: normalizeText(data.abstract) || fallbackAbstract,
         keywords: normalizeList(data.keywords || data.keywordsText || ''),
       }
     }
@@ -93,6 +108,15 @@ onMounted(async () => {
 const closePage = () => {
   safeBack(router, '/academic')
 }
+
+const paperInfoRows = computed(() => [
+  { label: '成果类型', value: paper.value.category },
+  { label: '作者', value: paper.value.authors.join(' / ') },
+  { label: '通讯作者', value: paper.value.corresponding },
+  { label: '来源', value: paper.value.source },
+  { label: '年份', value: paper.value.date },
+  { label: 'DOI', value: paper.value.doi }
+].filter(item => item.value))
 </script>
 
 <template>
@@ -122,6 +146,16 @@ const closePage = () => {
         </div>
       </section>
 
+      <section class="info-section">
+        <h2>基础信息</h2>
+        <dl class="info-grid">
+          <div v-for="item in paperInfoRows" :key="item.label">
+            <dt>{{ item.label }}</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
+        </dl>
+      </section>
+
       <section class="detail-section">
         <h2>摘要</h2>
         <p>{{ paper.abstract }}</p>
@@ -129,9 +163,10 @@ const closePage = () => {
 
       <section class="detail-section">
         <h2>关键词</h2>
-        <div class="keyword-list">
+        <div v-if="paper.keywords.length" class="keyword-list">
           <span v-for="keyword in paper.keywords" :key="keyword">{{ keyword }}</span>
         </div>
+        <p v-else class="empty-text">暂无关键词，当前条目展示基础题录信息。</p>
       </section>
 
       <section class="paper-actions" aria-label="论文操作">
@@ -141,7 +176,7 @@ const closePage = () => {
           :aria-disabled="!paper.pdfUrl"
           :download="paper.pdfUrl ? '' : undefined"
         >
-          下载全文 PDF ({{ paper.downloads }})
+          {{ paper.pdfUrl ? `下载全文 PDF (${paper.downloads})` : '暂无 PDF 文件' }}
         </a>
         <div class="secondary-actions">
           <button type="button">打印全文</button>
@@ -223,6 +258,11 @@ const closePage = () => {
   margin-bottom: 28px;
 }
 
+.info-section {
+  margin-bottom: 28px;
+}
+
+.info-section h2,
 .detail-section h2 {
   margin-bottom: 12px;
   display: flex;
@@ -235,6 +275,7 @@ const closePage = () => {
   line-height: var(--line-height-control);
 }
 
+.info-section h2::before,
 .detail-section h2::before {
   content: "";
   width: 4px;
@@ -247,6 +288,31 @@ const closePage = () => {
   font-size: var(--font-size-md);
   line-height: var(--line-height-article);
   text-align: justify;
+}
+
+.info-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.info-grid div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  color: #77716d;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+}
+
+.info-grid dt {
+  color: #9a9692;
+}
+
+.info-grid dd {
+  min-width: 0;
+  margin: 0;
+  color: #4f4945;
+  overflow-wrap: anywhere;
 }
 
 .keyword-list {
@@ -270,6 +336,12 @@ const closePage = () => {
 
 .keyword-list span:hover {
   background-color: #f1f1f1;
+}
+
+.empty-text {
+  color: #9a9692;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
 .paper-actions {

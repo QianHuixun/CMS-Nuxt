@@ -12,6 +12,7 @@ import ExpertDetailView from '@/views/ExpertDetailView.vue'
 import PaperDetailView from '@/views/PaperDetailView.vue'
 import MonographDetailView from '@/views/MonographDetailView.vue'
 import PatentDetailView from '@/views/PatentDetailView.vue'
+import ProjectDetailView from '@/views/ProjectDetailView.vue'
 
 const routes = [
   { path: '/', component: LandingView },
@@ -27,6 +28,7 @@ const routes = [
   { path: '/paper/:id?', component: PaperDetailView, name: 'PaperDetail' },
   { path: '/monograph/:id?', component: MonographDetailView, name: 'MonographDetail' },
   { path: '/patent/:id?', component: PatentDetailView, name: 'PatentDetail' },
+  { path: '/project/:id?', component: ProjectDetailView, name: 'ProjectDetail' },
 ]
 
 const router = createRouter({
