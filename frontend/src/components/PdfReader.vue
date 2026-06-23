@@ -332,7 +332,7 @@ onBeforeUnmount(() => {
 
         <article v-if="!hasDocument" class="pdf-fallback">
           <img v-if="fallbackImage" :src="fallbackImage" alt="文档预览占位">
-          <p v-else>请为该条目配置文件地址</p>
+          <p v-else>文件未上传</p>
         </article>
       </div>
     </div>

@@ -38,11 +38,11 @@ const fallbackWords = [
 ]
 
 const fallbackProjectList = [
-  { tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },
-  { tag: 'STATE KEY LABORATORY FUND', title: 'Digital Reconstruction of the Song Dynasty Bronze Figure', meta: 'PI: Prof. Zhang Hua · ¥1.8M' },
-  { tag: 'PROVINCIAL HEALTH GRANT', title: 'Metabolomics in Herb-Drug Interaction Studies', meta: 'PI: Dr. Sun Qian · ¥0.9M' },
-  { tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
-  { tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
+  { id: 'project_002', tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },
+  { id: 'project_009', tag: 'STATE KEY LABORATORY FUND', title: 'Digital Reconstruction of the Song Dynasty Bronze Figure', meta: 'PI: Prof. Zhang Hua · ¥1.8M' },
+  { id: 'project_011', tag: 'PROVINCIAL HEALTH GRANT', title: 'Metabolomics in Herb-Drug Interaction Studies', meta: 'PI: Dr. Sun Qian · ¥0.9M' },
+  { id: 'project_010', tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
+  { id: 'project_003', tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
 ]
 
 // 固定中心点槽位：每根竹简优先占一个横向位置，避免 X 轴重叠
@@ -191,6 +191,7 @@ onMounted(async () => {
   try {
     const projectRes = await fetchProjects({ pageNum: 1, pageSize: 50 })
     const nextProjectList = (projectRes.rows || []).map(p => ({
+      id: p.id,
       tag: p.type,
       title: p.title,
       meta: `负责人: ${p.leader} · ${p.startYear}-${p.endYear}`,
@@ -290,13 +291,18 @@ function goExpert(id) {
         <h2 class="section-title">获批课题</h2>
         <p class="section-subtitle">2024 科研资助项目</p>
         <div class="project-list">
-          <div v-for="(project, index) in projectList" :key="index" class="project-item">
+          <router-link
+            v-for="(project, index) in projectList"
+            :key="index"
+            class="project-item"
+            :to="`/project/${project.id}`"
+          >
             <div class="project-title">
               <span class="project-title-main">{{ project.title }}</span>
               <span class="project-title-sub">{{ project.tag }}</span>
             </div>
             <div class="project-meta">{{ project.meta }}</div>
-          </div>
+          </router-link>
         </div>
         <router-link class="view-all-btn" :to="{ path: '/achievements', query: { tab: 'topics' } }">
           <span>查看</span>
@@ -611,7 +617,10 @@ function goExpert(id) {
 .project-list::-webkit-scrollbar { display: none; }
 
 .project-item { 
+  display: block;
   margin-bottom: 24px; 
+  color: inherit;
+  text-decoration: none;
   transition: opacity 0.2s; 
   cursor: pointer; 
 }

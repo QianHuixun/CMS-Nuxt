@@ -10,6 +10,7 @@ const databases = [
     status: 'active',
     info: '汇聚天回汉墓出土医简高清图像、释文、注释、单字切分图像与检索数据。',
     url: asset('databases/tianhui-slip-001.png'),
+    link: 'https://thyj.cdutcm.edu.cn/',
     videoUrl: asset('videos/lab-promo.mp4'),
     icon: 'database',
     sort: 1,
@@ -21,6 +22,7 @@ const databases = [
     status: 'active',
     info: '整合出土医学文献与传世医籍，构建多维度知识关联与检索服务。',
     url: asset('databases/wanjuan-platform.png'),
+    link: 'http://116.228.198.134:1651/',
     videoUrl: asset('videos/wanjuan-demo.mp4'),
     icon: 'scroll',
     sort: 2,
@@ -32,6 +34,7 @@ const databases = [
     status: 'active',
     info: '收录巴蜀地区历代中医古籍文献，支持全文检索与图像对照。',
     url: asset('books/book-classics-second.jpg'),
+    link: 'http://210.41.219.244:9024/frontend/home',
     icon: 'book',
     sort: 3,
     backimg: asset('books/book-classics-second.jpg')
@@ -42,6 +45,7 @@ const databases = [
     status: 'active',
     info: '以沉浸式VR技术呈现中医药历史文物与馆藏精品，支持线上虚拟参观。',
     url: asset('databases/annotation-system.png'),
+    link: 'http://bwgvr.cdutcm.edu.cn/?scene_id=102603802',
     videoUrl: asset('videos/annotation-demo.mp4'),
     icon: 'default',
     sort: 4,
@@ -386,7 +390,8 @@ const projects = [
     institution: '成都中医药大学',
     level: '国家级',
     summary: '',
-    keywords: ''
+    keywords: '',
+    fileUrl: asset('projects/project-002.pdf')
   },
   {
     id: 'project_003',
@@ -484,7 +489,8 @@ const projects = [
     institution: '成都中医药大学',
     level: '国家级',
     summary: '',
-    keywords: ''
+    keywords: '',
+    fileUrl: asset('projects/project-004.pdf')
   },
   {
     id: 'project_010',
@@ -512,7 +518,8 @@ const projects = [
     institution: '成都中医药大学',
     level: '国家级',
     summary: '',
-    keywords: ''
+    keywords: '',
+    fileUrl: asset('projects/project-001.pdf')
   },
   {
     id: 'project_012',
@@ -4026,6 +4033,7 @@ export default [
       let list = [...projects]
       if (query.year) list = list.filter(p => p.startYear === Number(query.year) || p.endYear === Number(query.year))
       if (query.type) list = list.filter(p => p.type === query.type)
+      list.sort((a, b) => Number(Boolean(b.fileUrl)) - Number(Boolean(a.fileUrl)))
       return wrap(paginate(list, query.pageNum, query.pageSize))
     }
   },

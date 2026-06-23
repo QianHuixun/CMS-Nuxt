@@ -114,7 +114,7 @@ const typeLabel = computed(() => {
 
 const detailRoute = (type, id) => {
   if (!id) return ''
-  const routes = { papers: '/paper', patents: '/patent', books: '/monograph' }
+  const routes = { papers: '/paper', patents: '/patent', books: '/monograph', topics: '/project' }
   return routes[type] ? `${routes[type]}/${id}` : ''
 }
 

@@ -36,6 +36,8 @@ async function enterSystem() {
   }
 
   try {
+    video.muted = false
+    video.volume = 1
     video.currentTime = 0
     await video.play()
   } catch (e) {
@@ -53,7 +55,6 @@ async function enterSystem() {
       :src="videoSrc"
       preload="auto"
       playsinline
-      muted
       @ended="finishIntro"
     ></video>
 
