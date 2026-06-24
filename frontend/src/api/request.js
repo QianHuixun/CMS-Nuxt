@@ -9,7 +9,17 @@ async function request(url, options = {}) {
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}: ${res.statusText}`)
   }
-  const json = await res.json()
+  const text = await res.text()
+  let json
+  try {
+    json = text ? JSON.parse(text) : null
+  } catch (e) {
+    const preview = text.trim().slice(0, 80)
+    throw new Error(`接口返回非 JSON: ${fullUrl}${preview ? ` (${preview})` : ''}`)
+  }
+  if (!json || typeof json !== 'object') {
+    throw new Error(`接口返回为空: ${fullUrl}`)
+  }
   if (json.code !== 200) {
     throw new Error(json.message || '请求失败')
   }
