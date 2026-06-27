@@ -14,8 +14,9 @@ export default defineConfig(({ command }) => {
         localEnabled: command === 'serve',
         prodEnabled: enableProdMock,
         injectCode: `
-          import { setupProdMockServer } from '../mock/index.js'
-          setupProdMockServer()
+          import { createProdMockServer } from 'vite-plugin-mock/client'
+          import mockModules from '../mock/index.js'
+          createProdMockServer(mockModules)
         `,
         logger: true,
       }),

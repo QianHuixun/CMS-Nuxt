@@ -4105,6 +4105,12 @@ export default [
       byType: countBy(projects, 'level')
     })
   },
+  // 19. 获取知识图谱数据
+  {
+    url: '/api/v1/knowledge/graph',
+    method: 'get',
+    response: () => wrap(knowledgeGraph)
+  },
   // 20. 查询活动概要列表
   {
     url: '/api/v1/activities/paginate',
@@ -4152,7 +4158,10 @@ export default [
       })
       return wrap({
         ...t,
-        bio: '长期从事中医古籍整理、领域知识抽取与数字资源建设，关注研究成果的结构化表达与传播。',
+        position: t.position || '',
+        researchAreas: t.researchAreas || [],
+        avatar: t.avatar || '',
+        bio: t.summary || t.description || '',
         achievements
       })
     }
@@ -4164,9 +4173,14 @@ export default [
     if (!sp) return wrap(null)
     return wrap({
       ...sp,
+      typeName: sp.typeName || sp.type || '',
+      owner: sp.owner || '',
+      inventors: sp.inventors || [],
+      registrationNo: sp.registrationNo || '',
       applicationDate: `${sp.year}-01-01T00:00:00Z`,
       issueDate: `${sp.year}-12-31T00:00:00Z`,
-      description: `${sp.title} 的支撑材料已归档，可在线预览登记证书或专利证书。`,
+      description: sp.description || `${sp.title}，${sp.year || ''}`,
+      keywords: sp.keywords || [],
       pdfUrl: isPdfUrl(sp.fileUrl) ? sp.fileUrl : '',
       attachments: sp.fileUrl ? [
         { name: `${sp.title}.pdf`, url: sp.fileUrl }
@@ -4183,11 +4197,17 @@ export default [
       if (!p) return wrap(null)
       return wrap({
         ...p,
-        volume: '',
-        issue: '',
-        pages: '',
+        type: p.type || '期刊',
+        authors: p.authors || (p.firstAuthor ? [p.firstAuthor] : []),
+        corresponding: p.corresponding || '',
+        journal: p.journal || '',
+        year: p.year || null,
+        doi: p.doi || '',
+        abstract: p.abstract || '',
+        keywords: p.keywords || [],
         url: p.fileUrl,
         pdfUrl: isPdfUrl(p.fileUrl) ? p.fileUrl : '',
+        coverImage: p.coverImage || '',
         attachments: p.fileUrl ? [
           { name: `${p.title}.${isPdfUrl(p.fileUrl) ? 'pdf' : 'jpg'}`, url: p.fileUrl }
         ] : []
@@ -4204,16 +4224,18 @@ export default [
       if (!b) return wrap(null)
       return wrap({
         ...b,
-        publishDate: `${b.year}-01-01T00:00:00Z`,
-        price: 0,
-        pages: 0,
-        words: 0,
-        pdfUrl: '',
-        description: `${b.title}，${b.author}，${b.publisher}，ISBN：${b.isbn || '暂缺'}。`,
-        toc: '目录信息待补充',
-        attachments: [
-          { name: '封面图片', url: b.coverImage }
-        ]
+        author: b.author || '',
+        publisher: b.publisher || '',
+        year: b.year || null,
+        isbn: b.isbn || '',
+        description: b.description || `${b.title}，${b.author || ''}，${b.publisher || ''}。`,
+        subtitle: b.subtitle || '',
+        abstract: b.abstract || '',
+        keywords: b.keywords || [],
+        coverImage: b.coverImage || '',
+        attachments: b.coverImage ? [
+          { name: '封面', url: b.coverImage }
+        ] : []
       })
     }
   },
@@ -4227,12 +4249,17 @@ export default [
       if (!p) return wrap(null)
       return wrap({
         ...p,
-        projectNo: p.projectNo,
-        startDate: `${p.startYear}-01-01T00:00:00Z`,
-        endDate: `${p.endYear}-12-31T00:00:00Z`,
-        members: p.participant ? p.participant.split(/[;；、]/).filter(Boolean) : [],
-        description: p.summary,
-        progress: '进行中',
+        type: p.type || '',
+        level: p.level || '',
+        leader: p.leader || '',
+        institution: p.institution || '',
+        startYear: p.startYear || null,
+        endYear: p.endYear || null,
+        projectNo: p.projectNo || '',
+        participants: p.participant ? p.participant.split(/[;；、]/).filter(Boolean) : [],
+        description: p.summary || p.description || '',
+        keywords: p.keywords || '',
+        progress: '',
         attachments: p.fileUrl ? [
           { name: `${p.title}.pdf`, url: p.fileUrl }
         ] : []
@@ -4249,9 +4276,14 @@ export default [
       if (!a) return wrap(null)
       return wrap({
         ...a,
-        title: a.name,
-        type: '会议',
-        gallery: a.gallery || [a.coverImage]
+        type: a.type || '',
+        coverImage: a.coverImage || '',
+        gallery: a.gallery || [],
+        organizer: a.organizer || '',
+        location: a.location || '',
+        time: a.time || null,
+        summary: a.summary || '',
+        content: a.content || '',
       })
     }
   }

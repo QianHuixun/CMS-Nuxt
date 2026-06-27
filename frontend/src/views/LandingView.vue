@@ -8,8 +8,8 @@ const isPlaying = ref(false)
 const isLeaving = ref(false)
 const videoSrc = '/mock-assets/videos/landing-intro.mp4'
 const pageConfig = {
-  title: '出土医学文献文物保护研究数字重点实验室',
-  subtitle: '数据集成平台',
+  title: '出土医学文献文物数字资源与科研',
+  subtitle: '服务平台',
   actionText: '进入系统 →'
 }
 
@@ -165,7 +165,7 @@ async function enterSystem() {
 }
 
 .title-main {
-  font-family: var(--font-landing-title);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
   font-weight: var(--font-weight-regular);
   font-style: var(--font-style-normal);
   font-size: var(--font-size-landing-title);
@@ -176,27 +176,8 @@ async function enterSystem() {
   color: #fff;
 }
 
-.line {
-  position: absolute;
-  bottom: -6px;
-  width: clamp(40px, 8vw, 100px);
-  height: 2px;
-  background-color: #fff;
-  opacity: 0.8;
-}
-
-.line-left {
-  right: calc(100% + 36px);
-  left: auto;
-}
-
-.line-right {
-  left: calc(100% + 36px);
-  right: auto;
-}
-
 .title-sub {
-  font-family: var(--font-landing-subtitle);
+  font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", "宋体", serif;
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-landing-subtitle);
   letter-spacing: var(--letter-spacing-sm);

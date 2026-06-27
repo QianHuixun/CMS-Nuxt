@@ -27,11 +27,11 @@ const decorShiftMap = {
 const pageConfig = {
   eyebrow: 'DIGITAL HUMANITIES ARCHIVE',
   title: '传承出土文献，赓续中医文脉',
-  description: '本中心致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。',
+  description: '本平台致力于通过数字化技术与现代科研手段，深挖中国出土医学文献与文物的学术价值，构建跨学科的知识服务平台。',
   cards: [
-    { key: 'resources', title: '资源导航', description: '整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。', route: '/resources', actionText: '进入导航' },
-    { key: 'knowledge', title: '知识图谱', description: '基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。', route: '/knowledge', actionText: '开启探索' },
-    { key: 'academic', title: '学术动态', description: '发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。', route: '/academic', actionText: '查看详情' }
+    { key: 'resources', title: '资源中心', description: '整合分散的出土医学文献资源，提供多维度的检索与分类导航服务。', route: '/resources', actionText: '进入导航' },
+    { key: 'knowledge', title: '知识发现', description: '基于本体建模技术，可视化展示古医籍中药、方剂与经络的内在关联。', route: '/knowledge', actionText: '开启探索' },
+    { key: 'academic', title: '学术前沿', description: '发布最新考古发现、学术论文及科研成果，促进中医文献学界交流。', route: '/academic', actionText: '查看详情' }
   ]
 }
 </script>

@@ -2,48 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchTalents, fetchWordClouds, fetchProjects } from '@/api/index.js'
+import EmptyState from '@/components/EmptyState.vue'
 
 const router = useRouter()
-
-const fallbackTeamList = [
-  { id: 1, name: 'Dr. Chen Wei', title: '首席研究员', desc: '"Pioneering the digitization of meridian systems throug...', avatar: 'https://example.edu/mock/talents/chen-wei.jpg' },
-  { id: 2, name: 'Prof. Li Na', title: '基因组学专家', desc: 'Focusing on the Herbome project and traditional...', avatar: 'https://example.edu/mock/talents/zhou-ming.jpg' },
-  { id: 3, name: 'Researcher Wang', title: '临床分析师', desc: 'Leading trials on the integration of Tianhui...', avatar: 'https://example.edu/mock/talents/li-qing.jpg' },
-  { id: 4, name: 'Dr. Chen Wei', title: '首席研究员', desc: '"Pioneering the digitization of meridian systems throug...', avatar: 'https://example.edu/mock/talents/chen-wei.jpg' },
-]
-
-// 示例词库
-const fallbackWords = [
-  '天回医简',
-  '脉书',
-  '简帛医书',
-  '中医药',
-  '三世医学',
-  '黄帝内经',
-  '生成式人工智能',
-  '川派中医',
-  '多模态',
-  '知识图谱',
-  '高质量数据集',
-  '中医药AI模型',
-  '数字人文',
-  '知识库',
-  '特藏文献',
-  '文物保护',
-  '中医生命伦理',
-  '非物质文化遗产',
-  '中华优秀传统文化',
-  '深度学习',
-  '中医古籍著录规则'
-]
-
-const fallbackProjectList = [
-  { id: 'project_002', tag: 'NATIONAL NATURAL SCIENCE FOUNDATION', title: 'Multi-modal AI Analysis for Ancient TCM Manuscripts', meta: 'PI: Dr. Zhou Ming · ¥2.4M' },
-  { id: 'project_009', tag: 'STATE KEY LABORATORY FUND', title: 'Digital Reconstruction of the Song Dynasty Bronze Figure', meta: 'PI: Prof. Zhang Hua · ¥1.8M' },
-  { id: 'project_011', tag: 'PROVINCIAL HEALTH GRANT', title: 'Metabolomics in Herb-Drug Interaction Studies', meta: 'PI: Dr. Sun Qian · ¥0.9M' },
-  { id: 'project_010', tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
-  { id: 'project_003', tag: 'INSTITUTIONAL CORE FUND', title: 'Machine Learning for Pulse Pattern Recognition', meta: 'PI: Researcher Liu · ¥1.2M' },
-]
 
 // 固定中心点槽位：每根竹简优先占一个横向位置，避免 X 轴重叠
 const bambooLayoutSlots = [
@@ -159,11 +120,9 @@ const createWordCloud = (words) => {
   })
 }
 
-const teamList = ref([...fallbackTeamList])
+const teamList = ref([])
 const wordCloud = ref([])
-const projectList = ref([...fallbackProjectList])
-
-wordCloud.value = createWordCloud(fallbackWords)
+const projectList = ref([])
 
 onMounted(async () => {
   try {

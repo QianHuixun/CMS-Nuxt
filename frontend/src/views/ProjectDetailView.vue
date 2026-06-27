@@ -5,48 +5,14 @@ import DocumentReaderLayout from '@/components/DocumentReaderLayout.vue'
 import PdfReader from '@/components/PdfReader.vue'
 import { fetchProjectDetail } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
+import { normalizeList, normalizeText, getPreviewUrl, getPdfUrl } from '@/utils/normalize.js'
 
 const route = useRoute()
 const router = useRouter()
 
-const normalizeList = (value, separator = /[;；、]/) => {
-  if (Array.isArray(value)) return value.filter(Boolean)
-  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
-  return []
-}
-
-const normalizeText = (value) => String(value ?? '').trim()
-const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
-const isPreviewUrl = (url = '') => /\.(pdf|png|jpe?g|gif|webp|bmp|svg)($|[?#])/i.test(url)
-
-const getAttachmentUrl = (attachments, checker) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return checker(url) || checker(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
-const getPreviewUrl = (data) => {
-  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
-  if (isPreviewUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentUrl(data?.attachments, isPreviewUrl)
-  return isPreviewUrl(attachmentUrl) ? attachmentUrl : ''
-}
-
-const getPdfUrl = (data) => {
-  const directUrl = data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
-  if (isPdfUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentUrl(data?.attachments, isPdfUrl)
-  return isPdfUrl(attachmentUrl) ? attachmentUrl : ''
-}
-
 const project = ref({
   title: '',
-  category: '获批课题',
+  category: '',
   leader: '',
   institution: '',
   date: '',
@@ -57,12 +23,14 @@ const project = ref({
   pdfUrl: '',
   abstract: '',
   keywords: [],
-  downloads: 'PDF',
+  downloads: '',
 })
 
 onMounted(async () => {
   try {
-    const data = await fetchProjectDetail(route.params.id || 'project_001')
+    const id = route.params.id
+    if (!id) return
+    const data = await fetchProjectDetail(id)
     if (!data) return
 
     const startYear = data.startYear ? String(data.startYear) : ''
@@ -71,18 +39,18 @@ onMounted(async () => {
 
     project.value = {
       title: normalizeText(data.title),
-      category: data.type || data.level || '获批课题',
+      category: normalizeText(data.type || data.level),
       leader: normalizeText(data.leader),
       institution: normalizeText(data.institution),
       date: startYear ? `${startYear}年` : '',
       period,
       projectNo: normalizeText(data.projectNo),
-      members: normalizeList(data.members?.length ? data.members : data.participant),
+      members: normalizeList(data.participants || data.participant),
       previewUrl: getPreviewUrl(data),
       pdfUrl: getPdfUrl(data),
-      abstract: normalizeText(data.description || data.summary) || `${data.title}，负责人：${data.leader || '待补充'}，立项周期：${period || '待补充'}。`,
+      abstract: normalizeText(data.description || data.summary),
       keywords: normalizeList(data.keywords),
-      downloads: 'PDF',
+      downloads: '',
     }
   } catch (e) {
     console.error('获取课题详情失败', e)

@@ -11,9 +11,9 @@ const route = useRoute()
 
 const navItems: NavItem[] = [
   { name: '首页', path: '/home' },
-  { name: '资源导航', path: '/resources' },
-  { name: '知识图谱', path: '/knowledge' },
-  { name: '学术动态', path: '/academic', activePaths: ['/academic-news', '/achievements', '/activity-timeline'] },
+  { name: '资源中心', path: '/resources' },
+  { name: '知识发现', path: '/knowledge' },
+  { name: '学术前沿', path: '/academic', activePaths: ['/academic-news', '/achievements', '/activity-timeline'] },
 ]
 
 const isActive = (item: NavItem): boolean => {
@@ -26,7 +26,7 @@ const isActive = (item: NavItem): boolean => {
   <header class="header">
     <div class="title-wrapper">
       <img src="@/assets/icons/nav-logo.svg" alt="logo" class="nav-logo" />
-      <h1 class="header-title">出土医学文献文物保护研究数字实验室数据集成平台</h1>
+      <h1 class="header-title">出土医学文献文物数字资源与科研服务平台</h1>
     </div>
     <nav class="nav">
       <router-link
