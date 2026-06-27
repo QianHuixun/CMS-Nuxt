@@ -7,22 +7,10 @@ import sideImageOne from '@/assets/images/pages/activity/side-image-1-56586a.png
 import sideImageTwo from '@/assets/images/pages/activity/side-image-2-56586a.png'
 import pageBg from '@/assets/images/backgrounds/mult-page/page-bg.png'
 import { fetchActivityDetail } from '@/api/index.js'
+import EmptyState from '@/components/EmptyState.vue'
 
 const route = useRoute()
-const fallbackGalleryImages = [
-  sideImageOne,
-  sideImageTwo,
-]
 const activity = ref(null)
-
-const fallbackTitle = '第十二届中医药创新论坛：数字人文视角下的简帛医学文献研究'
-const fallbackIntroLead = '本届论坛聚焦“数字人文视角下的简帛医学文献研究”，探讨出土医学文物在现代中医临床中的应用价值。通过高光谱成像与数字化复原技术，为失传医籍的重建提供科技支撑。'
-const fallbackIntroSupport = '研究中心近年来在成都老官山汉墓、甘肃武威汉简等关键领域取得突破性进展。本次会议将首次公开部分未发表的竹简红外扫描影像资料。数字化平台使我们能够超越物理层面的磨损，重现汉唐时期的用药逻辑。'
-const fallbackParagraphs = [
-  '研究中心自成立以来，始终致力于构建多维度、立体化的中医药文献数据库。在古籍数字化国家实验室的技术支持下，我们实现了从二维图像到三维结构、从孤立碎片到语义网络的跨越式发展。此次论坛不仅是一次学术成果的检阅，更是一次方法论的深度反思。',
-  '我们如何在尊重传统真实性的前提下，利用生成式人工智能赋能医典考证？如何将博物馆中的“冷”文物转化为临床中的“活”处方？针对这些课题，与会学者展开了激烈的辩论。',
-]
-const fallbackClosingParagraph = '论坛期间，来自全球的50余家学术机构共同签署了《中医出土文献数字化开放协作协议》。实验室展示了最新的VR沉浸式古方模拟系统，让与会者身临其境体验古代炮制工艺。通过该系统，复杂的古方演化过程得以视觉化呈现，极大提升了文献研究的直观性。'
 
 const formatDate = (value) => {
   if (!value) return ''
@@ -41,30 +29,31 @@ const extractParagraphs = (html = '') => {
     .filter(Boolean)
 }
 
-const pageTitle = computed(() => activity.value?.name || activity.value?.title || fallbackTitle)
+const pageTitle = computed(() => activity.value?.name || '')
 const heroSrc = computed(() => activity.value?.coverImage || heroImage)
 const featureSrc = computed(() => activity.value?.gallery?.[0] || sideImageTwo)
 const galleryImages = computed(() => {
   const images = Array.isArray(activity.value?.gallery) ? activity.value.gallery.slice(1, 3) : []
-  return [...images, ...fallbackGalleryImages].slice(0, 2)
+  return images.slice(0, 2)
 })
 const bottomSrc = computed(() => galleryImages.value[1] || largeImage)
-const forumLabel = computed(() => activity.value?.type || 'ACTIVITY SILHOUETTE')
+const forumLabel = computed(() => activity.value?.type || '')
 const contentParagraphs = computed(() => extractParagraphs(activity.value?.content))
-const introLead = computed(() => activity.value?.summary || fallbackIntroLead)
-const introSupport = computed(() => contentParagraphs.value[0] || fallbackIntroSupport)
-const bodyParagraphs = computed(() => {
-  const paragraphs = contentParagraphs.value.slice(1, -1)
-  return paragraphs.length ? paragraphs : fallbackParagraphs
-})
-const closingParagraph = computed(() => contentParagraphs.value.at(-1) || fallbackClosingParagraph)
+const introLead = computed(() => activity.value?.summary || '')
+const introSupport = computed(() => contentParagraphs.value[0] || '')
+const bodyParagraphs = computed(() => contentParagraphs.value.slice(1, -1))
+const closingParagraph = computed(() => contentParagraphs.value.at(-1) || '')
 const displayDate = computed(() => formatDate(activity.value?.time))
 const metadataItems = computed(() => [
-  { label: 'ORGANIZER', value: activity.value?.organizer || '中国出土医学文献与文物研究中心' },
-  { label: 'LOCATION', value: activity.value?.location || '古籍数字化国家实验室' },
-  { label: 'DATE', value: displayDate.value || '2024年10月24日' },
+  { label: 'ORGANIZER', value: activity.value?.organizer || '' },
+  { label: 'LOCATION', value: activity.value?.location || '' },
+  { label: 'DATE', value: displayDate.value || '' },
 ])
-const imageCaption = computed(() => activity.value ? `${activity.value.location || ''}${displayDate.value ? ` · ${displayDate.value}` : ''}` : '古籍数字化国家实验室：高精度光谱采集系统演示')
+const imageCaption = computed(() => {
+  const parts = [activity.value?.location, displayDate.value].filter(Boolean)
+  return parts.join(' · ')
+})
+const hasData = computed(() => !!activity.value)
 
 function goBack() {
   window.history.back()
@@ -75,8 +64,10 @@ function goHome() {
 }
 
 onMounted(async () => {
+  const id = route.params.id
+  if (!id) return
   try {
-    activity.value = await fetchActivityDetail(route.params.id || 'activity_001')
+    activity.value = await fetchActivityDetail(id)
   } catch (e) {
     console.error(e)
   }
@@ -85,58 +76,63 @@ onMounted(async () => {
 
 <template>
   <main class="activity-page" :style="{ '--page-bg': `url(${pageBg})` }">
-    <section class="page-header">
-      <div class="header-label">{{ forumLabel }}</div>
-      <h1>{{ pageTitle }}</h1>
-    </section>
+    <template v-if="hasData">
+      <section class="page-header">
+        <div class="header-label">{{ forumLabel }}</div>
+        <h1>{{ pageTitle }}</h1>
+      </section>
 
-    <section class="meta-band" aria-label="会议信息">
-      <div class="meta-band-inner">
-        <div class="meta-grid">
-          <article v-for="item in metadataItems" :key="item.label" class="meta-item">
-            <p>{{ item.label }}</p>
-            <h3>{{ item.value }}</h3>
-          </article>
+      <section v-if="metadataItems.some(m => m.value)" class="meta-band" aria-label="会议信息">
+        <div class="meta-band-inner">
+          <div class="meta-grid">
+            <article v-for="item in metadataItems.filter(m => m.value)" :key="item.label" class="meta-item">
+              <p>{{ item.label }}</p>
+              <h3>{{ item.value }}</h3>
+            </article>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="quote-block">
-      <div class="quote-line"></div>
-      <div class="quote-content">
-        <p class="quote-lead">{{ introLead }}</p>
-        <p class="quote-support">{{ introSupport }}</p>
-      </div>
-    </section>
+      <section v-if="introLead" class="quote-block">
+        <div class="quote-line"></div>
+        <div class="quote-content">
+          <p class="quote-lead">{{ introLead }}</p>
+          <p v-if="introSupport" class="quote-support">{{ introSupport }}</p>
+        </div>
+      </section>
 
-    <section class="image-block image-block--single">
-      <figure class="feature-image feature-image--compact">
-        <img :src="featureSrc">
-        <figcaption>{{ pageTitle }}</figcaption>
-      </figure>
-    </section>
-
-    <section class="body-block">
-      <h2>活动纪实</h2>
-      <p v-for="paragraph in bodyParagraphs" :key="paragraph">{{ paragraph }}</p>
-      <div class="dual-images">
-        <figure>
-          <img :src="heroSrc" alt="大会堂开会全景图">
+      <section class="image-block image-block--single">
+        <figure class="feature-image feature-image--compact">
+          <img :src="featureSrc">
+          <figcaption>{{ pageTitle }}</figcaption>
         </figure>
-        <figure>
-          <img :src="galleryImages[0] || sideImageOne" alt="手持放大镜观察古籍纸张特写图">
-        </figure>
-      </div>
-      <p class="body-caption">{{ imageCaption }}</p>
-    </section>
+      </section>
 
-    <section class="closing-block">
-      <p>{{ closingParagraph }}</p>
-    </section>
+      <section v-if="bodyParagraphs.length" class="body-block">
+        <h2>活动纪实</h2>
+        <p v-for="paragraph in bodyParagraphs" :key="paragraph">{{ paragraph }}</p>
+        <div class="dual-images">
+          <figure>
+            <img :src="heroSrc" alt="大会堂开会全景图">
+          </figure>
+          <figure>
+            <img :src="galleryImages[0] || sideImageOne" alt="手持放大镜观察古籍纸张特写图">
+          </figure>
+        </div>
+        <p v-if="imageCaption" class="body-caption">{{ imageCaption }}</p>
+      </section>
 
-    <section class="bottom-stage">
-      <img :src="bottomSrc" :alt="`${pageTitle}活动现场`">
-    </section>
+      <section v-if="closingParagraph" class="closing-block">
+        <p>{{ closingParagraph }}</p>
+      </section>
+
+      <section class="bottom-stage">
+        <img :src="bottomSrc" :alt="`${pageTitle}活动现场`">
+      </section>
+    </template>
+    <EmptyState v-else>
+      <p>暂无活动数据</p>
+    </EmptyState>
 
     <div class="action-buttons">
       <button class="button button--ghost" type="button" @click="goBack">

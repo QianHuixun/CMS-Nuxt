@@ -124,18 +124,11 @@ const patentTypeLabels = {
 }
 
 const results = ref([])
-const fallbackChartBars = [
-  { year: '2021', value: 42 },
-  { year: '2022', value: 56 },
-  { year: '2023', value: 70 },
-  { year: '2024', value: 86 },
-  { year: '2025', value: 100, active: true },
-]
 const stats = ref({ total: 0, byType: {}, byYear: [] })
 
 const chartBars = computed(() => {
   const rows = stats.value.byYear || []
-  if (!rows.length) return fallbackChartBars
+  if (!rows.length) return []
   const max = Math.max(...rows.map(item => item.count || 0), 1)
   return rows.map(item => ({
     year: String(item.year),

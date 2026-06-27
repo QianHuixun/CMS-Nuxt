@@ -49,62 +49,14 @@ const legends = [
 ]
 
 const caseDetail = ref({
-  title: '《临证指南医案》',
-  subtitle: 'Case_1-4 · 叶天士医案知识图谱',
-  text: '稚年纯阳体质，热症最多。病偏右胸高，呼气不利，肺气不能清肃。热郁内蒸，逆传膻中，致天君震动，状若痫症。夫肺主卫，心主营，二气循环于肺胃脉中。',
-  tags: [
-    { label: '肺气不能清肃', type: 'pathology' },
-    { label: '痫症', type: 'symptom' },
-    { label: '四苓', type: 'formula' },
-    { label: '茯苓', type: 'herb' },
-    { label: '淡竹叶', type: 'herb' }
-  ],
-  summary: [
-    { label: '来源', value: '《临证指南医案》' },
-    { label: '诊次', value: '5 次，默认显示诊次1' },
-    { label: '实体', value: '症状 7 · 病机 6 · 方剂 5 · 中药 28' },
-    { label: '关系', value: '组成、加味、减味、诊次用方' }
-  ]
+  title: '',
+  subtitle: '',
+  text: '',
+  tags: [],
+  summary: [],
 })
 
-const graphData = ref({
-  nodes: [
-    { id: 'center', label: '叶天士医案\n知识图谱', type: 'center', level: 1, rings: 3 },
-    { id: 'n1', label: '叶天士晚年\n方案真本', type: 'book', level: 2, rings: 1 },
-    { id: 'n2', label: '案1-4', type: 'center', level: 3, rings: 1 },
-    { id: 'n3', label: '眉寿堂\n方案选存', type: 'visit', level: 2, rings: 0 },
-    { id: 'n4', label: '未刻本\n叶氏医案', type: 'symptom', level: 2, rings: 0 },
-    { id: 'n5', label: '病因病机\n肺热', type: 'pathology', level: 2, rings: 1 },
-    { id: 'n6', label: '症状\n咳嗽', type: 'formula', level: 3, rings: 1 },
-    { id: 'n7', label: '方剂\n四苓', type: 'formula', level: 3, rings: 1 },
-    { id: 'n8', label: '诊次1', type: 'center', level: 3, rings: 1 },
-    { id: 'n9', label: '组成\n草药', type: 'formula', level: 3, rings: 1 },
-    ...Array.from({ length: 40 }, (_, i) => ({
-      id: `p${i}`,
-      label: '',
-      type: ['herb', 'symptom', 'case', 'formula', 'pathology'][Math.floor(Math.random() * 5)],
-      level: Math.random() > 0.6 ? 4 : 5,
-      rings: 0
-    }))
-  ],
-  links: [
-    { source: 'center', target: 'n1' },
-    { source: 'center', target: 'n2' },
-    { source: 'center', target: 'n3' },
-    { source: 'center', target: 'n4' },
-    { source: 'center', target: 'n5' },
-    { source: 'n1', target: 'n6' },
-    { source: 'n1', target: 'n9' },
-    { source: 'center', target: 'n8' },
-    { source: 'center', target: 'n7' },
-    { source: 'n2', target: 'n7' },
-    { source: 'n5', target: 'n6' },
-    ...Array.from({ length: 40 }, (_, i) => ({
-      source: ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8'][Math.floor(Math.random() * 8)],
-      target: `p${i}`
-    }))
-  ]
-})
+const graphData = ref({ nodes: [], links: [] })
 
 function updateSidePanel(node) {
   if (!node.label) return
@@ -172,6 +124,8 @@ function getInitialPosition(node, index, width, height) {
 }
 
 function initD3Graph() {
+  if (!graphData.value.nodes.length) return
+
   const svgElement = graphSvg.value
   if (!svgElement) return
 

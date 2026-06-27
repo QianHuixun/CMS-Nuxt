@@ -6,52 +6,10 @@ import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchBookDetail } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
+import { normalizeList, normalizeText, getPreviewUrl, getPdfUrl } from '@/utils/normalize.js'
 
 const route = useRoute()
 const router = useRouter()
-const normalizeList = (value, separator = ';') => {
-  if (Array.isArray(value)) return value.filter(Boolean)
-  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
-  return []
-}
-const normalizeText = (value) => String(value ?? '').trim()
-
-const getAttachmentPdfUrl = (attachments) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
-const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
-const isPreviewUrl = (url = '') => /\.(pdf|png|jpe?g|gif|webp|bmp|svg)($|[?#])/i.test(url)
-
-const getAttachmentPreviewUrl = (attachments) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return isPreviewUrl(url) || isPreviewUrl(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
-const getPreviewUrl = (data) => {
-  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || data?.coverImage || ''
-  if (isPreviewUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentPreviewUrl(data?.attachments)
-  return isPreviewUrl(attachmentUrl) ? attachmentUrl : ''
-}
-
-const getPdfUrl = (data) => {
-  const directUrl = data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
-  if (isPdfUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentPdfUrl(data?.attachments)
-  return isPdfUrl(attachmentUrl) ? attachmentUrl : ''
-}
 
 const monograph = ref({
   title: '',
@@ -70,21 +28,23 @@ const monograph = ref({
 
 onMounted(async () => {
   try {
-    const data = await fetchBookDetail(route.params.id || 'book_001')
+    const id = route.params.id
+    if (!id) return
+    const data = await fetchBookDetail(id)
     if (data) {
       monograph.value = {
         title: data.title,
-        subtitle: normalizeText(data.description) ? data.description.slice(0, 30) : `${data.publisher || '出版信息'} · ${data.year || ''}`,
+        subtitle: normalizeText(data.subtitle || data.description || ''),
         source: normalizeText(data.publisher),
-        authors: [data.author || '未知'],
+        authors: [data.author || ''],
         date: data.year ? `${data.year}年` : '',
-        edition: '第一版',
+        edition: '',
         isbn: normalizeText(data.isbn),
         previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
-        abstract: normalizeText(data.description) || `${data.title}，${data.author || '作者信息待补充'}，${data.publisher || '出版单位待补充'}，${data.year ? `${data.year}年` : '出版年份待补充'}。`,
+        abstract: normalizeText(data.description || data.abstract || ''),
         keywords: normalizeList(data.keywords || data.keywordsText || data.tags || ''),
-        downloads: '68 MB',
+        downloads: '',
       }
     }
   } catch (e) {

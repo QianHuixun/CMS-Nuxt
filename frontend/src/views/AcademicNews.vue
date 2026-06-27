@@ -24,6 +24,7 @@ const patentRoute = (id) => `/patent/${id}`
 const activityTimelineRoute = '/activity-timeline'
 
 const activityPhotoSrc = (photo) => photo?.thumbUrl || photo?.imageUrl || ''
+const rowsOf = (res) => Array.isArray(res?.rows) ? res.rows : []
 const formatBookTitle = (title) => {
   if (!title) return ''
   return title.startsWith('《') ? title : `《${title}》`
@@ -46,7 +47,7 @@ const goBack = () => {
 onMounted(async () => {
   try {
     const res = await fetchPapers({ pageNum: 1, pageSize: 18 })
-    papers.value = (res.rows || []).map(p => ({
+    papers.value = rowsOf(res).map(p => ({
       id: p.id,
       journal: p.journal || '',
       title: p.title,
@@ -58,13 +59,13 @@ onMounted(async () => {
   }
   try {
     const res = await fetchBooks({ pageNum: 1, pageSize: 1 })
-    books.value = res.rows || []
+    books.value = rowsOf(res)
   } catch (e) {
     console.error('获取著作列表失败', e)
   }
   try {
     const res = await fetchSoftwarePatents({ pageNum: 1, pageSize: 4 })
-    patents.value = (res.rows || []).map(p => ({
+    patents.value = rowsOf(res).map(p => ({
       id: p.id,
       code: p.registrationNo || '',
       title: p.title,
@@ -74,13 +75,13 @@ onMounted(async () => {
   }
   try {
     const res = await fetchActivityPhotos({ pageNum: 1, pageSize: 2 })
-    activityPhotos.value = (res.rows || []).slice(0, 2)
+    activityPhotos.value = rowsOf(res).slice(0, 2)
   } catch (e) {
     console.error('获取活动剪影失败', e)
   }
   try {
     const res = await fetchActivities({ pageNum: 1, pageSize: 6 })
-    activities.value = (res.rows || []).map(a => ({
+    activities.value = rowsOf(res).map(a => ({
       id: a.id,
       title: a.title,
       date: formatDate(a.time),

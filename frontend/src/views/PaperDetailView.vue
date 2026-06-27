@@ -6,60 +6,15 @@ import PdfReader from '@/components/PdfReader.vue'
 import documentPage from '@/assets/images/pages/paper-detail/document-page.png'
 import { fetchPaperDetail } from '@/api/index.js'
 import { safeBack } from '@/router/navigation.js'
+import { normalizeList, normalizeText, getPreviewUrl, getPdfUrl } from '@/utils/normalize.js'
 
 const route = useRoute()
 const router = useRouter()
 const currentPage = ref(1)
-const normalizeList = (value, separator = ',') => {
-  if (Array.isArray(value)) return value.filter(Boolean)
-  if (typeof value === 'string') return value.split(separator).map(item => item.trim()).filter(Boolean)
-  return []
-}
-const normalizeText = (value) => {
-  const text = String(value ?? '').trim()
-  return text && text !== '/' ? text : ''
-}
-
-const getAttachmentPdfUrl = (attachments) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return /\.pdf($|[?#])/i.test(url) || /\.pdf$/i.test(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
-const isPdfUrl = (url = '') => /\.pdf($|[?#])/i.test(url)
-const isPreviewUrl = (url = '') => /\.(pdf|png|jpe?g|gif|webp|bmp|svg)($|[?#])/i.test(url)
-
-const getAttachmentPreviewUrl = (attachments) => {
-  const file = (Array.isArray(attachments) ? attachments : []).find((item) => {
-    const url = item?.url || item?.fileUrl || item?.downloadUrl || ''
-    const name = item?.name || ''
-    return isPreviewUrl(url) || isPreviewUrl(name)
-  })
-  return file?.url || file?.fileUrl || file?.downloadUrl || ''
-}
-
-const getPreviewUrl = (data) => {
-  const directUrl = data?.previewUrl || data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || data?.coverImage || ''
-  if (isPreviewUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentPreviewUrl(data?.attachments)
-  return isPreviewUrl(attachmentUrl) ? attachmentUrl : ''
-}
-
-const getPdfUrl = (data) => {
-  const directUrl = data?.pdfUrl || data?.fileUrl || data?.downloadUrl || data?.url || ''
-  if (isPdfUrl(directUrl)) return directUrl
-
-  const attachmentUrl = getAttachmentPdfUrl(data?.attachments)
-  return isPdfUrl(attachmentUrl) ? attachmentUrl : ''
-}
 
 const paper = ref({
   title: '',
-  category: '学术论文',
+  category: '',
   authors: [],
   corresponding: '',
   source: '',
@@ -75,18 +30,14 @@ const paper = ref({
 
 onMounted(async () => {
   try {
-    const data = await fetchPaperDetail(route.params.id || 'paper_001')
+    const id = route.params.id
+    if (!id) return
+    const data = await fetchPaperDetail(id)
     if (data) {
       const authors = normalizeList(data.authors).length ? normalizeList(data.authors) : [data.firstAuthor || '未知']
-      const fallbackAbstract = [
-        normalizeText(data.title),
-        normalizeText(data.journal),
-        data.year ? `${data.year}年` : '',
-        normalizeText(data.type)
-      ].filter(Boolean).join(' / ')
       paper.value = {
         title: data.title,
-        category: data.type || '学术论文',
+        category: normalizeText(data.type),
         authors,
         corresponding: normalizeText(data.corresponding),
         source: normalizeText(data.journal),
@@ -96,7 +47,7 @@ onMounted(async () => {
         previewUrl: getPreviewUrl(data),
         pdfUrl: getPdfUrl(data),
         previewImage: documentPage,
-        abstract: normalizeText(data.abstract) || fallbackAbstract,
+        abstract: normalizeText(data.abstract),
         keywords: normalizeList(data.keywords || data.keywordsText || ''),
       }
     }
